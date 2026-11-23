@@ -59,6 +59,7 @@ Na de installatie:
 ## Projectstructuur
 
 ```
+AGENTS.md                hoe je deze repo beheert, bouwt en bijwerkt (voor agents en mensen)
 repository.yaml          add-on-repository voor HA
 appie/
   config.yaml            add-on: opties, ingress, versie
