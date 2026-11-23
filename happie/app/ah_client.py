@@ -1,6 +1,6 @@
 """Minimal async client for the (unofficial) Albert Heijn mobile API.
 
-The endpoints are reverse engineered from the Appie app; they are not
+The endpoints are reverse engineered from the AH mobile app; they are not
 documented by AH and can change without notice.
 """
 from __future__ import annotations

@@ -5,7 +5,7 @@ import sys
 import tempfile
 from types import SimpleNamespace
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "appie", "app"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "happie", "app"))
 
 from ah_client import AHClient  # noqa: E402
 from mock import FakeHA, install_mocks  # noqa: E402

@@ -126,7 +126,7 @@ async def main() -> None:
 
         if "HA_TOKEN" not in env:
             res = await ws_call(
-                s, token, {"type": "auth/long_lived_access_token", "client_name": "appie-addon-dev", "lifespan": 3650}
+                s, token, {"type": "auth/long_lived_access_token", "client_name": "happie-dev", "lifespan": 3650}
             )
             env["HA_URL"] = HA
             env["HA_TOKEN"] = res["result"]

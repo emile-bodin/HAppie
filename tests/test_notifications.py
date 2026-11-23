@@ -4,7 +4,7 @@ import os
 import sys
 import tempfile
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "appie", "app"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "happie", "app"))
 os.environ["DATA_DIR"] = tempfile.mkdtemp()
 
 import main  # noqa: E402
@@ -35,10 +35,10 @@ async def run():
     app.sync.last_exc = AHAuthError("expired")
     await app.check_login_notification()
     await app.check_login_notification()
-    assert [n[0] for n in ha.notes] == ["appie_login"], ha.notes
+    assert [n[0] for n in ha.notes] == ["happie_login"], ha.notes
     app.sync.last_exc = None
     await app.check_login_notification()
-    assert ha.dismissed == ["appie_login"]
+    assert ha.dismissed == ["happie_login"]
 
     # --- 3. sensors
     app._product_cache = {
@@ -64,7 +64,7 @@ async def run():
     app.get_frequent = frequent
     ha.notes.clear()
     await app.check_bonus_notifications()
-    assert len(ha.notes) == 1 and ha.notes[0][0] == "appie_bonus"
+    assert len(ha.notes) == 1 and ha.notes[0][0] == "happie_bonus"
     msg = ha.notes[0][2]
     assert "Pesto" in msg and "op je lijst" in msg and "Bananen" in msg and "Kaas" not in msg, msg
     await app.check_bonus_notifications()

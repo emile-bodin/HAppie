@@ -3,7 +3,7 @@
 # Config staat in een docker-volume (niet in OneDrive, dat botst met de database).
 services:
   homeassistant:
-    container_name: appie-dev-ha
+    container_name: happie-dev-ha
     image: ghcr.io/home-assistant/home-assistant:stable
     restart: unless-stopped
     ports:

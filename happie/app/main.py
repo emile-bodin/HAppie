@@ -29,27 +29,27 @@ from sync import SyncEngine
 DATA_DIR = Path(os.environ.get("DATA_DIR", "/data"))
 STATIC_DIR = Path(__file__).parent / "static"
 INGRESS_IP = "172.30.32.2"
-DELIVERY_SENSOR = "sensor.appie_volgende_bezorging"
+DELIVERY_SENSOR = "sensor.happie_volgende_bezorging"
 DELIVERY_REFRESH = 300  # seconds
-LIST_SENSOR = "sensor.appie_lijst_items"
-COST_SENSOR = "sensor.appie_geschatte_kosten"
-BONUS_SENSOR = "sensor.appie_bonus_items"
-LOGIN_NOTIFICATION = "appie_login"
-BONUS_NOTIFICATION = "appie_bonus"
+LIST_SENSOR = "sensor.happie_lijst_items"
+COST_SENSOR = "sensor.happie_geschatte_kosten"
+BONUS_SENSOR = "sensor.happie_bonus_items"
+LOGIN_NOTIFICATION = "happie_login"
+BONUS_NOTIFICATION = "happie_bonus"
 BONUS_CHECK_INTERVAL = 3 * 3600
 FREQUENT_TTL = 6 * 3600
 BONUS_TTL = 3600
-INVENTORY_SENSOR = "sensor.appie_voorraad"
-SPEND_WEEK_SENSOR = "sensor.appie_uitgaven_week"
-SPEND_MONTH_SENSOR = "sensor.appie_uitgaven_maand"
-BUDGET_SENSOR = "binary_sensor.appie_boven_budget"
-BUDGET_NOTIFICATION = "appie_budget"
+INVENTORY_SENSOR = "sensor.happie_voorraad"
+SPEND_WEEK_SENSOR = "sensor.happie_uitgaven_week"
+SPEND_MONTH_SENSOR = "sensor.happie_uitgaven_maand"
+BUDGET_SENSOR = "binary_sensor.happie_boven_budget"
+BUDGET_NOTIFICATION = "happie_budget"
 SPENDING_REFRESH = 6 * 3600
 ORDER_LINES_TTL = 300  # open orders can still change; delivered ones are cached for good
 DONE_STATES = ("DELIVERED", "COMPLETED")
 CANCELLED_STATES = ("CANCELLED", "CANCELED")
 
-_LOGGER = logging.getLogger("appie")
+_LOGGER = logging.getLogger("happie")
 
 
 def load_options() -> dict[str, Any]:
@@ -179,7 +179,7 @@ class App:
         if expired and not self._login_notified:
             _LOGGER.warning("AH-sessie verlopen; melding gestuurd")
             await self.ha.notify(
-                "Appie: opnieuw inloggen bij AH",
+                "HAppie: opnieuw inloggen bij AH",
                 "Je Albert Heijn-sessie is verlopen, daardoor staat de sync van je boodschappenlijst stil. "
                 "Open **HAppie** in de zijbalk en log opnieuw in.",
                 LOGIN_NOTIFICATION,
@@ -585,6 +585,11 @@ class App:
     async def login(self, request: web.Request) -> web.Response:
         body = await request.json()
         await self.ah.login_with_code(body.get("code", ""))
+        await self._after_login()
+        await self.run_sync_now()
+        return web.json_response({"ok": True})
+
+    async def _after_login(self) -> None:
         self._member = None
         self._frequent = self._bonus = None
         if self.ha and self._login_notified:
@@ -595,8 +600,6 @@ class App:
             self._login_notified = False
         # First sync after login merges both lists.
         self.sync.reset()
-        await self.run_sync_now()
-        return web.json_response({"ok": True})
 
     async def logout(self, request: web.Request) -> web.Response:
         self.ah.logout()
@@ -865,11 +868,11 @@ async def main() -> None:
 
     async with aiohttp.ClientSession() as session:
         app = App(session, options)
-        if os.environ.get("APPIE_MOCK"):
+        if os.environ.get("HAPPIE_MOCK"):
             from mock import install_mocks
 
-            # APPIE_MOCK=ah -> only fake the AH list, talk to a real HA
-            install_mocks(app, mock_ha=os.environ["APPIE_MOCK"] != "ah")
+            # HAPPIE_MOCK=ah -> only fake the AH list, talk to a real HA
+            install_mocks(app, mock_ha=os.environ["HAPPIE_MOCK"] != "ah")
 
         web_app = web.Application(middlewares=[ingress_only, json_errors])
         r = web_app.router

@@ -1,10 +1,10 @@
-# HAppie: je Appie-boodschappen in Home Assistant
+# HAppie: je AH-boodschappen in Home Assistant
 
-Een Home Assistant-add-on waarmee je je **Albert Heijn-boodschappenlijst** vanuit HA beheert. Je lijst blijft in twee richtingen gelijk met de **Appie-app** en met een **To-do-lijst in HA**.
+Een Home Assistant-add-on waarmee je je **Albert Heijn-boodschappenlijst** vanuit HA beheert. Je lijst blijft in twee richtingen gelijk met de **AH-app** en met een **To-do-lijst in HA**.
 
-> ⚠️ Gebruikt de onofficiële API van de Appie-app. AH kan die zonder aankondiging wijzigen.
+> ⚠️ Gebruikt de onofficiële API van de AH-app. AH kan die zonder aankondiging wijzigen.
 
-Huidige versie: **0.6.2**. Zie de [changelog](appie/CHANGELOG.md) en de [gebruikersdocumentatie](appie/DOCS.md).
+Huidige versie: **0.7.0**. Zie de [changelog](happie/CHANGELOG.md) en de [gebruikersdocumentatie](happie/DOCS.md).
 
 ## Functies
 
@@ -31,13 +31,13 @@ Huidige versie: **0.6.2**. Zie de [changelog](appie/CHANGELOG.md) en de [gebruik
 
   | Sensor | Waarde |
   |---|---|
-  | `sensor.appie_volgende_bezorging` | begin van het tijdvak, met de details als attributen |
-  | `sensor.appie_lijst_items` | aantal open items |
-  | `sensor.appie_geschatte_kosten` | geschatte kosten (EUR), inclusief bonus |
-  | `sensor.appie_bonus_items` | aantal items op je lijst dat in de bonus is |
-  | `sensor.appie_uitgaven_week` / `_maand` | uitgegeven deze week / maand (EUR) |
-  | `binary_sensor.appie_boven_budget` | uitgegeven + lijst boven je weekbudget |
-  | `sensor.appie_voorraad` | aantal producten op voorraad |
+  | `sensor.happie_volgende_bezorging` | begin van het tijdvak, met de details als attributen |
+  | `sensor.happie_lijst_items` | aantal open items |
+  | `sensor.happie_geschatte_kosten` | geschatte kosten (EUR), inclusief bonus |
+  | `sensor.happie_bonus_items` | aantal items op je lijst dat in de bonus is |
+  | `sensor.happie_uitgaven_week` / `_maand` | uitgegeven deze week / maand (EUR) |
+  | `binary_sensor.happie_boven_budget` | uitgegeven + lijst boven je weekbudget |
+  | `sensor.happie_voorraad` | aantal producten op voorraad |
 
 - Meldingen: als je AH-sessie verloopt, als iets op je lijst of iets wat je vaak koopt in de bonus komt (één keer per aanbieding), en als je boven je weekbudget komt (één keer per week). Met `notify_service` gaan ze ook naar je telefoon.
 
@@ -45,28 +45,28 @@ Huidige versie: **0.6.2**. Zie de [changelog](appie/CHANGELOG.md) en de [gebruik
 
 > Voorlopig wordt de add-on alleen op de lokale dev-HA getest (zie *Ontwikkelen*).
 
-**Lokaal bouwen:** kopieer de map `appie/` naar `/addons/appie` op je HA-machine (via de Samba- of SSH-add-on). Kies dan in de Add-on-winkel **⋮ › Controleren op updates**. De add-on staat daarna onder *Lokale add-ons*. Haal dan wel de regel `image:` uit `config.yaml` weg, anders downloadt HA het image van GitHub in plaats van je lokale code te bouwen. Lokaal testen kan ook met `docker build appie/` (BuildKit).
+**Lokaal bouwen:** kopieer de map `happie/` naar `/addons/happie` op je HA-machine (via de Samba- of SSH-add-on). Kies dan in de Add-on-winkel **⋮ › Controleren op updates**. De add-on staat daarna onder *Lokale add-ons*. Haal dan wel de regel `image:` uit `config.yaml` weg, anders downloadt HA het image van GitHub in plaats van je lokale code te bouwen. Lokaal testen kan ook met `docker build happie/` (BuildKit).
 
 **Via GitHub (aanbevolen):** voeg `https://github.com/emile-bodin/HAppie` toe via **Instellingen › Apps › App-winkel › ⋮ › Repositories**. HAppie staat daarna in de winkel. Je HA downloadt een kant-en-klaar image voor jouw processor (amd64 of aarch64; 32-bit armv7 ondersteunt Home Assistant niet meer), dus installeren gaat snel.
 
 **Automatische builds** (volgens het officiële [apps-example](https://github.com/home-assistant/apps-example)):
-- *Builder*: bij elke push en pull request naar `main` draaien de tests. Is er iets veranderd in `appie/config.yaml`, de `Dockerfile` of `appie/app/`, dan bouwt GitHub Actions de images voor amd64 en aarch64. Op `main` worden ze gepubliceerd als `ghcr.io/emile-bodin/happie:<versie>` (één multi-arch image) en wordt een GitHub Release `v<versie>` gemaakt met de tekst uit de changelog.
+- *Builder*: bij elke push en pull request naar `main` draaien de tests. Is er iets veranderd in `happie/config.yaml`, de `Dockerfile` of `happie/app/`, dan bouwt GitHub Actions de images voor amd64 en aarch64. Op `main` worden ze gepubliceerd als `ghcr.io/emile-bodin/happie:<versie>` (één multi-arch image) en wordt een GitHub Release `v<versie>` gemaakt met de tekst uit de changelog.
 - Een image van een bestaande versie wordt nooit overschreven. Wijzig je de app zonder het versienummer op te hogen, dan wordt er alleen als test gebouwd.
 - *Lint*: controleert de app-configuratie, ook dagelijks.
 - Dependabot houdt de actions en de base image bij.
 
-**Een nieuwe versie uitbrengen:** verhoog `version` in `appie/config.yaml`, zet een sectie `## <versie>` bovenaan `appie/CHANGELOG.md` en push naar `main`. HA meldt de update dan vanzelf.
+**Een nieuwe versie uitbrengen:** verhoog `version` in `happie/config.yaml`, zet een sectie `## <versie>` bovenaan `happie/CHANGELOG.md` en push naar `main`. HA meldt de update dan vanzelf.
 
 Na de installatie:
 1. Maak een to-do-lijst aan: **Instellingen › Apparaten & diensten › Integratie toevoegen › Lokale to-do** → `Boodschappen` (wordt `todo.boodschappen`).
 2. Start de add-on en open **HAppie** in de zijbalk.
-3. Koppel je AH-account. De stappen staan in het paneel en in [DOCS.md](appie/DOCS.md#ah-account-koppelen).
+3. Koppel je AH-account. De stappen staan in het paneel en in [DOCS.md](happie/DOCS.md#ah-account-koppelen).
 
 ## Projectstructuur
 
 ```
 repository.yaml          add-on-repository voor HA
-appie/
+happie/
   config.yaml            add-on: opties, ingress, versie
   Dockerfile             container (HA-base met Alpine + Python + aiohttp)
   README.md, icon.png, logo.png   beschrijving en afbeeldingen in de App-winkel
@@ -96,7 +96,7 @@ pip install aiohttp
 ### Zonder Home Assistant
 
 ```bash
-APPIE_MOCK=1 DATA_DIR=.devdata python appie/app/main.py   # dashboard met nep-AH en nep-HA op http://localhost:8099
+HAPPIE_MOCK=1 DATA_DIR=.devdata python happie/app/main.py   # dashboard met nep-AH en nep-HA op http://localhost:8099
 ```
 
 Zoeken gebruikt ook in mock-modus de echte AH-API, met een anonieme token.
@@ -141,7 +141,7 @@ python dev/e2e_test.py              # end-to-end tegen de lokale HA (naast run_a
 
 ## Credits
 
-AH documenteert de API van de Appie-app niet. Hoe die werkt (inloggen, endpoints, velden) hebben we uit deze open-sourceprojecten gehaald. Bedankt aan de makers:
+AH documenteert de API van de AH-app niet. Hoe die werkt (inloggen, endpoints, velden) hebben we uit deze open-sourceprojecten gehaald. Bedankt aan de makers:
 
 - [gwillem/appie-go](https://github.com/gwillem/appie-go): Go-library en CLI voor de AH-API, plus [API-documentatie](https://github.com/gwillem/appie-go/blob/main/doc/albertheijn_api.md). Onze belangrijkste bron voor inloggen, de boodschappenlijst, zoeken, producten en bestellingen.
 - [KixAss/home-assistant-appie](https://github.com/KixAss/home-assistant-appie): HA-integratie met tweewegsync. Hier hebben we gekeken hoe je items afvinkt en verwijdert in de lijst-API (`shoppinglist/v2`).
@@ -157,4 +157,9 @@ Verder gebruiken we:
 
 ## Gemaakt met Claude
 
-Deze add-on is gevibecoded met [Claude Code](https://claude.com/claude-code) van Anthropic. Claude schreef het grootste deel van de code, de tests en de documentatie, en zocht uit hoe de AH-API werkt. De richting, het testen met een echt AH-account en de keuzes kwamen van mij. Controleer de code dus zelf voordat je erop vertrouwt.
+HAppie is gebouwd met [Claude Code](https://claude.com/claude-code) van Anthropic. Claude schreef het grootste deel van de code, de tests en de documentatie, en zocht uit hoe de AH-API werkt. Wat de app moet doen, de keuzes en het testen met een echt AH-account en in dagelijks gebruik kwamen van mij.
+
+Wat dat voor jou betekent:
+- De kern (sync, uitgaven, bonusberekening, voorraad, meldingen) heeft automatische tests die bij elke wijziging in GitHub Actions draaien. Het paneel test ik met de hand.
+- HAppie gebruikt een onofficiële AH-API en heeft toegang tot je AH-account. Kijk dus gerust zelf in de code voordat je de app installeert.
+- Zie je iets geks? Meld het via [Issues](https://github.com/emile-bodin/HAppie/issues).
