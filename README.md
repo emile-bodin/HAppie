@@ -4,7 +4,7 @@ Een Home Assistant-add-on waarmee je je **Albert Heijn-boodschappenlijst** vanui
 
 > ⚠️ Gebruikt de onofficiële API van de Appie-app. AH kan die zonder aankondiging wijzigen.
 
-Huidige versie: **0.6.1**. Zie de [changelog](appie/CHANGELOG.md) en de [gebruikersdocumentatie](appie/DOCS.md).
+Huidige versie: **0.6.2**. Zie de [changelog](appie/CHANGELOG.md) en de [gebruikersdocumentatie](appie/DOCS.md).
 
 ## Functies
 
@@ -50,7 +50,7 @@ Huidige versie: **0.6.1**. Zie de [changelog](appie/CHANGELOG.md) en de [gebruik
 **Via GitHub (aanbevolen):** voeg `https://github.com/emile-bodin/HAppie` toe via **Instellingen › Apps › App-winkel › ⋮ › Repositories**. HAppie staat daarna in de winkel. Je HA downloadt een kant-en-klaar image voor jouw processor (amd64 of aarch64; 32-bit armv7 ondersteunt Home Assistant niet meer), dus installeren gaat snel.
 
 **Automatische builds** (volgens het officiële [apps-example](https://github.com/home-assistant/apps-example)):
-- *Builder*: bij elke push en pull request naar `main` draaien de tests. Is er iets veranderd in `appie/config.yaml`, de `Dockerfile` of `appie/app/`, dan bouwt GitHub Actions de images voor amd64 en aarch64. Op `main` worden ze gepubliceerd als `ghcr.io/emile-bodin/{arch}-happie:<versie>` en wordt een GitHub Release `v<versie>` gemaakt met de tekst uit de changelog.
+- *Builder*: bij elke push en pull request naar `main` draaien de tests. Is er iets veranderd in `appie/config.yaml`, de `Dockerfile` of `appie/app/`, dan bouwt GitHub Actions de images voor amd64 en aarch64. Op `main` worden ze gepubliceerd als `ghcr.io/emile-bodin/happie:<versie>` (één multi-arch image) en wordt een GitHub Release `v<versie>` gemaakt met de tekst uit de changelog.
 - Een image van een bestaande versie wordt nooit overschreven. Wijzig je de app zonder het versienummer op te hogen, dan wordt er alleen als test gebouwd.
 - *Lint*: controleert de app-configuratie, ook dagelijks.
 - Dependabot houdt de actions en de base image bij.

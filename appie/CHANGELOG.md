@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.6.2
+- Eén image voor amd64 en aarch64 (`ghcr.io/emile-bodin/happie`), volgens de huidige richtlijnen van Home Assistant. HA kiest automatisch de juiste versie voor jouw processor.
+
 ## 0.6.1
 - **Fix:** in de container kwam de omgeving van Home Assistant niet bij de app aan (onder andere de toegang tot HA). Daardoor werkten de sync met je to-do-lijst, de sensoren en meldingen niet in een echte installatie.
 - Gebouwd volgens de nieuwe werkwijze van Home Assistant (Docker BuildKit) op een actuele basis (Alpine 3.24), met beveiligingsupdates.
