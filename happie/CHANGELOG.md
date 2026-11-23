@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.2
+- De zoekbalk valt bij het typen niet meer half onder de kop: de bovenrand blijft zichtbaar.
+- Het barcodeknopje in de zoekbalk staat weer netjes gecentreerd en heeft weer de juiste kleur.
+
 ## 0.7.1
 - De bezorgkaart is compacter en duidelijker. Staat er nog niets in je gereserveerde bezorgmoment, dan zie je "Vul aan tot € 45 vóór zo 18:00" in plaats van het lange bericht van AH. Zit je onder het minimumbedrag, dan zie je hoeveel er nog bij moet.
 - De statusregel op de bezorgkaart blijft op één regel; de volledige tekst staat in de tooltip. De rij met tegels wordt daardoor niet meer onnodig hoog.
