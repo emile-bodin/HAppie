@@ -43,11 +43,9 @@ Huidige versie: **0.7.0**. Zie de [changelog](happie/CHANGELOG.md) en de [gebrui
 
 ## Installeren
 
-> Voorlopig wordt de add-on alleen op de lokale dev-HA getest (zie *Ontwikkelen*).
+**Via GitHub (aanbevolen):** voeg `https://github.com/emile-bodin/HAppie` toe via **Instellingen › Apps › App-winkel › ⋮ › Repositories**. HAppie staat daarna in de winkel. Je HA downloadt een kant-en-klaar image voor jouw processor (amd64 of aarch64; 32-bit armv7 ondersteunt Home Assistant niet meer), dus installeren gaat snel.
 
 **Lokaal bouwen:** kopieer de map `happie/` naar `/addons/happie` op je HA-machine (via de Samba- of SSH-add-on). Kies dan in de Add-on-winkel **⋮ › Controleren op updates**. De add-on staat daarna onder *Lokale add-ons*. Haal dan wel de regel `image:` uit `config.yaml` weg, anders downloadt HA het image van GitHub in plaats van je lokale code te bouwen. Lokaal testen kan ook met `docker build happie/` (BuildKit).
-
-**Via GitHub (aanbevolen):** voeg `https://github.com/emile-bodin/HAppie` toe via **Instellingen › Apps › App-winkel › ⋮ › Repositories**. HAppie staat daarna in de winkel. Je HA downloadt een kant-en-klaar image voor jouw processor (amd64 of aarch64; 32-bit armv7 ondersteunt Home Assistant niet meer), dus installeren gaat snel.
 
 **Automatische builds** (volgens het officiële [apps-example](https://github.com/home-assistant/apps-example)):
 - *Builder*: bij elke push en pull request naar `main` draaien de tests. Is er iets veranderd in `happie/config.yaml`, de `Dockerfile` of `happie/app/`, dan bouwt GitHub Actions de images voor amd64 en aarch64. Op `main` worden ze gepubliceerd als `ghcr.io/emile-bodin/happie:<versie>` (één multi-arch image) en wordt een GitHub Release `v<versie>` gemaakt met de tekst uit de changelog.
