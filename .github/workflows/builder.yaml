@@ -1,0 +1,138 @@
+# Based on https://github.com/home-assistant/apps-example/blob/main/.github/workflows/builder.yaml
+name: Builder
+
+env:
+  # changes to these files (inside an app folder) need a new image
+  MONITORED_FILES: "config.yaml Dockerfile app"
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Set up Python
+        uses: actions/setup-python@v7.1.0
+        with:
+          python-version: "3.12"
+
+      - name: Run the tests
+        run: |
+          pip install aiohttp
+          set -e
+          for t in tests/test_*.py; do
+            echo "== $t"
+            python "$t"
+          done
+
+  init:
+    name: Initialize builds
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.filter.outputs.changed }}
+      changed_apps: ${{ steps.filter.outputs.changed_apps }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Get changed files
+        id: changed_files
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62 # v47
+
+      - name: Find app directories
+        id: apps
+        uses: home-assistant/actions/helpers/find-addons@07f46fd2e19967768b5fd3000f91f857452b767c # 2026.11.0
+
+      - name: Filter changed apps
+        id: filter
+        env:
+          APPS: ${{ steps.apps.outputs.addons }}
+          CHANGED_FILES: ${{ steps.changed_files.outputs.all_changed_files }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          changed_apps=()
+
+          # Manual run or a change to the build workflows: rebuild all apps
+          if [[ "${EVENT}" == "workflow_dispatch" || "${CHANGED_FILES}" =~ \.github/workflows/(builder|build-app)\.yaml ]]; then
+            changed_apps=(${APPS})
+          else
+            for app in ${APPS}; do
+              for file in ${MONITORED_FILES}; do
+                if [[ "${CHANGED_FILES}" =~ ${app}/${file} ]]; then
+                  changed_apps+=("${app}")
+                  break
+                fi
+              done
+            done
+          fi
+
+          if [[ ${#changed_apps[@]} -gt 0 ]]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "changed_apps=$(jq -nc '$ARGS.positional' --args "${changed_apps[@]}")" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-app:
+    name: Build ${{ matrix.app }}
+    needs: [init, tests]
+    if: needs.init.outputs.changed == 'true'
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.init.outputs.changed_apps) }}
+    uses: ./.github/workflows/build-app.yaml
+    with:
+      app: ${{ matrix.app }}
+      publish: ${{ github.event_name != 'pull_request' }}
+    secrets: inherit
+
+  release:
+    name: GitHub Release ${{ matrix.app }}
+    needs: [init, build-app]
+    if: github.event_name != 'pull_request' && needs.init.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    strategy:
+      matrix:
+        app: ${{ fromJSON(needs.init.outputs.changed_apps) }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7.0.1
+
+      - name: Tag and release a new version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APP: ${{ matrix.app }}
+        run: |
+          version=$(sed -nE 's/^version:[[:space:]]*"?([^"]+)"?[[:space:]]*$/\1/p' "${APP}/config.yaml")
+          tag="v${version}"
+          if gh release view "${tag}" > /dev/null 2>&1; then
+            echo "Release ${tag} already exists, nothing to do."
+            exit 0
+          fi
+          # notes: the section of this version in the changelog
+          awk -v v="${version}" '/^## /{ if (found) exit; if ($2 == v) found = 1; next } found' "${APP}/CHANGELOG.md" > notes.md
+          if [[ ! -s notes.md ]]; then
+            echo "Geen sectie '## ${version}' in ${APP}/CHANGELOG.md." >> notes.md
+          fi
+          gh release create "${tag}" --target "${GITHUB_SHA}" --title "HAppie ${version}" --notes-file notes.md

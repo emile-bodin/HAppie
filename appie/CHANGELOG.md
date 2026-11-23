@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1
+- **Fix:** in de container kwam de omgeving van Home Assistant niet bij de app aan (onder andere de toegang tot HA). Daardoor werkten de sync met je to-do-lijst, de sensoren en meldingen niet in een echte installatie.
+- Gebouwd volgens de nieuwe werkwijze van Home Assistant (Docker BuildKit) op een actuele basis (Alpine 3.24), met beveiligingsupdates.
+- Eén image voor amd64 en aarch64 (`ghcr.io/emile-bodin/happie`), dat HA automatisch voor jouw processor kiest.
+- Eigen icoon en logo in de App-winkel.
+
 ## 0.6.0
 - Te installeren via GitHub: voeg https://github.com/emile-bodin/HAppie toe als repository in de App-winkel. Kant-en-klare images voor amd64 en aarch64 worden automatisch gebouwd.
 - Nieuwe naam: **HAppie** (HA + Appie). In de zijbalk heet het paneel nu *HAppie*. Entiteiten (`sensor.appie_*`) en de slug blijven gelijk, dus je automations blijven werken.

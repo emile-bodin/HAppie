@@ -4,7 +4,7 @@ Een Home Assistant-add-on waarmee je je **Albert Heijn-boodschappenlijst** vanui
 
 > ⚠️ Gebruikt de onofficiële API van de Appie-app. AH kan die zonder aankondiging wijzigen.
 
-Huidige versie: **0.6.0**. Zie de [changelog](appie/CHANGELOG.md) en de [gebruikersdocumentatie](appie/DOCS.md).
+Huidige versie: **0.6.1**. Zie de [changelog](appie/CHANGELOG.md) en de [gebruikersdocumentatie](appie/DOCS.md).
 
 ## Functies
 
@@ -45,11 +45,17 @@ Huidige versie: **0.6.0**. Zie de [changelog](appie/CHANGELOG.md) en de [gebruik
 
 > Voorlopig wordt de add-on alleen op de lokale dev-HA getest (zie *Ontwikkelen*).
 
-**Lokaal bouwen:** kopieer de map `appie/` naar `/addons/appie` op je HA-machine (via de Samba- of SSH-add-on). Kies dan in de Add-on-winkel **⋮ › Controleren op updates**. De add-on staat daarna onder *Lokale add-ons*. Haal dan wel de regel `image:` uit `config.yaml` weg, anders downloadt HA het image van GitHub in plaats van je lokale code te bouwen.
+**Lokaal bouwen:** kopieer de map `appie/` naar `/addons/appie` op je HA-machine (via de Samba- of SSH-add-on). Kies dan in de Add-on-winkel **⋮ › Controleren op updates**. De add-on staat daarna onder *Lokale add-ons*. Haal dan wel de regel `image:` uit `config.yaml` weg, anders downloadt HA het image van GitHub in plaats van je lokale code te bouwen. Lokaal testen kan ook met `docker build appie/` (BuildKit).
 
 **Via GitHub (aanbevolen):** voeg `https://github.com/emile-bodin/HAppie` toe via **Instellingen › Apps › App-winkel › ⋮ › Repositories**. HAppie staat daarna in de winkel. Je HA downloadt een kant-en-klaar image voor jouw processor (amd64 of aarch64; 32-bit armv7 ondersteunt Home Assistant niet meer), dus installeren gaat snel.
 
-**Automatische builds:** bij elke push naar `main` draait GitHub Actions de tests, controleert de app-configuratie en bouwt de images (amd64 en aarch64) naar `ghcr.io/emile-bodin/{arch}-happie` met het versienummer uit `appie/config.yaml`. Een nieuwe versie uitbrengen = het versienummer in `config.yaml` ophogen (plus een regel in de changelog) en pushen; HA meldt de update dan vanzelf.
+**Automatische builds** (volgens het officiële [apps-example](https://github.com/home-assistant/apps-example)):
+- *Builder*: bij elke push en pull request naar `main` draaien de tests. Is er iets veranderd in `appie/config.yaml`, de `Dockerfile` of `appie/app/`, dan bouwt GitHub Actions de images voor amd64 en aarch64. Op `main` worden ze gepubliceerd als `ghcr.io/emile-bodin/happie:<versie>` (één multi-arch image) en wordt een GitHub Release `v<versie>` gemaakt met de tekst uit de changelog.
+- Een image van een bestaande versie wordt nooit overschreven. Wijzig je de app zonder het versienummer op te hogen, dan wordt er alleen als test gebouwd.
+- *Lint*: controleert de app-configuratie, ook dagelijks.
+- Dependabot houdt de actions en de base image bij.
+
+**Een nieuwe versie uitbrengen:** verhoog `version` in `appie/config.yaml`, zet een sectie `## <versie>` bovenaan `appie/CHANGELOG.md` en push naar `main`. HA meldt de update dan vanzelf.
 
 Na de installatie:
 1. Maak een to-do-lijst aan: **Instellingen › Apparaten & diensten › Integratie toevoegen › Lokale to-do** → `Boodschappen` (wordt `todo.boodschappen`).
@@ -59,11 +65,11 @@ Na de installatie:
 ## Projectstructuur
 
 ```
-AGENTS.md                hoe je deze repo beheert, bouwt en bijwerkt (voor agents en mensen)
 repository.yaml          add-on-repository voor HA
 appie/
   config.yaml            add-on: opties, ingress, versie
-  Dockerfile, build.yaml container (Alpine + Python + aiohttp)
+  Dockerfile             container (HA-base met Alpine + Python + aiohttp)
+  README.md, icon.png, logo.png   beschrijving en afbeeldingen in de App-winkel
   DOCS.md, CHANGELOG.md  gebruikersdocumentatie
   translations/          teksten bij de opties (nl/en)
   app/
