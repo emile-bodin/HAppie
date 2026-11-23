@@ -35,16 +35,26 @@ jobs:
         with:
           path: "./${{ inputs.app }}"
 
-      # values go through env, so names and descriptions with spaces stay intact
+      # The info helper returns JSON-encoded strings ("..."). They go through env
+      # (so spaces stay intact) and jq decodes them; plain values pass unchanged.
       - name: Normalize app information
         id: normalize
         env:
-          image: ${{ steps.info.outputs.image }}
-          version: ${{ steps.info.outputs.version }}
-          name: ${{ steps.info.outputs.name }}
-          description: ${{ steps.info.outputs.description }}
-          url: ${{ steps.info.outputs.url }}
+          IMAGE: ${{ steps.info.outputs.image }}
+          VERSION: ${{ steps.info.outputs.version }}
+          NAME: ${{ steps.info.outputs.name }}
+          DESCRIPTION: ${{ steps.info.outputs.description }}
+          URL: ${{ steps.info.outputs.url }}
         run: |
+          unq() {
+            local out
+            if out=$(jq -er 'select(type == "string")' <<< "$1" 2> /dev/null); then printf '%s' "$out"; else printf '%s' "$1"; fi
+          }
+          image=$(unq "$IMAGE")
+          version=$(unq "$VERSION")
+          name=$(unq "$NAME")
+          description=$(unq "$DESCRIPTION")
+          url=$(unq "$URL")
           echo "image_name=${image##*/}" >> "$GITHUB_OUTPUT"
           echo "registry_prefix=${image%/*}" >> "$GITHUB_OUTPUT"
           echo "version=${version}" >> "$GITHUB_OUTPUT"
