@@ -13,6 +13,6 @@ CMD [ "/usr/bin/with-contenv", "python3", "-u", "/app/main.py" ]
 
 LABEL \
     org.opencontainers.image.title="Home Assistant App: HAppie" \
-    org.opencontainers.image.description="Albert Heijn-boodschappenlijst in Home Assistant, met sync naar de Appie-app" \
+    org.opencontainers.image.description="Albert Heijn-boodschappenlijst in Home Assistant, met sync naar de AH-app" \
     org.opencontainers.image.source="https://github.com/emile-bodin/HAppie" \
     org.opencontainers.image.licenses="Apache-2.0"

@@ -2,7 +2,7 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "appie", "app"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "happie", "app"))
 
 from ah_client import bonus_line  # noqa: E402
 

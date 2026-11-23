@@ -5,7 +5,7 @@ import sys
 import tempfile
 from datetime import date
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "appie", "app"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "happie", "app"))
 os.environ["DATA_DIR"] = tempfile.mkdtemp()
 
 import main  # noqa: E402
@@ -129,13 +129,13 @@ async def test_app_sensors_and_budget_warning():
 
     await app.check_budget_notification()
     await app.check_budget_notification()
-    assert [n[0] for n in ha.notes] == ["appie_budget"], ha.notes
+    assert [n[0] for n in ha.notes] == ["happie_budget"], ha.notes
     assert "105.00" in ha.notes[0][2]
 
     # list shrinks -> back under budget -> notification dismissed
     await app.publish_list_sensors([ListItem("Kaas", 1, False, 1)])
     await app.check_budget_notification()
-    assert ha.dismissed == ["appie_budget"]
+    assert ha.dismissed == ["happie_budget"]
     await app.publish_spending_sensors()
     assert ha.states[main.BUDGET_SENSOR][0] == "off"
 

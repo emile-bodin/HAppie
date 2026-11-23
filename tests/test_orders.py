@@ -6,7 +6,7 @@ import sys
 import tempfile
 from datetime import date, timedelta
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "appie", "app"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "happie", "app"))
 os.environ["DATA_DIR"] = tempfile.mkdtemp()
 
 import main  # noqa: E402

@@ -1,4 +1,4 @@
-"""Development mocks: in-memory AH list and HA to-do list (APPIE_MOCK=1).
+"""Development mocks: in-memory AH list and HA to-do list (HAPPIE_MOCK=1).
 
 Product search still talks to the real AH API with an anonymous token.
 """

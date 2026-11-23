@@ -24,7 +24,7 @@ for line in env_file.read_text(encoding="utf-8").splitlines():
 env["SUPERVISOR_TOKEN"] = env["HA_TOKEN"]
 env.setdefault("PORT", "8099")
 if "--mock-ah" in sys.argv:
-    env["APPIE_MOCK"] = "ah"
+    env["HAPPIE_MOCK"] = "ah"
     env["DATA_DIR"] = str(ROOT / ".devdata" / "mock-ah")
 else:
     env["DATA_DIR"] = str(ROOT / ".devdata" / "real")
@@ -43,7 +43,7 @@ if "--no-ha" not in sys.argv:
 
 print(f"Paneel: http://localhost:{env['PORT']}  ->  HA: {env['HA_URL']}", flush=True)
 try:
-    code = subprocess.call([sys.executable, "-u", str(ROOT / "appie" / "app" / "main.py")], env=env)
+    code = subprocess.call([sys.executable, "-u", str(ROOT / "happie" / "app" / "main.py")], env=env)
 except KeyboardInterrupt:
     code = 0
 finally:

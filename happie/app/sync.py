@@ -193,7 +193,7 @@ class SyncEngine:
                 tomb.update(failed)
         if tomb:
             self.warnings.append(
-                "Deze items konden niet bij AH verwijderd worden; haal ze weg in de Appie-app: "
+                "Deze items konden niet bij AH verwijderd worden; haal ze weg in de AH-app: "
                 + ", ".join(sorted(tomb))
             )
         if ha_dupes:
