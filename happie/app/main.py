@@ -453,6 +453,7 @@ class App:
                         "eta_start": self._local_iso(d.get("date"), d.get("eta_start")),
                         "eta_end": self._local_iso(d.get("date"), d.get("eta_end")),
                         "eta_message": d.get("eta_message"),
+                        "min_order": d.get("min_order"),
                     }
                 )
                 try:

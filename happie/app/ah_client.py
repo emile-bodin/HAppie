@@ -87,11 +87,16 @@ def parse_eta(info: dict[str, Any] | None) -> dict[str, Any]:
     message = info.get("message") or None
     m = re.search(r"(\d{1,2}[:.]\d{2})\s*(?:en|tot|-|–)\s*(\d{1,2}[:.]\d{2})", message or "")
     fmt = lambda t: t.replace(".", ":").zfill(5)  # noqa: E731
+    # a reserved but (nearly) empty slot: "Vul je bestelling aan tot €45 vóór zondag om 18:00. ..."
+    fill = re.search(r"aan tot\s*€\s*(\d+(?:[.,]\d{1,2})?)", message or "")
+    fill_by = re.search(r"om\s+(\d{1,2}[:.]\d{2})", message or "") if fill else None
     return {
         "eta_start": fmt(m.group(1)) if m else None,
         "eta_end": fmt(m.group(2)) if m else None,
         "eta_message": message,
         "track_state": info.get("state"),
+        "min_order": float(fill.group(1).replace(",", ".")) if fill else None,
+        "fill_by": fmt(fill_by.group(1)) if fill_by else None,
     }
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.1
+- De bezorgkaart is compacter en duidelijker. Staat er nog niets in je gereserveerde bezorgmoment, dan zie je "Vul aan tot € 45 vóór zo 18:00" in plaats van het lange bericht van AH. Zit je onder het minimumbedrag, dan zie je hoeveel er nog bij moet.
+- De statusregel op de bezorgkaart blijft op één regel; de volledige tekst staat in de tooltip. De rij met tegels wordt daardoor niet meer onnodig hoog.
+- Nieuw attribuut `min_order` op `sensor.happie_volgende_bezorging`: het minimumbedrag dat AH noemt voor een gereserveerd moment.
+- Eigen kleuren: het paneel gebruikt nu de kleuren van het HAppie-icoon (petrol en koraal) in plaats van die van Albert Heijn.
+- In het donkere thema hebben productfoto's geen fel witte achtergrond meer, maar een zacht grijs vlak.
+
 ## 0.7.0
 - **Let op: dit verandert je installatie.** De interne naam van de app is nu `happie` in plaats van `appie`, omdat "Appie" een merk van Albert Heijn is. Home Assistant ziet HAppie daardoor als een nieuwe app:
   - Installeer HAppie opnieuw uit de App-winkel en verwijder daarna de oude versie. Neem je opties (to-do-lijst, weekbudget, meldingen) over.

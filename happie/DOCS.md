@@ -52,7 +52,7 @@ Daarna ververst de add-on de token zelf. Je wachtwoord wordt nooit opgeslagen.
 
 | Sensor | Waarde |
 |---|---|
-| `sensor.happie_volgende_bezorging` | Begin van het tijdvak; datum, tijdvak, wijzigtermijn, aantal artikelen, de artikelen zelf (`products`) en, als de bestelling onderweg is, het verwachte venster (`eta_window`, `eta_start`, `eta_end`, `eta_message`) als attributen |
+| `sensor.happie_volgende_bezorging` | Begin van het tijdvak; datum, tijdvak, wijzigtermijn, aantal artikelen, de artikelen zelf (`products`) en, als de bestelling onderweg is, het verwachte venster (`eta_window`, `eta_start`, `eta_end`, `eta_message`) als attributen. Bij een gereserveerd moment dat nog (bijna) leeg is ook het minimumbedrag (`min_order`) |
 | `sensor.happie_lijst_items` | Aantal open items; de items zelf als attribuut |
 | `sensor.happie_geschatte_kosten` | Geschatte kosten van de open items (EUR) |
 | `sensor.happie_bonus_items` | Aantal items op je lijst dat in de bonus is |

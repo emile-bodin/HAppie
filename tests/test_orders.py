@@ -101,6 +101,9 @@ async def run():
     assert attrs["eta_end"].startswith(f"{today}T19:40:00") and "bezorger" in attrs["eta_message"]
     assert parse_eta({"message": "Bezorging tussen 9.05 - 10.05"})["eta_start"] == "09:05"
     assert parse_eta({"state": "CONFIRMED"})["eta_start"] is None
+    fill = parse_eta({"state": "UNKNOWN", "message": "Vul je bestelling aan tot €45 vóór zondag om 18:00. Geen boodschappen nodig? Annuleer dan nu je moment."})
+    assert fill["min_order"] == 45 and fill["fill_by"] == "18:00" and fill["eta_start"] is None
+    assert parse_eta({"message": "Onze bezorger verwacht tussen 18:40 en 19:40 uur."})["min_order"] is None
     print("all order tests passed")
 
 
