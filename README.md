@@ -47,9 +47,9 @@ Huidige versie: **0.6.0**. Zie de [changelog](appie/CHANGELOG.md) en de [gebruik
 
 **Lokaal bouwen:** kopieer de map `appie/` naar `/addons/appie` op je HA-machine (via de Samba- of SSH-add-on). Kies dan in de Add-on-winkel **⋮ › Controleren op updates**. De add-on staat daarna onder *Lokale add-ons*. Haal dan wel de regel `image:` uit `config.yaml` weg, anders downloadt HA het image van GitHub in plaats van je lokale code te bouwen.
 
-**Via GitHub (aanbevolen):** voeg `https://github.com/emile-bodin/HAppie` toe via **Instellingen › Apps › App-winkel › ⋮ › Repositories**. HAppie staat daarna in de winkel. Je HA downloadt een kant-en-klaar image voor jouw processor (amd64, aarch64 of armv7), dus installeren gaat snel.
+**Via GitHub (aanbevolen):** voeg `https://github.com/emile-bodin/HAppie` toe via **Instellingen › Apps › App-winkel › ⋮ › Repositories**. HAppie staat daarna in de winkel. Je HA downloadt een kant-en-klaar image voor jouw processor (amd64 of aarch64; 32-bit armv7 ondersteunt Home Assistant niet meer), dus installeren gaat snel.
 
-**Automatische builds:** bij elke push naar `main` draait GitHub Actions de tests, controleert de app-configuratie en bouwt de images naar `ghcr.io/emile-bodin/{arch}-happie` met het versienummer uit `appie/config.yaml`. Een nieuwe versie uitbrengen = het versienummer in `config.yaml` ophogen (plus een regel in de changelog) en pushen; HA meldt de update dan vanzelf.
+**Automatische builds:** bij elke push naar `main` draait GitHub Actions de tests, controleert de app-configuratie en bouwt de images (amd64 en aarch64) naar `ghcr.io/emile-bodin/{arch}-happie` met het versienummer uit `appie/config.yaml`. Een nieuwe versie uitbrengen = het versienummer in `config.yaml` ophogen (plus een regel in de changelog) en pushen; HA meldt de update dan vanzelf.
 
 Na de installatie:
 1. Maak een to-do-lijst aan: **Instellingen › Apparaten & diensten › Integratie toevoegen › Lokale to-do** → `Boodschappen` (wordt `todo.boodschappen`).

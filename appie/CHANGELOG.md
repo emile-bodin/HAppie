@@ -1,7 +1,7 @@
 # Changelog
 
 ## 0.6.0
-- Te installeren via GitHub: voeg https://github.com/emile-bodin/HAppie toe als repository in de App-winkel. Kant-en-klare images voor amd64, aarch64 en armv7 worden automatisch gebouwd.
+- Te installeren via GitHub: voeg https://github.com/emile-bodin/HAppie toe als repository in de App-winkel. Kant-en-klare images voor amd64 en aarch64 worden automatisch gebouwd.
 - Nieuwe naam: **HAppie** (HA + Appie). In de zijbalk heet het paneel nu *HAppie*. Entiteiten (`sensor.appie_*`) en de slug blijven gelijk, dus je automations blijven werken.
 - **Uitgavenoverzicht**: wat je per week en per maand bij AH uitgeeft, uit je online bestellingen én je kassabonnen uit de winkel.
   - Nieuwe tegel *Uitgegeven deze week* bovenaan. Klik erop voor een staafgrafiek (per week of per maand, online en winkel apart), kerncijfers en je laatste aankopen.
