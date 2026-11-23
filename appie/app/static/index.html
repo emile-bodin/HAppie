@@ -1,0 +1,1746 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HAppie</title>
+<style>
+  :root {
+    --bg: #eef2f5; --card: #ffffff; --card-2: #f7f9fb; --text: #1c2228; --muted: #6b7680; --line: #e3e7eb;
+    --ah: #00a0e2; --ah-dark: #0079ad; --ah-soft: #e3f4fc; --bonus: #ff7900; --bonus-soft: #fff1e5;
+    --danger: #d93025; --ok: #2e9d4f; --radius: 14px; --shadow: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.08);
+    --top: 60px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0f1215; --card: #1a1f23; --card-2: #22282d; --text: #e7eaed; --muted: #95a0a9; --line: #2c3338;
+            --ah-soft: #0c2a38; --bonus-soft: #3a2310; --shadow: 0 1px 2px rgba(0,0,0,.4); }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+  button { font: inherit; color: inherit; }
+  .hidden { display: none !important; }
+  .muted { color: var(--muted); }
+
+  /* ---------- top bar ---------- */
+  .topbar { position: sticky; top: 0; z-index: 20; height: var(--top); display: flex; align-items: center; gap: 12px;
+            padding: 0 16px; background: var(--ah); color: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.15); }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px; flex: 1; min-width: 0; }
+  .brand span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,.16); border: 0; color: #fff;
+          border-radius: 999px; padding: 6px 12px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  .chip:hover { background: rgba(255,255,255,.26); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #c8d0d6; flex: none; }
+  .dot.ok { background: #6be38f; } .dot.bad { background: #ff8a80; } .dot.busy { background: #ffd54f; }
+  .avatar { width: 28px; height: 28px; border-radius: 50%; background: #fff; color: var(--ah-dark); display: grid; place-items: center;
+            font-weight: 700; font-size: 12px; flex: none; }
+  .account-chip { padding: 3px 12px 3px 3px; }
+  .account-chip .who { display: flex; flex-direction: column; line-height: 1.15; text-align: left; }
+  .account-chip .who small { opacity: .85; font-size: 11px; display: flex; align-items: center; gap: 5px; }
+  .iconbtn { width: 36px; height: 36px; border-radius: 10px; border: 0; background: rgba(255,255,255,.16); color: #fff; cursor: pointer;
+             display: grid; place-items: center; flex: none; }
+  .iconbtn:hover { background: rgba(255,255,255,.26); }
+
+  .menu { position: absolute; right: 12px; top: calc(var(--top) - 4px); z-index: 30; width: 290px; background: var(--card); color: var(--text);
+          border-radius: var(--radius); box-shadow: 0 10px 30px rgba(0,0,0,.2); padding: 16px; }
+  .menu .head { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+  .menu .head .avatar { width: 42px; height: 42px; font-size: 15px; background: var(--ah); color: #fff; }
+  .menu dl { margin: 0 0 12px; font-size: 13px; display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; }
+  .menu dt { color: var(--muted); } .menu dd { margin: 0; display: flex; align-items: center; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
+  .menu .actions { display: flex; gap: 8px; }
+
+  /* ---------- layout ---------- */
+  .page { padding: 16px; display: flex; flex-direction: column; gap: 16px; max-width: 1600px; margin: 0 auto; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .stat { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; display: flex; gap: 12px; align-items: center; min-width: 0; }
+  .stat .ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--ah-soft); color: var(--ah); flex: none; }
+  .stat.bonus .ico { background: var(--bonus-soft); color: var(--bonus); }
+  .stat .val { font-size: 22px; font-weight: 700; line-height: 1.1; }
+  .stat .lbl { font-size: 12px; line-height: 1.3; color: var(--muted); overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .stats { grid-template-columns: minmax(280px, 1.8fr) repeat(5, minmax(0, 1fr)); }
+  .stat.delivery { background: linear-gradient(135deg, var(--ah) 0%, var(--ah-dark) 100%); color: #fff; }
+  .stat.delivery .ico { background: rgba(255,255,255,.18); color: #fff; }
+  .stat.delivery .lbl { color: rgba(255,255,255,.85); }
+  .stat.delivery .val { font-size: 19px; }
+  .stat.delivery .sub { font-size: 12px; color: rgba(255,255,255,.9); margin-top: 3px; display: flex; flex-wrap: wrap; gap: 2px 8px; }
+  .stat.delivery .pill { background: rgba(255,255,255,.22); border-radius: 999px; padding: 0 7px; font-weight: 600; }
+  .stat.delivery .pill.eta { background: #fff; color: var(--ah-dark); }
+  .stat.delivery.none { background: var(--card); color: var(--text); }
+  .stat.delivery.none .ico { background: var(--card-2); color: var(--muted); } .stat.delivery.none .lbl, .stat.delivery.none .sub { color: var(--muted); }
+  @media (max-width: 1199px) { .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); } .stat.delivery { grid-column: span 3; } }
+  .progress { height: 4px; background: var(--line); border-radius: 4px; margin-top: 6px; overflow: hidden; }
+  .progress i { display: block; height: 100%; background: var(--ok); width: 0; transition: width .3s; }
+
+  .grid { display: grid; gap: 16px; grid-template-columns: minmax(300px, 1fr) minmax(380px, 1.35fr) minmax(280px, .95fr);
+          grid-template-areas: "search list suggest"; align-items: start; }
+  .panel { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+  .panel > header { display: flex; align-items: center; gap: 8px; padding: 14px 16px 10px; }
+  .panel > header h2 { margin: 0; font-size: 16px; flex: 1; display: flex; align-items: center; gap: 8px; }
+  .panel > header .count { background: var(--ah-soft); color: var(--ah-dark); font-size: 12px; border-radius: 999px; padding: 1px 8px; font-weight: 700; }
+  .panel .body { padding: 0 16px 16px; overflow: auto; min-height: 0; }
+  [data-panel=search] { grid-area: search; } [data-panel=list] { grid-area: list; } [data-panel=suggest] { grid-area: suggest; }
+
+  /* desktop + tablet: fixed viewport, panels scroll on their own */
+  @media (min-width: 768px) {
+    .page { height: calc(100dvh - var(--top)); }
+    .grid { flex: 1; min-height: 0; align-items: stretch; }
+    .panel { max-height: 100%; }
+    .tabbar { display: none !important; }
+  }
+  @media (min-width: 1200px) { .grid:not(.inv) { align-items: start; max-height: 100%; } }
+  /* tablet: list left, search + suggestions stacked right */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .grid { grid-template-columns: 1.15fr 1fr; grid-template-rows: auto minmax(0, 1fr); grid-template-areas: "list search" "list suggest"; }
+    [data-panel=search] { max-height: 55vh; }
+    .account-chip .who small { display: none; }
+  }
+  /* phone: one panel at a time with a bottom tab bar */
+  @media (max-width: 767px) {
+    :root { --top: 56px; }
+    .page { padding: 12px 12px calc(84px + env(safe-area-inset-bottom)); gap: 12px; }
+    .stats { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .stat.delivery, .stat.spend { grid-column: 1 / -1; }
+    .stat { padding: 10px 12px; gap: 10px; } .stat .ico { width: 34px; height: 34px; border-radius: 10px; } .stat .val { font-size: 18px; }
+    body[data-tab=search] #stats .stat:not(.delivery), body[data-tab=suggest] #stats .stat:not(.delivery) { display: none; }
+    body[data-tab=search] .stat.delivery, body[data-tab=suggest] .stat.delivery { padding: 8px 12px; }
+    body[data-tab=search] .stat.delivery .ico, body[data-tab=suggest] .stat.delivery .ico,
+    body[data-tab=search] .stat.delivery .lbl, body[data-tab=suggest] .stat.delivery .lbl { display: none; }
+    body[data-tab=search] .stat.delivery .val, body[data-tab=suggest] .stat.delivery .val { font-size: 15px; }
+    .grid { grid-template-columns: 1fr; grid-template-areas: none; }
+    .grid > .panel { grid-area: auto; display: none; }
+    body[data-tab=list] [data-panel=list], body[data-tab=search] [data-panel=search], body[data-tab=suggest] [data-panel=suggest] { display: flex; }
+    body[data-tab=search] [data-panel=search] header { position: sticky; top: var(--top); background: var(--card); z-index: 2; border-radius: var(--radius) var(--radius) 0 0; }
+    .account-chip .who, #syncChip .txt { display: none; }
+    .account-chip { padding: 3px; }
+    .brand { font-size: 17px; }
+    .menu { left: 12px; right: 12px; width: auto; }
+  }
+  .tabbar { position: fixed; z-index: 15; left: 0; right: 0; bottom: 0; display: flex; background: var(--card); border-top: 1px solid var(--line);
+            padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); box-shadow: 0 -2px 10px rgba(0,0,0,.06); }
+  .tabbar button { flex: 1; border: 0; background: transparent; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0;
+                   font-size: 12px; color: var(--muted); cursor: pointer; border-radius: 10px; position: relative; }
+  .tabbar button.active { color: var(--ah); background: var(--ah-soft); }
+  .tabbar .badge-n { position: absolute; top: 2px; left: calc(50% + 6px); background: var(--ah); color: #fff; font-size: 10px; font-weight: 700;
+                     border-radius: 999px; padding: 0 5px; min-width: 16px; text-align: center; }
+
+  /* ---------- controls ---------- */
+  .search { position: relative; }
+  .search svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+  .search input { width: 100%; padding: 11px 14px 11px 38px; font: inherit; border: 1px solid var(--line); border-radius: 12px; background: var(--card-2); color: var(--text); }
+  .search input:focus { outline: 2px solid var(--ah); border-color: transparent; background: var(--card); }
+  .kbd { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; }
+  @media (hover: none) { .kbd { display: none; } }
+  .btn { background: var(--ah); color: #fff; border: 0; border-radius: 10px; padding: 9px 14px; font-weight: 600; cursor: pointer; }
+  .btn:hover { background: var(--ah-dark); } .btn:disabled { opacity: .5; cursor: default; }
+  .btn.ghost { background: transparent; color: var(--ah); border: 1px solid var(--line); }
+  .btn.ghost:hover { background: var(--ah-soft); }
+  .btn.sm { padding: 5px 10px; font-size: 13px; }
+  .freetext { margin-top: 10px; font-size: 14px; } .freetext a { color: var(--ah); cursor: pointer; font-weight: 600; }
+  .hint { font-size: 13px; color: var(--muted); padding: 18px 4px; text-align: center; }
+
+  .results { margin-top: 12px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .results.list { display: block; }
+  .product { border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 5px; position: relative; background: var(--card); }
+  .product img { width: 100%; height: 96px; object-fit: contain; background: #fff; border-radius: 8px; }
+  .product .title { font-size: 13px; font-weight: 600; line-height: 1.25; flex: 1; }
+  .product .meta { font-size: 12px; color: var(--muted); }
+  .product .btn { padding: 6px; font-size: 13px; margin-top: 2px; }
+  .product .badge { position: absolute; top: 8px; left: 8px; }
+  .price { font-weight: 700; } .price s { color: var(--muted); font-weight: 400; margin-left: 4px; font-size: 12px; }
+  .badge { display: inline-block; background: var(--bonus); color: #fff; font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 6px; white-space: nowrap; }
+
+  .group { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 14px 0 2px; font-weight: 600; }
+  ul.items { list-style: none; margin: 0; padding: 0; }
+  ul.items li { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  ul.items li:last-child { border-bottom: 0; }
+  .thumb { width: 44px; height: 44px; object-fit: contain; background: #fff; border-radius: 8px; flex: none; }
+  .ph { width: 44px; height: 44px; border-radius: 8px; background: var(--card-2); flex: none; display: grid; place-items: center; color: var(--muted); }
+  .name { flex: 1; min-width: 0; } .name > span { display: block; overflow-wrap: anywhere; }
+  .name small { display: flex; flex-wrap: wrap; gap: 4px 6px; align-items: center; color: var(--muted); font-size: 12px; margin-top: 1px; }
+  li.checked .name, li.checked .thumb { opacity: .45; } li.checked .name > span { text-decoration: line-through; }
+  .chk { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line); background: transparent; cursor: pointer; flex: none; display: grid; place-items: center; color: #fff; padding: 0; }
+  .chk:hover { border-color: var(--ok); } .chk.on { background: var(--ok); border-color: var(--ok); }
+  .qty { display: flex; align-items: center; gap: 2px; flex: none; }
+  .qty button, .del { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--line); background: transparent; cursor: pointer; font-size: 16px; line-height: 1; }
+  .qty button:hover { background: var(--card-2); }
+  .del { border: 0; color: var(--muted); } .del:hover { color: var(--danger); background: var(--card-2); }
+  .qty span { min-width: 22px; text-align: center; font-weight: 700; }
+  .empty { text-align: center; padding: 40px 10px; color: var(--muted); }
+  .empty svg { opacity: .35; margin-bottom: 8px; }
+
+  .srow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .srow:last-child { border-bottom: 0; }
+  .srow .name small .price { color: var(--text); }
+  .add { width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--ah); color: #fff; font-size: 20px; line-height: 1; cursor: pointer; flex: none; }
+  .add:hover { background: var(--ah-dark); }
+  .bonusprice { color: var(--bonus); }
+  .name small s { opacity: .8; }
+  .bonushint { color: var(--bonus); font-weight: 600; }
+  .onlist { font-size: 12px; color: var(--ok); font-weight: 600; flex: none; white-space: nowrap; }
+  .seg { display: flex; gap: 4px; margin: 0 16px 6px; background: var(--card-2); border-radius: 10px; padding: 3px; }
+  .seg button { flex: 1; border: 0; background: transparent; border-radius: 8px; padding: 6px 4px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; }
+  .seg button.active { background: var(--card); color: var(--ah-dark); box-shadow: var(--shadow); }
+  .freq { font-size: 11px; font-weight: 700; color: var(--ah-dark); background: var(--ah-soft); border-radius: 6px; padding: 1px 6px; }
+  .subhead { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 12px 0 2px; font-weight: 600; }
+  .scanbtn { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border: 0; border-radius: 9px; background: transparent; color: var(--ah); cursor: pointer; display: grid; place-items: center; }
+  .scanbtn:hover { background: var(--ah-soft); }
+  .search input { padding-right: 76px; }
+  .search .kbd { right: 46px; }
+
+  /* view switch: Boodschappen | Voorraad */
+  .viewswitch { display: flex; background: rgba(255,255,255,.16); border-radius: 10px; padding: 3px; gap: 2px; flex: none; }
+  .viewswitch button { border: 0; background: transparent; color: #fff; padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; opacity: .85; }
+  .viewswitch button.active { background: #fff; color: var(--ah-dark); opacity: 1; }
+  @media (max-width: 767px) { .viewswitch { display: none !important; } }
+  body[data-view=inv] #stats, body[data-view=inv] #grid { display: none !important; }
+  body:not([data-view=inv]) #invStats, body:not([data-view=inv]) #invGrid { display: none !important; }
+
+  /* voorraad */
+  .stats.inv-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid.inv { grid-template-columns: minmax(320px, 1fr) minmax(380px, 1.4fr); grid-template-rows: minmax(0, 1fr); grid-template-areas: "invadd invlist"; }
+  [data-panel=invadd] { grid-area: invadd; } [data-panel=invlist] { grid-area: invlist; }
+  @media (max-width: 767px) {
+    .grid.inv { grid-template-columns: 1fr; grid-template-areas: none; grid-template-rows: auto; }
+    body[data-tab=inv] .grid.inv > .panel { display: flex; }
+    .stats.inv-stats .lbl { white-space: normal; }
+  }
+  .scanrow { display: flex; gap: 8px; margin-top: 10px; align-items: center; flex-wrap: wrap; }
+  .scanbig { display: inline-flex; gap: 6px; align-items: center; }
+  .scanrow .seg { margin: 0; flex: 1; min-width: 240px; }
+  .unpack { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 4px; }
+  .unpack summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; }
+  .unpack summary::-webkit-details-marker { display: none; }
+  .unpack summary::after { content: "▾"; transition: transform .2s; }
+  .unpack:not([open]) summary::after { transform: rotate(-90deg); }
+  @media (max-width: 767px) { .stats.inv-stats .ico { display: none; } }
+  .orow { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .orow:last-child { border-bottom: 0; }
+  .orow .name small { display: block; }
+  .qtybtn { min-width: 36px; height: 30px; border: 1px solid var(--line); border-radius: 8px; background: var(--card-2); font-weight: 700; cursor: pointer; padding: 0 6px; }
+  .qtybtn:hover { border-color: var(--ah); }
+  .qtyinput { width: 60px; height: 30px; text-align: center; font: inherit; font-weight: 700; border: 1px solid var(--ah); border-radius: 8px; background: var(--card); color: var(--text); }
+  li.empty-stock .name, li.empty-stock .thumb, li.empty-stock .ph { opacity: .5; }
+  .oplabel { color: var(--danger); font-weight: 700; }
+  .tolist { border: 0; background: transparent; color: var(--ah); width: 30px; height: 30px; border-radius: 8px; cursor: pointer; display: grid; place-items: center; flex: none; }
+  .tolist:hover { background: var(--ah-soft); }
+  .toast button { margin-left: 12px; background: transparent; border: 0; color: #7fd3ff; font-weight: 700; cursor: pointer; padding: 0; }
+  .toast.show.has-action { pointer-events: auto; }
+  .qtybig { font-size: 26px; font-weight: 800; line-height: 1; }
+  .modebadge { font-size: 12px; font-weight: 700; border-radius: 999px; padding: 2px 8px; background: var(--ah-soft); color: var(--ah-dark); margin-left: 8px; vertical-align: middle; }
+  .modebadge.out { background: var(--bonus-soft); color: var(--bonus); }
+  .flash { animation: flash .6s ease-out; }
+  @keyframes flash { from { background: color-mix(in srgb, var(--ok) 25%, transparent); } to { background: transparent; } }
+
+  /* barcode modal */
+  .modal { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.55); display: grid; place-items: center; padding: 16px; }
+  .modal .box { background: var(--card); color: var(--text); border-radius: 18px; width: 100%; max-width: 440px; max-height: calc(100dvh - 32px); overflow: auto; padding: 16px; box-shadow: 0 20px 50px rgba(0,0,0,.35); }
+  .modal header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .modal header h3 { margin: 0; font-size: 17px; }
+  .modal .box > header { position: sticky; top: -16px; z-index: 3; background: var(--card); margin: -16px -16px 10px; padding: 16px 16px 8px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  .empty .actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+  .spend-fresh { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin: -4px 0 12px; }
+  .chart .vl { fill: var(--text); font-size: 12px; font-weight: 700; }
+  .viewfinder { position: relative; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 4 / 3; display: grid; place-items: center; color: #ccc; font-size: 13px; text-align: center; }
+  .viewfinder video { width: 100%; height: 100%; object-fit: cover; }
+  .viewfinder .frame { position: absolute; left: 12%; right: 12%; top: 32%; bottom: 32%; border: 2px solid rgba(255,255,255,.85); border-radius: 10px; box-shadow: 0 0 0 999px rgba(0,0,0,.25); pointer-events: none; }
+  .viewfinder .laser { position: absolute; left: 14%; right: 14%; top: 50%; height: 2px; background: #ff5252; box-shadow: 0 0 8px #ff5252; animation: laser 1.6s ease-in-out infinite alternate; pointer-events: none; }
+  @keyframes laser { from { top: 36%; } to { top: 64%; } }
+  .modal .row { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .modal .row input { flex: 1; min-width: 140px; padding: 10px 12px; font: inherit; border: 1px solid var(--line); border-radius: 10px; background: var(--card-2); color: var(--text); }
+  .scanresult { display: flex; gap: 12px; align-items: center; margin-top: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; }
+  .scanresult img { width: 72px; height: 72px; object-fit: contain; background: #fff; border-radius: 8px; }
+
+  /* ---------- orders ---------- */
+  .stat.delivery { cursor: pointer; }
+  .stat.delivery:hover { filter: brightness(1.05); }
+  .stat.delivery:focus-visible, .stat.spend:focus-visible { outline: 2px solid var(--ah-dark); outline-offset: 2px; }
+  .ordertabs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .ordertabs .rowlbl { font-size: 12px; color: var(--muted); font-weight: 600; min-width: 62px; }
+  .ordertabs button { flex: none; border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 999px; padding: 5px 11px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  .ordertabs button small { color: var(--muted); margin-left: 4px; }
+  .ordertabs button.active { background: var(--ah); border-color: var(--ah); color: #fff; } .ordertabs button.active small { color: rgba(255,255,255,.85); }
+  .ordersum { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: center; font-size: 14px; background: var(--card-2); border-radius: 10px; padding: 10px 12px; }
+  .ordersum .grow { flex: 1; min-width: 160px; }
+  .ordersum .disc { color: var(--bonus); font-weight: 600; }
+  .ordertools { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+  .ordertools input { flex: 1; min-width: 0; padding: 8px 10px; font: inherit; border: 1px solid var(--line); border-radius: 10px; background: var(--card-2); color: var(--text); }
+  ul.items li .oq { font-weight: 700; min-width: 34px; text-align: right; }
+  ul.items li .oq small { display: block; font-weight: 400; color: var(--danger); font-size: 11px; }
+  .dupe { font-size: 11px; border-radius: 999px; padding: 0 7px; background: var(--ah-soft); color: var(--ah-dark); font-weight: 600; }
+
+  /* ---------- spending ---------- */
+  .stat.spend { border: 0; text-align: left; font: inherit; color: inherit; cursor: pointer; width: 100%; }
+  .stat.spend:hover { box-shadow: 0 0 0 2px var(--ah-soft), var(--shadow); }
+  .stat.spend .ico { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+  .stat.spend.warn .ico { background: var(--bonus-soft); color: var(--bonus); }
+  .stat.spend.over .ico { background: color-mix(in srgb, var(--danger) 15%, transparent); color: var(--danger); }
+  .stat.spend.over .val { color: var(--danger); }
+  .budgetbar { height: 4px; background: var(--line); border-radius: 2px; margin-top: 5px; overflow: hidden; display: flex; }
+  .budgetbar i { background: var(--ah); } .budgetbar i.list { background: color-mix(in srgb, var(--ah) 40%, transparent); }
+  .stat.spend.over .budgetbar i { background: var(--danger); } .stat.spend.over .budgetbar i.list { background: color-mix(in srgb, var(--danger) 45%, transparent); }
+  .modal .box.wide { max-width: 720px; }
+  .spend-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
+  .spend-kpis div { background: var(--card-2); border-radius: 10px; padding: 8px 10px; min-width: 0; }
+  .spend-kpis b { display: block; font-size: 17px; } .spend-kpis small { color: var(--muted); font-size: 12px; }
+  @media (max-width: 400px) { .spend-kpis b { font-size: 15px; } }
+  .chart svg { width: 100%; height: auto; display: block; touch-action: manipulation; }
+  .chart .b-online { fill: var(--ah); } .chart .b-winkel { fill: var(--bonus); }
+  .chart .gl { stroke: var(--line); } .chart .al { fill: var(--muted); font-size: 11px; }
+  .chart .al.cur { fill: var(--text); font-weight: 700; }
+  .chart .bl { stroke: var(--danger); stroke-width: 1.5; stroke-dasharray: 5 4; } .chart .bt { fill: var(--danger); font-size: 11px; }
+  .chart .hit { fill: transparent; cursor: pointer; } .chart g.sel .hit { fill: var(--card-2); }
+  .legend { display: flex; gap: 14px; font-size: 12px; color: var(--muted); flex-wrap: wrap; margin-top: 6px; }
+  .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+  .chart-tip { font-size: 13px; min-height: 20px; margin-top: 6px; }
+  .budgetbox { background: var(--card-2); border-radius: 10px; padding: 10px 12px; margin-top: 10px; font-size: 14px; border-left: 4px solid var(--ok); }
+  .budgetbox.over { border-color: var(--danger); } .budgetbox.warn { border-color: var(--bonus); }
+  .recent { list-style: none; margin: 6px 0 0; padding: 0; font-size: 13px; }
+  .recent li { display: flex; gap: 8px; justify-content: space-between; padding: 6px 0; border-top: 1px solid var(--line); }
+  .recent .src { font-size: 11px; border-radius: 999px; padding: 0 7px; background: var(--ah-soft); color: var(--ah-dark); margin-left: 6px; }
+  .recent .src.winkel { background: var(--bonus-soft); color: var(--bonus); }
+
+  .banner { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 12px 16px; border-left: 4px solid var(--bonus); font-size: 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .banner.error { border-color: var(--danger); }
+  .banner > div { flex: 1; min-width: 200px; }
+
+  /* login */
+  .login { max-width: 560px; margin: 24px auto; background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; }
+  .login h2 { margin: 0 0 4px; } ol.steps { padding-left: 20px; } ol.steps li { margin-bottom: 8px; }
+  .login .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .login input { flex: 1; min-width: 200px; padding: 11px 14px; font: inherit; border: 1px solid var(--line); border-radius: 12px; background: var(--card-2); color: var(--text); }
+  code { background: var(--card-2); padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+
+  .toast { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); background: #323232; color: #fff;
+           padding: 10px 16px; border-radius: 10px; font-size: 14px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: calc(100% - 32px); z-index: 50; }
+  @media (max-width: 767px) { .toast { bottom: calc(84px + env(safe-area-inset-bottom)); } }
+  .toast.show { opacity: 1; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body data-tab="list">
+
+<header class="topbar">
+  <div class="brand">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 18a2 2 0 1 1 0 4 2 2 0 0 1 0-4M1 2h3.27l.94 2H20a1 1 0 0 1 1 1c0 .17-.05.34-.12.5l-3.58 6.47c-.34.61-1 1.03-1.75 1.03H8.1l-.9 1.63-.03.12a.25.25 0 0 0 .25.25H19v2H7a2 2 0 0 1-2-2c0-.35.09-.68.24-.96l1.36-2.45L3 4H1V2m6 16a2 2 0 1 1 0 4 2 2 0 0 1 0-4"/></svg>
+    <h1 id="brandTitle" style="font:inherit;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">HAppie</h1>
+  </div>
+  <div class="viewswitch hidden" id="viewSwitch" role="tablist">
+    <button data-view="shop" class="active">Boodschappen</button>
+    <button data-view="inv">Voorraad</button>
+  </div>
+  <button class="chip hidden" id="syncChip" title="Nu synchroniseren"><span class="dot" id="syncDot"></span><span class="txt" id="syncTxt"></span>
+    <svg id="syncIco" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6a6 6 0 0 1 6 6 6 6 0 0 1-.7 2.8l1.46 1.46A8 8 0 0 0 20 12a8 8 0 0 0-8-8m0 14a6 6 0 0 1-6-6c0-1 .25-1.97.7-2.8L5.24 7.74A8 8 0 0 0 4 12a8 8 0 0 0 8 8v3l4-4-4-4z"/></svg>
+  </button>
+  <button class="chip account-chip" id="accountChip">
+    <span class="avatar" id="avatar">?</span>
+    <span class="who"><b id="accName">Niet ingelogd</b><small><span class="dot" id="accDot"></span><span id="accState">Albert Heijn</span></small></span>
+  </button>
+</header>
+
+<div class="menu hidden" id="accountMenu">
+  <div class="head">
+    <span class="avatar" id="menuAvatar">?</span>
+    <div><b id="menuName">Niet ingelogd</b><div class="muted" style="font-size:13px">Albert Heijn-account</div></div>
+  </div>
+  <dl>
+    <dt>Status</dt><dd id="menuState"></dd>
+    <dt>Home Assistant</dt><dd id="menuHa"></dd>
+    <dt>Laatste sync</dt><dd id="menuSync"></dd>
+  </dl>
+  <div class="actions">
+    <button class="btn sm" id="menuSyncBtn">Nu synchroniseren</button>
+    <button class="btn ghost sm" id="menuLogout">Uitloggen</button>
+    <button class="btn sm hidden" id="menuLogin">Inloggen</button>
+  </div>
+</div>
+
+<div class="page">
+  <div id="banners" style="display:contents"></div>
+  <div id="spendBanner" style="display:contents"></div>
+
+  <!-- Login -->
+  <section id="loginView" class="login hidden">
+    <h2 id="loginTitle">Koppel je Albert Heijn-account</h2>
+    <p class="muted" style="margin-top:0">Eenmalig. Daarna blijft de add-on zelf ingelogd.</p>
+    <ol class="steps">
+      <li>Open een <b>computerbrowser</b>, druk op <code>F12</code> en ga naar het tabblad <b>Netwerk</b>. Zet <b>Log behouden</b> (Preserve log) aan.</li>
+      <li><a id="loginLink" target="_blank" rel="noopener">Open de AH-loginpagina</a> in datzelfde tabblad en log in.</li>
+      <li>Na het inloggen blijf je op een lege pagina staan. Zoek in het Netwerk-tabblad met <code>Ctrl+F</code> (zoekt ook in de antwoorden) naar <code>login-exit</code>. Die tekst staat in het verzoek <code>ingelogd</code>. Kopieer het stuk <code>appie://login-exit?code=…</code>.</li>
+      <li>Plak het hieronder. De code is maar een paar minuten geldig.</li>
+    </ol>
+    <div class="row">
+      <input type="text" id="codeInput" placeholder="appie://login-exit?code=…">
+      <button class="btn" id="loginBtn">Koppelen</button>
+      <button class="btn ghost hidden" id="loginCancel">Annuleren</button>
+    </div>
+  </section>
+
+  <!-- Dashboard -->
+  <section class="stats hidden" id="stats">
+    <div class="stat delivery none" id="delivery" title="" role="button" tabindex="0" aria-label="Bestelling bekijken">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M18 18.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m1.5-9 1.96 2.5H17V9.5M6 18.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3M20 8h-3V4H3a2 2 0 0 0-2 2v11h2a3 3 0 0 0 3 3 3 3 0 0 0 3-3h6a3 3 0 0 0 3 3 3 3 0 0 0 3-3h2v-5z"/></svg></div>
+      <div style="min-width:0;flex:1">
+        <div class="lbl" id="dlvLbl">Volgende bezorging</div>
+        <div class="val" id="dlvVal"><span class="spinner"></span></div>
+        <div class="sub" id="dlvSub"></div>
+      </div>
+    </div>
+    <div class="stat">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h2v2H3zm4 0h14v2H7zM3 11h2v2H3zm4 0h14v2H7zm-4 7h2v2H3zm4 0h14v2H7z"/></svg></div>
+      <div style="min-width:0"><div class="val" id="stOpen">0</div><div class="lbl">Te halen</div></div>
+    </div>
+    <div class="stat">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M15 18.5A6.5 6.5 0 0 1 9.24 15H15l1-2H8.58a6 6 0 0 1 0-2H15l1-2H9.24A6.5 6.5 0 0 1 15 5.5c1.61 0 3.09.59 4.23 1.57L21 5.3A9 9 0 0 0 15 3a9 9 0 0 0-8.4 6H3l-1 2h4.06a8 8 0 0 0 0 2H3l-1 2h4.6a9 9 0 0 0 8.4 6c2.31 0 4.41-.87 6-2.3l-1.77-1.77A6.4 6.4 0 0 1 15 18.5"/></svg></div>
+      <div style="min-width:0"><div class="val" id="stCost">€ 0</div><div class="lbl" id="stCostLbl">Geschatte kosten</div></div>
+    </div>
+    <button class="stat spend" id="spendTile" type="button" title="Uitgavenoverzicht">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 18v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1h-9a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2m0-2h10V8H12m4 5.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/></svg></div>
+      <div style="min-width:0;flex:1"><div class="val" id="spVal">–</div><div class="lbl" id="spLbl">Uitgegeven deze week</div>
+        <div class="budgetbar hidden" id="spBar"><i id="spBarSpent"></i><i class="list" id="spBarList"></i></div></div>
+    </button>
+    <div class="stat bonus">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21.41 11.58l-9-9A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42M5.5 7A1.5 1.5 0 1 1 7 5.5 1.5 1.5 0 0 1 5.5 7"/></svg></div>
+      <div style="min-width:0"><div class="val" id="stBonus">0</div><div class="lbl">In de bonus</div></div>
+    </div>
+    <div class="stat">
+      <div class="ico" style="background:color-mix(in srgb, var(--ok) 15%, transparent);color:var(--ok)"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+      <div style="min-width:0;flex:1"><div class="val" id="stDone">0/0</div><div class="lbl">Afgevinkt</div><div class="progress"><i id="stProg"></i></div></div>
+    </div>
+  </section>
+
+  <main class="grid hidden" id="grid">
+    <section class="panel" data-panel="search">
+      <header><h2>Zoeken</h2></header>
+      <div class="body">
+        <form id="searchForm" class="search" autocomplete="off">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+          <input type="text" id="searchInput" placeholder="Zoek een product…" enterkeyhint="search">
+          <span class="kbd">/</span>
+          <button type="button" class="scanbtn" id="scanBtn" title="Barcode scannen" aria-label="Barcode scannen">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h2v12H4zm3 0h1v12H7zm2 0h3v12H9zm4 0h1v12h-1zm3 0h2v12h-2zm3 0h1v12h-1zM2 4v4H0V4a2 2 0 0 1 2-2h4v2zm20-2a2 2 0 0 1 2 2v4h-2V4h-4V2zM2 16v4h4v2H2a2 2 0 0 1-2-2v-4zm20 4v-4h2v4a2 2 0 0 1-2 2h-4v-2z"/></svg>
+          </button>
+        </form>
+        <div id="freeText" class="freetext hidden"></div>
+        <div id="results" class="results"></div>
+        <div id="searchHint" class="hint">Zoek in het AH-assortiment, of typ iets en druk op Enter om het als losse tekst toe te voegen.</div>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="list">
+      <header>
+        <h2>Mijn lijst <span class="count" id="listCount">0</span></h2>
+        <button class="btn ghost sm hidden" id="clearChecked">Afgevinkte wissen</button>
+      </header>
+      <div class="body" id="list"></div>
+    </section>
+
+    <section class="panel" data-panel="suggest">
+      <header><h2>Ontdekken</h2><button class="btn ghost sm" id="refreshSug" title="Vernieuwen">↻</button></header>
+      <div class="seg" id="discoverTabs" role="tablist">
+        <button data-d="foryou" class="active">Voor jou</button>
+        <button data-d="frequent">Vaak gekocht</button>
+        <button data-d="bonus">Bonus</button>
+      </div>
+      <div class="body">
+        <div class="muted" style="font-size:12px;margin:4px 0" id="discoverNote"></div>
+        <div id="suggestions"><div class="hint"><span class="spinner"></span></div></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Voorraad -->
+  <section class="stats inv-stats hidden" id="invStats">
+    <div class="stat">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2m0 2v6h10V4zm0 8v8h10v-8zm1-6h2v3H8zm0 8h2v3H8z"/></svg></div>
+      <div style="min-width:0"><div class="val" id="ivProducts">0</div><div class="lbl">Producten</div></div>
+    </div>
+    <div class="stat">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 2 7l10 5 10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+      <div style="min-width:0"><div class="val" id="ivUnits">0</div><div class="lbl">Stuks</div></div>
+    </div>
+    <div class="stat bonus">
+      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20m1 15h-2v-2h2zm0-4h-2V7h2z"/></svg></div>
+      <div style="min-width:0"><div class="val" id="ivEmpty">0</div><div class="lbl">Op</div></div>
+    </div>
+  </section>
+
+  <main class="grid inv hidden" id="invGrid">
+    <section class="panel" data-panel="invadd">
+      <header><h2>Toevoegen</h2></header>
+      <div class="body">
+        <form id="invSearchForm" class="search" autocomplete="off">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+          <input type="text" id="invSearch" placeholder="Zoek een product…" enterkeyhint="search">
+          <button type="button" class="scanbtn" id="invScanBtn" title="Barcode scannen" aria-label="Barcode scannen">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h2v12H4zm3 0h1v12H7zm2 0h3v12H9zm4 0h1v12h-1zm3 0h2v12h-2zm3 0h1v12h-1zM2 4v4H0V4a2 2 0 0 1 2-2h4v2zm20-2a2 2 0 0 1 2 2v4h-2V4h-4V2zM2 16v4h4v2H2a2 2 0 0 1-2-2v-4zm20 4v-4h2v4a2 2 0 0 1-2 2h-4v-2z"/></svg>
+          </button>
+        </form>
+        <div class="scanrow">
+          <button class="btn scanbig" id="invScanBig">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h2v12H4zm3 0h1v12H7zm2 0h3v12H9zm4 0h1v12h-1zm3 0h2v12h-2zm3 0h1v12h-1zM2 4v4H0V4a2 2 0 0 1 2-2h4v2zm20-2a2 2 0 0 1 2 2v4h-2V4h-4V2zM2 16v4h4v2H2a2 2 0 0 1-2-2v-4zm20 4v-4h2v4a2 2 0 0 1-2 2h-4v-2z"/></svg>
+            Scannen</button>
+          <div class="seg" id="scanModeSeg" title="Scanmodus">
+            <button data-mode="choose" class="active">Kiezen</button>
+            <button data-mode="in">Inruimen +1</button>
+            <button data-mode="out">Verbruiken −1</button>
+          </div>
+        </div>
+        <div id="invFreeText" class="freetext hidden"></div>
+        <div id="invResults" class="results"></div>
+        <details class="unpack" id="unpackBox" open>
+          <summary class="subhead">Bestelling uitpakken</summary>
+          <div class="muted" style="font-size:12px;margin-bottom:4px">Zet alles uit een bezorging in één keer in je voorraad.</div>
+          <div id="invOrders"><div class="hint"><span class="spinner"></span></div></div>
+        </details>
+      </div>
+    </section>
+
+    <section class="panel" data-panel="invlist">
+      <header>
+        <h2>Voorraad <span class="count" id="invCount">0</span></h2>
+      </header>
+      <div style="padding:0 16px 8px" id="invFilterBox">
+        <div class="search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M14 12v7.88a1 1 0 0 1-.29.83l-2 2a1 1 0 0 1-1.41 0 1 1 0 0 1-.3-.83V12h-.03L4.21 4.62a1 1 0 0 1 .17-1.4A1 1 0 0 1 5 3h14a1 1 0 0 1 .62.22 1 1 0 0 1 .17 1.4L14.03 12z"/></svg>
+          <input type="text" id="invFilter" placeholder="Filter je voorraad…" aria-label="Filter je voorraad">
+        </div>
+      </div>
+      <div class="body" id="invList"></div>
+    </section>
+  </main>
+</div>
+
+<nav class="tabbar hidden" id="tabbar">
+  <button data-tab="list" class="active">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h2v2H3zm4 0h14v2H7zM3 11h2v2H3zm4 0h14v2H7zm-4 7h2v2H3zm4 0h14v2H7z"/></svg>
+    Lijst<span class="badge-n" id="tabCount">0</span></button>
+  <button data-tab="search">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+    Zoeken</button>
+  <button data-tab="suggest">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.62L12 2 9.19 8.62 2 9.24l5.45 4.73L5.82 21z"/></svg>
+    Ontdekken</button>
+  <button data-tab="inv">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2m0 2v6h10V4zm0 8v8h10v-8zm1-6h2v3H8zm0 8h2v3H8z"/></svg>
+    Voorraad</button>
+</nav>
+
+<div class="modal hidden" id="orderModal" role="dialog" aria-modal="true" aria-labelledby="orderTitle">
+  <div class="box wide">
+    <header><h3 id="orderTitle">Bestellingen</h3>
+      <div style="display:flex;gap:6px;align-items:center"><button class="btn ghost sm" id="orderRefresh" title="Opnieuw ophalen bij AH">↻</button><button class="del" id="orderClose" aria-label="Sluiten">✕</button></div></header>
+    <div class="ordertabs" id="orderTabs" role="tablist"></div>
+    <div id="orderSum"></div>
+    <div class="ordertools hidden" id="orderTools"><input type="search" id="orderFilter" placeholder="Zoek in deze bestelling…"><span class="muted" id="orderCount" style="font-size:13px;white-space:nowrap"></span></div>
+    <div id="orderBody"><div class="hint"><span class="spinner"></span></div></div>
+  </div>
+</div>
+
+<div class="modal hidden" id="spendModal" role="dialog" aria-modal="true" aria-labelledby="spendTitle">
+  <div class="box wide">
+    <header><h3 id="spendTitle">Uitgaven bij AH</h3>
+      <div style="display:flex;gap:6px;align-items:center"><button class="btn ghost sm" id="spendRefresh" title="Opnieuw ophalen bij AH">↻</button><button class="del" id="spendClose" aria-label="Sluiten">✕</button></div></header>
+    <div class="seg" id="spendTabs" role="tablist" style="margin:0 0 12px"><button data-p="week" class="active">Per week</button><button data-p="month">Per maand</button></div>
+    <div class="spend-kpis" id="spendKpis"></div>
+    <div class="spend-fresh" id="spendFresh"></div>
+    <div class="chart" id="spendChart" aria-describedby="spendTable"><div class="hint"><span class="spinner"></span></div></div>
+    <div class="legend" id="spendLegend"></div>
+    <div class="chart-tip" id="spendTip" aria-live="polite"></div>
+    <table class="sr-only" id="spendTable"></table>
+    <div id="spendBudget"></div>
+    <h4 style="margin:16px 0 0;font-size:14px">Laatste aankopen</h4>
+    <ul class="recent" id="spendRecent"></ul>
+    <div class="muted" id="spendNote" style="font-size:12px;margin-top:10px"></div>
+  </div>
+</div>
+
+<div class="modal hidden" id="scanModal" role="dialog" aria-modal="true" aria-labelledby="scanTitle">
+  <div class="box">
+    <header><h3 id="scanTitle">Barcode scannen</h3><button class="del" id="scanClose" aria-label="Sluiten">✕</button></header>
+    <div class="viewfinder" id="viewfinder">
+      <video id="scanVideo" playsinline muted class="hidden"></video>
+      <div class="frame hidden" id="scanFrame"></div><div class="laser hidden" id="scanLaser"></div>
+      <div id="scanMsg" style="padding:20px">Camera starten…</div>
+    </div>
+    <div class="row">
+      <label class="btn ghost" style="flex:1;text-align:center;cursor:pointer">📷 Foto maken
+        <input type="file" accept="image/*" capture="environment" id="scanPhoto" class="hidden">
+      </label>
+    </div>
+    <form class="row" id="scanManual">
+      <input type="text" inputmode="numeric" pattern="[0-9]*" id="scanCode" placeholder="Of typ de barcode (EAN)">
+      <button class="btn">Zoeken</button>
+    </form>
+    <div id="scanResult"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const euro = (n) => n == null ? "" : "€ " + Number(n).toFixed(2).replace(".", ",");
+const bonusLabel = (t) => !t ? "Bonus" : String(t)
+  .replace(/(?:€\s*)?(\d+)[.,](\d{2})(?!\d)/g, "€ $1,$2")
+  .replace(/^VOOR\b/, "voor");
+const isPhone = () => matchMedia("(max-width: 767px)").matches;
+let status = {}, items = [], suggestions = [], lastResults = [], forceLogin = false;
+
+async function api(path, body) {
+  const opts = body === undefined ? {} : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) };
+  const res = await fetch(path, opts);
+  let data = {};
+  try { data = await res.json(); } catch (_) {}
+  if (!res.ok) {
+    if (data.auth) loadStatus().catch(() => {});
+    const err = new Error(data.order_mode ? "Je bestelling staat open voor wijzigingen; de lijst is tijdelijk vergrendeld door AH." : (data.error || res.statusText));
+    err.data = data; throw err;
+  }
+  return data;
+}
+function toast(msg, action) {
+  const t = $("#toast"); t.textContent = msg;
+  t.classList.toggle("has-action", !!action);
+  if (action) {
+    const b = document.createElement("button"); b.textContent = action.label;
+    b.onclick = () => { t.classList.remove("show"); action.fn(); };
+    t.appendChild(b);
+  }
+  t.classList.add("show");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("show"), action ? 5000 : 2600);
+}
+function ago(ts) {
+  if (!ts) return "nog niet";
+  const s = Math.round(Date.now() / 1000 - ts);
+  if (s < 10) return "zojuist";
+  if (s < 60) return `${s} s geleden`;
+  if (s < 3600) return `${Math.round(s / 60)} min geleden`;
+  return new Date(ts * 1000).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });
+}
+const initials = (name) => (name || "?").split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0].toUpperCase()).join("") || "?";
+
+// ---------------- status / account ----------------
+const STATE = {
+  ok: ["ok", "Verbonden"], expired: ["bad", "Sessie verlopen"], unknown: ["busy", "Verbonden (naam onbekend)"], logged_out: ["", "Niet ingelogd"],
+};
+async function loadStatus() {
+  status = await api("api/status");
+  const st = status.account_state || (status.logged_in ? "ok" : "logged_out");
+  const [dotCls, stateTxt] = STATE[st] || STATE.unknown;
+  const name = status.account?.name || (status.logged_in ? "AH-account" : "Niet ingelogd");
+
+  for (const id of ["#avatar", "#menuAvatar"]) $(id).textContent = status.logged_in ? initials(status.account?.name) : "?";
+  $("#accName").textContent = status.account?.first_name || name;
+  $("#menuName").textContent = name;
+  $("#accDot").className = "dot " + dotCls;
+  $("#accState").textContent = stateTxt;
+  $("#menuState").innerHTML = `<span class="dot ${dotCls}"></span>${esc(stateTxt)}`;
+  $("#menuHa").innerHTML = status.ha_connected
+    ? `<span class="dot ${status.todo_exists === false ? "bad" : "ok"}"></span><code>${esc(status.todo_entity)}</code>`
+    : `<span class="dot"></span>Niet verbonden`;
+  $("#menuSync").textContent = status.logged_in ? ago(status.last_sync) : "–";
+  $("#menuLogout").classList.toggle("hidden", !status.logged_in);
+  $("#menuSyncBtn").classList.toggle("hidden", !status.logged_in);
+  $("#menuLogin").classList.toggle("hidden", status.logged_in && st !== "expired");
+  $("#accountChip").title = `${name} · ${stateTxt}`;
+
+  const syncBad = !!status.last_error;
+  $("#syncChip").classList.toggle("hidden", !status.logged_in);
+  $("#syncDot").className = "dot " + (syncBad ? "bad" : status.order_mode ? "busy" : "ok");
+  $("#syncTxt").textContent = syncBad ? "Sync-fout" : status.order_mode ? "Sync gepauzeerd" : "Sync " + ago(status.last_sync);
+
+  const showLogin = !status.logged_in || forceLogin;
+  $("#loginView").classList.toggle("hidden", !showLogin);
+  $("#loginTitle").textContent = st === "expired" ? "Je AH-sessie is verlopen" : "Koppel je Albert Heijn-account";
+  $("#loginCancel").classList.toggle("hidden", !status.logged_in);
+  for (const id of ["#stats", "#grid", "#tabbar", "#invStats", "#invGrid", "#viewSwitch"]) $(id).classList.toggle("hidden", showLogin);
+  $("#loginLink").href = status.login_url;
+
+  const b = [];
+  if (st === "expired" && !showLogin)
+    b.push(`<div class="banner error"><div><b>Je AH-sessie is verlopen.</b> De sync staat stil tot je opnieuw inlogt.</div><button class="btn sm" data-relogin>Opnieuw inloggen</button></div>`);
+  else if (status.last_error && !showLogin) b.push(`<div class="banner error"><div><b>Sync-fout:</b> ${esc(status.last_error)}</div></div>`);
+  if (status.order_mode && !showLogin)
+    b.push(`<div class="banner"><div><b>Je bestelling staat open voor wijzigingen.</b> Zolang dat zo is, vergrendelt AH je boodschappenlijst.
+      De sync is gepauzeerd en er wordt niets verwijderd. Rond je wijzigingen af in de Appie-app (of annuleer ze), dan gaat alles vanzelf verder.</div></div>`);
+  if (status.ha_connected && status.todo_exists === false)
+    b.push(`<div class="banner"><div><b>To-do-lijst <code>${esc(status.todo_entity)}</code> niet gevonden.</b>
+      Maak hem aan via Instellingen › Apparaten &amp; diensten › Integratie toevoegen › <i>Lokale to-do</i>.</div></div>`);
+  for (const w of status.warnings || []) b.push(`<div class="banner"><div>${esc(w)}</div></div>`);
+  $("#banners").innerHTML = b.join("");
+}
+$("#banners").addEventListener("click", (e) => { if (e.target.closest("[data-relogin]")) showLoginView(); });
+function showLoginView() { forceLogin = true; closeMenu(); loadStatus(); window.scrollTo(0, 0); }
+$("#loginCancel").onclick = () => { forceLogin = false; loadStatus(); };
+
+function closeMenu() { $("#accountMenu").classList.add("hidden"); }
+$("#accountChip").onclick = (e) => { e.stopPropagation(); $("#accountMenu").classList.toggle("hidden"); };
+document.addEventListener("click", (e) => { if (!e.target.closest("#accountMenu")) closeMenu(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMenu(); });
+$("#menuLogin").onclick = showLoginView;
+$("#menuLogout").onclick = async () => {
+  if (!confirm("Wil je je AH-account ontkoppelen? De sync stopt dan.")) return;
+  closeMenu(); await api("api/logout", {}); items = []; await refresh();
+};
+async function syncNow() {
+  $("#syncIco").outerHTML = `<span id="syncIco" class="spinner"></span>`;
+  try { await api("api/sync", {}); toast("Gesynchroniseerd"); } catch (err) { toast(err.message); }
+  loadDelivery(true);
+  $("#syncIco").outerHTML = `<svg id="syncIco" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6a6 6 0 0 1 6 6 6 6 0 0 1-.7 2.8l1.46 1.46A8 8 0 0 0 20 12a8 8 0 0 0-8-8m0 14a6 6 0 0 1-6-6c0-1 .25-1.97.7-2.8L5.24 7.74A8 8 0 0 0 4 12a8 8 0 0 0 8 8v3l4-4-4-4z"/></svg>`;
+  await refresh();
+}
+$("#syncChip").onclick = syncNow;
+$("#menuSyncBtn").onclick = () => { closeMenu(); syncNow(); };
+
+// ---------------- stats ----------------
+function renderStats() {
+  const open = items.filter((i) => !i.checked);
+  const done = items.length - open.length;
+  let cost = 0, saving = 0, unknown = 0, bonus = 0;
+  for (const i of open) {
+    if (i.line) { cost += i.line.total; saving += i.line.saving; } else unknown++;
+    if (i.product?.is_bonus) bonus++;
+  }
+  $("#stOpen").textContent = open.reduce((n, i) => n + i.quantity, 0);
+  $("#stCost").textContent = euro(cost).replace(",00", ",–");
+  const lbl = [];
+  if (saving > 0.004) lbl.push(`−${euro(saving)} bonus`);
+  if (unknown) lbl.push(`+${unknown} zonder prijs`);
+  $("#stCostLbl").textContent = lbl.length ? lbl.join(" · ") : "Geschatte kosten";
+  $("#stCostLbl").title = saving > 0.004 ? `Inclusief ${euro(saving)} bonusvoordeel` : "";
+  $("#stBonus").textContent = bonus;
+  $("#stDone").textContent = `${done}/${items.length}`;
+  $("#stProg").style.width = items.length ? (done / items.length * 100) + "%" : "0";
+  $("#listCount").textContent = open.length;
+  $("#tabCount").textContent = open.length;
+  $("#tabCount").classList.toggle("hidden", !open.length);
+  if (spend) renderSpendTile();
+}
+
+// ---------------- orders ----------------
+const ORDER_STATE_SHORT = { DELIVERED: "bezorgd", COMPLETED: "bezorgd", OUT_FOR_DELIVERY: "onderweg", CONFIRMED: "bevestigd",
+  SUBMITTED: "geplaatst", REOPENED: "open", IN_PROGRESS: "onderweg", PROCESSING: "in behandeling" };
+let orders = [], orderSel = null, orderData = null;
+function orderLabel(o) {
+  const d = new Date(o.date + "T12:00:00").toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" });
+  return `${d}<small>${ORDER_STATE_SHORT[o.state] || o.state.toLowerCase()}</small>`;
+}
+async function openOrders() {
+  $("#orderModal").classList.remove("hidden");
+  $("#orderBody").innerHTML = `<div class="hint"><span class="spinner"></span></div>`;
+  try { orders = (await api("api/orders")).orders; }
+  catch (err) { $("#orderBody").innerHTML = `<div class="hint">${esc(err.message)}</div>`; return; }
+  if (!orders.length) { $("#orderTabs").innerHTML = ""; $("#orderSum").innerHTML = ""; $("#orderBody").innerHTML = `<div class="hint">Geen bestellingen gevonden.</div>`; return; }
+  // start at the next delivery, or the first upcoming order
+  const next = $("#delivery").dataset.order;
+  const pick = orders.find((o) => String(o.order_id) === next) || orders[0];
+  showOrder(pick.order_id);
+}
+async function showOrder(id, refresh = false) {
+  orderSel = id;
+  const o = orders.find((x) => x.order_id === id);
+  const tab = (x) => `<button data-o="${x.order_id}" class="${x.order_id === id ? "active" : ""}" role="tab" aria-selected="${x.order_id === id}">${orderLabel(x)}</button>`;
+  const up = orders.filter((x) => !x.done), past = orders.filter((x) => x.done);
+  $("#orderTabs").innerHTML = (up.length ? `<span class="rowlbl">Komend</span>${up.map(tab).join("")}` : "")
+    + (up.length && past.length ? `<span style="flex-basis:100%;height:0"></span>` : "")
+    + (past.length ? `<span class="rowlbl">Bezorgd</span>${past.map(tab).join("")}` : "");
+  $("#orderSum").innerHTML = ""; $("#orderTools").classList.add("hidden");
+  $("#orderBody").innerHTML = `<div class="hint"><span class="spinner"></span></div>`;
+  try { orderData = await api(`api/orders/${id}?done=${o.done ? 1 : 0}` + (refresh ? "&refresh=1" : "")); }
+  catch (err) { $("#orderBody").innerHTML = `<div class="hint">${esc(err.message)}</div>`; return; }
+  if (orderSel !== id) return;
+  orderData.unpacked = orderData.unpacked || o.unpacked;
+  renderOrder(o);
+}
+function renderOrder(o) {
+  const d = orderData, lines = d.lines;
+  const date = new Date(o.date + "T12:00:00").toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" });
+  const dupes = lines.filter((l) => l.on_list).length;
+  const sum = [`<span class="grow"><b>${esc(date)}</b> · ${esc((ORDER_STATE[o.state] || ORDER_STATE_SHORT[o.state] || o.state).toLowerCase())}<br>
+    <span class="muted">${lines.length} producten · ${d.items} stuks</span></span>`];
+  if (o.total) sum.push(`<span><b>${euro(o.total)}</b>${o.discount ? ` <span class="disc">−${euro(o.discount)} korting</span>` : ""}</span>`);
+  if (o.done) sum.push(d.unpacked ? `<span class="onlist">✓ uitgepakt</span>` : `<button class="btn sm" id="orderUnpack">Uitpakken naar voorraad</button>`);
+  $("#orderSum").innerHTML = `<div class="ordersum">${sum.join("")}</div>`
+    + (dupes && !o.done ? `<div class="muted" style="font-size:13px;margin-top:6px"><span class="dupe">ook op lijst</span> ${dupes} ${dupes === 1 ? "product staat" : "producten staan"} ook nog op je boodschappenlijst.</div>` : "");
+  $("#orderTools").classList.toggle("hidden", lines.length < 8);
+  $("#orderFilter").value = "";
+  renderOrderLines();
+}
+function renderOrderLines() {
+  const o = orders.find((x) => x.order_id === orderSel), q = $("#orderFilter").value.trim().toLowerCase();
+  if (!orderData.lines.length) {
+    $("#orderBody").innerHTML = `<div class="hint">${o.done ? "Geen producten gevonden in deze bestelling." : "Deze bestelling is nog leeg. Vul hem in de Appie-app."}</div>`;
+    $("#orderCount").textContent = ""; return;
+  }
+  const lines = orderData.lines.filter((l) => !q || `${l.product.title} ${l.product.brand || ""}`.toLowerCase().includes(q));
+  const groups = new Map();
+  for (const l of lines) { const c = l.product.category || "Overig"; if (!groups.has(c)) groups.set(c, []); groups.get(c).push(l); }
+  $("#orderCount").textContent = q ? `${lines.length} van ${orderData.lines.length}` : "";
+  $("#orderBody").innerHTML = lines.length ? [...groups].map(([cat, ls]) => `<div class="group">${esc(cat)}</div><ul class="items">${ls.map((l) => {
+    const p = l.product, bits = [];
+    if (p.unit_size) bits.push(esc(p.unit_size));
+    if (l.line) bits.push(l.quantity > 1 ? `${euro(p.price_before || p.price)} × ${l.quantity} ≈ ${euro(l.line.total)}` : `≈ ${euro(l.line.total)}`);
+    if (l.on_list && !o.done) bits.push(`<span class="dupe">ook op lijst${l.on_list > 1 ? ` (${l.on_list}×)` : ""}</span>`);
+    const short = l.ordered > l.quantity ? `<small>van ${l.ordered}</small>` : "";
+    return `<li>${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" loading="lazy">` : `<div class="ph">?</div>`}
+      <div class="name"><span>${esc(p.title)}</span>${bits.length ? `<small>${bits.join("<span>·</span>")}</small>` : ""}</div>
+      <div class="oq">${l.quantity}×${short}</div></li>`;
+  }).join("")}</ul>`).join("") : `<div class="hint">Niets gevonden voor “${esc(q)}”.</div>`;
+}
+const closeOrders = () => $("#orderModal").classList.add("hidden");
+$("#delivery").addEventListener("click", openOrders);
+$("#delivery").addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openOrders(); } });
+$("#orderClose").onclick = closeOrders;
+$("#orderModal").addEventListener("click", (e) => { if (e.target.id === "orderModal") closeOrders(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#orderModal").classList.contains("hidden")) closeOrders(); });
+$("#orderTabs").addEventListener("click", (e) => { const b = e.target.closest("button[data-o]"); if (b) showOrder(+b.dataset.o); });
+$("#orderFilter").addEventListener("input", renderOrderLines);
+$("#orderRefresh").onclick = () => { if (orderSel != null) showOrder(orderSel, true); };
+$("#orderSum").addEventListener("click", async (e) => {
+  const btn = e.target.closest("#orderUnpack");
+  if (!btn) return;
+  if (!confirm(`Alle ${orderData.items} artikelen van deze bezorging aan je voorraad toevoegen?`)) return;
+  btn.disabled = true; btn.innerHTML = `<span class="spinner"></span>`;
+  try {
+    const r = await api("api/inventory/unpack", { order_id: orderSel });
+    toast(r.already ? "Deze bestelling was al uitgepakt" : `${r.added} artikelen (${r.products} producten) toegevoegd aan je voorraad`);
+    orderData.unpacked = true;
+    const o = orders.find((x) => x.order_id === orderSel); o.unpacked = true; renderOrder(o);
+  } catch (err) { toast(err.message); btn.disabled = false; btn.textContent = "Uitpakken naar voorraad"; }
+});
+
+// ---------------- spending ----------------
+let spend = null, spendPeriod = "week", spendSel = null;
+const listCost = () => items.filter((i) => !i.checked).reduce((n, i) => n + (i.line ? i.line.total : 0), 0);
+const shortDate = (d) => new Date(d + "T12:00:00").toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" });
+async function loadSpending(refresh = false) {
+  try { spend = await api(`api/spending?period=${spendPeriod}` + (refresh ? "&refresh=1" : "")); }
+  catch (err) {
+    $("#spVal").textContent = "–"; $("#spLbl").textContent = "Uitgaven niet beschikbaar"; $("#spendTile").title = err.message;
+    if (!$("#spendModal").classList.contains("hidden")) $("#spendChart").innerHTML = `<div class="hint">${esc(err.message)}</div>`;
+    return;
+  }
+  renderSpendTile();
+  if (!$("#spendModal").classList.contains("hidden")) renderSpendModal();
+}
+// budget with the live list cost (the server value lags behind until the next sync)
+function budgetNow() {
+  const b = spend?.summary?.budget;
+  if (!b) return null;
+  const list = listCost(), spent = spend.summary.this_week, projected = spent + list;
+  return { budget: b.budget, spent, list, projected, remaining: b.budget - projected,
+           over: projected > b.budget + 0.004, warn: projected > b.budget * 0.9 };
+}
+function renderSpendTile() {
+  const s = spend.summary, b = budgetNow(), tile = $("#spendTile");
+  $("#spVal").textContent = euro(s.this_week);
+  tile.classList.toggle("over", !!b?.over);
+  tile.classList.toggle("warn", !!b && !b.over && b.warn);
+  $("#spBar").classList.toggle("hidden", !b);
+  if (b) {
+    $("#spLbl").textContent = b.over ? `${euro(-b.remaining)} boven budget` : `Nog ${euro(b.remaining)} over`;
+    const max = Math.max(b.budget, b.projected) || 1;
+    $("#spBarSpent").style.width = (b.spent / max * 100) + "%";
+    $("#spBarList").style.width = (b.list / max * 100) + "%";
+    tile.title = `Deze week ${euro(b.spent)} + lijst ${euro(b.list)} = ${euro(b.projected)} van ${euro(b.budget)}`;
+  } else {
+    $("#spLbl").textContent = "Uitgegeven deze week";
+    tile.title = `Uitgavenoverzicht · vorige week ${euro(s.last_week)}`;
+  }
+  $("#spendBanner").innerHTML = b?.over && document.body.dataset.view !== "inv"
+    ? `<div class="banner error"><div><b>Boven je weekbudget.</b> Deze week ${euro(b.spent)} uitgegeven, met je lijst erbij ${euro(b.projected)}:
+       ${euro(-b.remaining)} meer dan je budget van ${euro(b.budget)}.</div><button class="btn ghost sm" data-spend>Bekijk uitgaven</button></div>` : "";
+}
+function niceStep(x) {
+  const p = 10 ** Math.floor(Math.log10(x || 1));
+  for (const m of [1, 2, 2.5, 5, 10]) if (m * p >= x) return m * p;
+  return 10 * p;
+}
+const spendVisible = () => (spend ? spend.buckets.slice(-($("#spendChart").clientWidth < 480 ? 6 : 12)) : []);
+function spendChartSvg(buckets, budget) {
+  // draw at the real width, so text stays 11px on a phone instead of being scaled down
+  const W = Math.max(280, Math.min(680, $("#spendChart").clientWidth || 680));
+  const H = W < 480 ? 200 : 230, L = 46, R = 8, T = 12, B = 24, n = buckets.length || 1;
+  const max = Math.max(1, ...buckets.map((b) => b.total), budget || 0);
+  const step = niceStep(max / 4), top = Math.ceil(max / step) * step;
+  const y = (v) => T + (H - T - B) * (1 - v / top);
+  const bw = (W - L - R) / n;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Uitgaven per ${spendPeriod === "week" ? "week" : "maand"}">`;
+  for (let v = 0; v <= top + 0.001; v += step)
+    svg += `<line class="gl" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text class="al" x="${L - 6}" y="${y(v) + 4}" text-anchor="end">€${Math.round(v)}</text>`;
+  buckets.forEach((b, i) => {
+    const x = L + i * bw, w = Math.min(bw * 0.62, 38), bx = x + (bw - w) / 2;
+    const cur = i === n - 1;
+    svg += `<g data-i="${i}" class="${spendSel === i ? "sel" : ""}"><rect class="hit" x="${x}" y="${T}" width="${bw}" height="${H - T - B}" rx="6"/>`;
+    if (spendSel === i && b.total) svg += `<text class="vl" x="${x + bw / 2}" y="${Math.max(T + 10, y(b.total) - 5)}" text-anchor="middle">€${Math.round(b.total)}</text>`;
+    if (b.online) svg += `<rect class="b-online" x="${bx}" y="${y(b.online)}" width="${w}" height="${y(0) - y(b.online)}" rx="2"${cur ? ' opacity=".75"' : ""}/>`;
+    if (b.winkel) svg += `<rect class="b-winkel" x="${bx}" y="${y(b.online + b.winkel)}" width="${w}" height="${y(b.online) - y(b.online + b.winkel)}" rx="2"${cur ? ' opacity=".75"' : ""}/>`;
+    const showLabel = bw >= 38 || (n - 1 - i) % 2 === 0;  // narrow: every other label, always the current one
+    svg += (showLabel ? `<text class="al${cur ? " cur" : ""}" x="${x + bw / 2}" y="${H - 7}" text-anchor="middle">${esc(b.label)}</text>` : "") + "</g>";
+  });
+  if (budget) svg += `<line class="bl" x1="${L}" x2="${W - R}" y1="${y(budget)}" y2="${y(budget)}"/><text class="bt" x="${W - R}" y="${y(budget) - 4}" text-anchor="end">budget ${euro(budget)}</text>`;
+  return svg + "</svg>";
+}
+const spendTipRange = (b) => spendPeriod === "week"
+  ? `${b.label} · ${shortDate(b.start)} – ${shortDate(b.end)}`
+  : new Date(b.start + "T12:00:00").toLocaleDateString("nl-NL", { month: "long", year: "numeric" });
+function spendTip(i) {
+  const b = spendVisible()[i];
+  if (!b) return "";
+  const range = spendTipRange(b);
+  const parts = [`online ${euro(b.online)}`];
+  if (spend.receipts_ok !== false) parts.push(`winkel ${euro(b.winkel)}`);
+  parts.push(`${b.count} ${b.count === 1 ? "aankoop" : "aankopen"}`);
+  return `<b>${esc(range)}: ${euro(b.total)}</b> <span class="muted">· ${parts.join(" · ")}</span>`;
+}
+function renderSpendModal() {
+  const s = spend.summary, b = budgetNow(), week = spendPeriod === "week";
+  document.querySelectorAll("#spendTabs button").forEach((x) => x.classList.toggle("active", x.dataset.p === spendPeriod));
+  // cards follow the chosen period; the average covers the complete periods in the chart
+  const done = spend.buckets.slice(0, -1);
+  const avg = done.length ? done.reduce((n, x) => n + x.total, 0) / done.length : 0;
+  const kpi = (v, l, t = "") => `<div title="${esc(t)}"><b>${euro(v)}</b><small>${l}</small></div>`;
+  $("#spendKpis").innerHTML = week
+    ? kpi(s.this_week, "Deze week") + kpi(s.last_week, "Vorige week") + kpi(avg, "Gemiddeld per week", `Over de laatste ${done.length} hele weken`)
+    : kpi(s.this_month, "Deze maand") + kpi(s.last_month, "Vorige maand") + kpi(avg, "Gemiddeld per maand", `Over de laatste ${done.length} hele maanden`);
+  $("#spendFresh").innerHTML = `<span>${spend.updated_at ? `Bijgewerkt ${ago(spend.updated_at)}` : "Nog niet opgehaald"}</span>`
+    + `<button class="btn ghost sm" data-spend-refresh>Nu bijwerken</button>`;
+  const shown = spendVisible();
+  if (spendSel == null || spendSel >= shown.length) spendSel = shown.length - 1;
+  $("#spendChart").innerHTML = spendChartSvg(shown, week && b ? b.budget : null);
+  $("#spendTable").innerHTML = `<caption>Uitgaven per ${week ? "week" : "maand"}</caption><tr><th>Periode</th><th>Totaal</th><th>Online</th><th>Winkel</th></tr>`
+    + shown.map((x) => `<tr><td>${esc(spendTipRange(x))}</td><td>${euro(x.total)}</td><td>${euro(x.online)}</td><td>${euro(x.winkel)}</td></tr>`).join("");
+  const leg = [`<span><i style="background:var(--ah)"></i>Online bestellingen</span>`];
+  if (spend.receipts_ok !== false) leg.push(`<span><i style="background:var(--bonus)"></i>Winkel (kassabonnen)</span>`);
+  if (spendPeriod === "week" && b) leg.push(`<span><i style="background:var(--danger);height:2px;vertical-align:3px"></i>Weekbudget</span>`);
+  $("#spendLegend").innerHTML = leg.join("");
+  $("#spendTip").innerHTML = spendTip(spendSel);
+  $("#spendBudget").innerHTML = b
+    ? `<div class="budgetbox ${b.over ? "over" : b.warn ? "warn" : ""}">Deze week <b>${euro(b.spent)}</b> + lijst ${euro(b.list)} = <b>${euro(b.projected)}</b> van ${euro(b.budget)}.
+       ${b.over ? `<b>${euro(-b.remaining)} boven budget.</b>` : `Nog ${euro(b.remaining)} over.`}</div>`
+    : `<div class="muted" style="font-size:13px;margin-top:8px">Wil je zien hoeveel je deze week nog kunt uitgeven? Stel een weekbudget in bij de instellingen van HAppie (Instellingen › Apps › HAppie › Configuratie).</div>`;
+  $("#spendRecent").innerHTML = (spend.recent || []).map((p) =>
+    `<li><span>${esc(shortDate(p.date))}<span class="src ${p.source}">${p.source === "online" ? "online" : "winkel"}</span></span><b>${euro(p.total)}</b></li>`).join("")
+    || `<li class="muted">Nog geen aankopen gevonden.</li>`;
+  $("#spendNote").textContent = spend.receipts_ok === false
+    ? "Kassabonnen konden niet opgehaald worden; je ziet alleen online bestellingen." : "";
+}
+function openSpending() {
+  $("#spendModal").classList.remove("hidden");
+  if (spend) renderSpendModal();
+  loadSpending();
+}
+const closeSpending = () => $("#spendModal").classList.add("hidden");
+$("#spendTile").onclick = openSpending;
+$("#spendClose").onclick = closeSpending;
+$("#spendModal").addEventListener("click", (e) => { if (e.target.id === "spendModal") closeSpending(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#spendModal").classList.contains("hidden")) closeSpending(); });
+$("#spendBanner").addEventListener("click", (e) => { if (e.target.closest("[data-spend]")) openSpending(); });
+$("#spendTabs").addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-p]");
+  if (!btn || btn.dataset.p === spendPeriod) return;
+  spendPeriod = btn.dataset.p; spendSel = null; loadSpending();
+});
+$("#spendChart").addEventListener("click", (e) => {
+  const g = e.target.closest("g[data-i]");
+  if (!g || !spend) return;
+  spendSel = +g.dataset.i; renderSpendModal();
+});
+$("#spendChart").addEventListener("mouseover", (e) => {
+  const g = e.target.closest("g[data-i]");
+  if (g && spend) $("#spendTip").innerHTML = spendTip(+g.dataset.i);
+});
+window.addEventListener("resize", () => { if (spend && !$("#spendModal").classList.contains("hidden")) renderSpendModal(); });
+$("#spendChart").addEventListener("mouseleave", () => { if (spend) $("#spendTip").innerHTML = spendTip(spendSel); });
+$("#spendRefresh").onclick = async () => {
+  const btn = $("#spendRefresh"); btn.disabled = true;
+  await loadSpending(true); btn.disabled = false;
+};
+$("#spendFresh").addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-spend-refresh]");
+  if (!btn) return;
+  btn.disabled = true; btn.innerHTML = `<span class="spinner"></span>`;
+  await loadSpending(true);
+});
+
+// ---------------- delivery ----------------
+const ORDER_STATE = { OUT_FOR_DELIVERY: "Onderweg", REOPENED: "Open voor wijzigingen", SUBMITTED: "Geplaatst", CONFIRMED: "Bevestigd", IN_PROGRESS: "Onderweg", PROCESSING: "Wordt verwerkt" };
+function dayLabel(dateStr) {
+  const d = new Date(dateStr + "T12:00:00"), now = new Date(); now.setHours(12, 0, 0, 0);
+  const diff = Math.round((d - now) / 864e5);
+  return diff === 0 ? "Vandaag" : diff === 1 ? "Morgen" : diff > 1 ? `Over ${diff} dagen` : "";
+}
+async function loadDelivery(refresh = false) {
+  let d;
+  try { d = (await api("api/delivery" + (refresh ? "?refresh=1" : ""))).delivery; }
+  catch (err) { $("#dlvVal").textContent = "Niet beschikbaar"; $("#dlvSub").textContent = err.message; return; }
+  const el = $("#delivery");
+  el.dataset.order = d ? d.order_id : "";
+  el.classList.toggle("none", !d);
+  if (!d) { $("#dlvLbl").textContent = "Volgende bezorging"; $("#dlvVal").textContent = "Geen bestelling gepland"; $("#dlvSub").innerHTML = ""; return; }
+  const date = new Date(d.date + "T12:00:00");
+  const dateTxt = date.toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" });
+  $("#dlvLbl").textContent = d.type === "PICKUP" ? "Volgende ophaalmoment" : "Volgende bezorging";
+  $("#dlvVal").textContent = dateTxt + (d.start ? ` · ${d.start}–${d.end}` : "");
+  const sub = [];
+  const rel = dayLabel(d.date); if (rel) sub.push(`<span class="pill">${rel}</span>`);
+  if (d.eta_start) sub.push(`<span class="pill eta">Verwacht ${d.eta_start}–${d.eta_end}</span>`);
+  else if (d.eta_message && d.track_state) sub.push(esc(d.eta_message));
+  if (d.closing_time && !d.eta_start && new Date(d.closing_time) > new Date()) {
+    const c = new Date(d.closing_time);
+    sub.push(`Wijzigen tot ${c.toLocaleDateString("nl-NL", { weekday: "short" })} ${c.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}`);
+  }
+  if (d.item_count) sub.push(`${d.item_count} artikelen`);
+  if (d.total != null) sub.push(euro(d.total));
+  $("#dlvSub").innerHTML = sub.join("<span>·</span>");
+  el.title = [ORDER_STATE[d.state] || d.state, d.eta_message].filter(Boolean).join(" · ");
+  if (d.state === "REOPENED") $("#dlvSub").insertAdjacentHTML("beforeend", `<span class="pill">✎ ${ORDER_STATE.REOPENED}</span>`);
+}
+
+// ---------------- list ----------------
+function renderList() {
+  renderStats();
+  renderDiscover();
+  if ($("#results").classList.contains("list") && lastResults.length) renderResults();
+  const open = items.filter((i) => !i.checked), done = items.filter((i) => i.checked);
+  $("#clearChecked").classList.toggle("hidden", !done.length);
+  if (!items.length) {
+    $("#list").innerHTML = `<div class="empty"><svg width="56" height="56" viewBox="0 0 24 24" fill="currentColor"><path d="M17 18a2 2 0 1 1 0 4 2 2 0 0 1 0-4M1 2h3.27l.94 2H20a1 1 0 0 1 1 1c0 .17-.05.34-.12.5l-3.58 6.47c-.34.61-1 1.03-1.75 1.03H8.1l-.9 1.63-.03.12a.25.25 0 0 0 .25.25H19v2H7a2 2 0 0 1-2-2c0-.35.09-.68.24-.96l1.36-2.45L3 4H1V2m6 16a2 2 0 1 1 0 4 2 2 0 0 1 0-4"/></svg>
+      <div><b>Je lijst is leeg</b></div><div style="font-size:13px">Zoek een product of kies een suggestie.</div>
+      <div class="actions"><button class="btn" data-goto="search">Product zoeken</button></div></div>`;
+    return;
+  }
+  const groups = new Map();
+  for (const i of open) {
+    const cat = i.product?.category || "Overig";
+    if (!groups.has(cat)) groups.set(cat, []);
+    groups.get(cat).push(i);
+  }
+  let html = "";
+  for (const [cat, list] of [...groups].sort((a, b) => (a[0] === "Overig") - (b[0] === "Overig") || a[0].localeCompare(b[0])))
+    html += `<div class="group">${esc(cat)}</div><ul class="items">${list.map(row).join("")}</ul>`;
+  if (done.length) html += `<div class="group">Afgevinkt</div><ul class="items">${done.map(row).join("")}</ul>`;
+  $("#list").innerHTML = html;
+}
+function row(i) {
+  const p = i.product, k = esc(i.key);
+  const img = p?.image ? `<img class="thumb" src="${esc(p.image)}" alt="" loading="lazy">` : `<div class="ph">✎</div>`;
+  const bits = [];
+  if (p?.unit_size) bits.push(esc(p.unit_size));
+  const l = i.line, unit = p?.price_before || p?.price;
+  if (l && unit) {
+    const reg = i.quantity > 1 ? `${euro(unit)} × ${i.quantity} = ` : "";
+    bits.push(l.applied
+      ? `${reg}<s>${euro(l.regular)}</s> <b class="bonusprice">${euro(l.total)}</b>`
+      : i.quantity > 1 ? `${reg}<b>${euro(l.total)}</b>` : euro(l.total));
+  }
+  if (p?.is_bonus) bits.push(`<span class="badge">${esc(bonusLabel(p.bonus))}</span>`);
+  if (l?.hint && !i.checked) bits.push(`<span class="bonushint">${esc(bonusLabel(l.hint))}</span>`);
+  return `<li class="${i.checked ? "checked" : ""}">
+    <button class="chk ${i.checked ? "on" : ""}" data-act="check" data-key="${k}" aria-label="Afvinken">${i.checked ? "✓" : ""}</button>
+    ${img}
+    <div class="name"><span>${esc(i.name)}</span>${bits.length ? `<small>${bits.join("<span>·</span>")}</small>` : ""}</div>
+    <div class="qty">
+      <button data-act="dec" data-key="${k}" aria-label="Minder">−</button><span>${i.quantity}</span><button data-act="inc" data-key="${k}" aria-label="Meer">+</button>
+    </div>
+    <button class="del" data-act="del" data-key="${k}" aria-label="Verwijderen">✕</button>
+  </li>`;
+}
+async function loadList() {
+  try { items = (await api("api/list")).items; }
+  catch (err) {
+    if (!err.data?.order_mode) throw err;
+    items = []; renderStats(); renderDiscover(); $("#clearChecked").classList.add("hidden");
+    $("#list").innerHTML = `<div class="empty"><div style="font-size:40px">🔒</div><div><b>Lijst tijdelijk vergrendeld</b></div>
+      <div style="font-size:13px">Je bestelling staat open voor wijzigingen. Zodra je die afrondt in de Appie-app, verschijnt je lijst hier weer.</div></div>`;
+    return;
+  }
+  renderList();
+}
+
+$("#list").addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-act]");
+  if (!btn) return;
+  const item = items.find((i) => i.key === btn.dataset.key);
+  if (!item) return;
+  try {
+    if (btn.dataset.act === "check") {
+      item.checked = !item.checked; renderList();
+      await api("api/list/check", { key: item.key, checked: item.checked });
+    } else if (btn.dataset.act === "inc" || btn.dataset.act === "dec") {
+      const q = item.quantity + (btn.dataset.act === "inc" ? 1 : -1);
+      if (q <= 0 && !confirm(`${item.name} verwijderen?`)) return;
+      item.quantity = q; if (q <= 0) items = items.filter((i) => i !== item); renderList();
+      await api("api/list/quantity", { key: item.key, quantity: q });
+    } else if (btn.dataset.act === "del") {
+      items = items.filter((i) => i !== item); renderList();
+      await api("api/list/remove", { key: item.key });
+    }
+  } catch (err) { toast(err.message); }
+  await loadList().catch(() => {});
+});
+$("#list").addEventListener("click", (e) => { if (e.target.closest("[data-goto=search]")) goSearch(); });
+function goSearch() { if (isPhone()) setTab("search"); else $("#searchInput").focus(); }
+$("#clearChecked").onclick = async () => {
+  const keys = items.filter((i) => i.checked).map((i) => i.key);
+  items = items.filter((i) => !i.checked); renderList();
+  try { await api("api/list/remove", { keys }); } catch (err) { toast(err.message); }
+  await loadList().catch(() => {});
+};
+
+// ---------------- search ----------------
+let searchTimer, searchSeq = 0;
+$("#searchInput").addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  const q = $("#searchInput").value.trim();
+  renderFreeText(q);
+  $("#searchHint").classList.toggle("hidden", !!q);
+  if (q.length < 2) { $("#results").innerHTML = ""; return; }
+  searchTimer = setTimeout(() => doSearch(q), 300);
+});
+$("#searchForm").addEventListener("submit", (e) => { e.preventDefault(); const q = $("#searchInput").value.trim(); if (q) addItem(q, null); });
+function renderFreeText(q) {
+  const el = $("#freeText");
+  el.classList.toggle("hidden", !q);
+  el.innerHTML = q ? `<a id="addFree">+ “${esc(q)}” als losse tekst</a> <span class="muted">(Enter)</span>` : "";
+  const a = $("#addFree"); if (a) a.onclick = () => addItem(q, null);
+}
+function productCard(p, idx, label = "+ Toevoegen") {
+  label = typeof label === "string" ? label : "+ Toevoegen";
+  return `<div class="product">
+    ${p.is_bonus ? `<span class="badge">${esc(bonusLabel(p.bonus))}</span>` : ""}
+    ${p.image ? `<img src="${esc(p.image)}" alt="" loading="lazy">` : ""}
+    <div class="title">${esc(p.title)}</div>
+    <div class="meta">${esc(p.unit_size || "")}</div>
+    <div class="price">${euro(p.price)}${p.is_bonus && p.price_before && p.price_before !== p.price ? `<s>${euro(p.price_before)}</s>` : ""}</div>
+    <button class="btn" data-idx="${idx}" aria-label="${esc(label.replace(/^\+\s*/, ""))}: ${esc(p.title)}" ${p.orderable === false && label === "+ Toevoegen" ? "disabled title='Niet leverbaar'" : ""}>${label}</button>
+  </div>`;
+}
+async function doSearch(q) {
+  const seq = ++searchSeq;
+  $("#results").innerHTML = `<div class="muted"><span class="spinner"></span> Zoeken…</div>`;
+  try {
+    const { products } = await api("api/search?q=" + encodeURIComponent(q));
+    if (seq !== searchSeq) return;
+    lastResults = products;
+    renderResults();
+  } catch (err) { if (seq === searchSeq) $("#results").innerHTML = `<div class="muted">${esc(err.message)}</div>`; }
+}
+// cards on larger screens, one product per line on a phone
+function renderResults() {
+  const el = $("#results"), phone = isPhone();
+  el.classList.toggle("list", phone);
+  el.innerHTML = lastResults.length
+    ? lastResults.map((p, i) => (phone ? srow(p, i) : productCard(p, i))).join("")
+    : `<div class="muted">Niets gevonden.</div>`;
+}
+matchMedia("(max-width: 767px)").addEventListener("change", () => { if (lastResults.length && $("#searchInput").value.trim()) renderResults(); });
+$("#results").addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-idx]");
+  if (!btn) return;
+  const p = lastResults[+btn.dataset.idx];
+  if (!btn.classList.contains("add")) return addItem(p.title, p.id, { keepSearch: true, btn });
+  pending.add(p.id); renderResults();
+  try { await addItem(p.title, p.id, { keepSearch: true }); }
+  finally { pending.delete(p.id); if (lastResults.includes(p)) renderResults(); }
+});
+
+// ---------------- suggestions ----------------
+let discover = "foryou";
+try { discover = localStorage.getItem("appie-discover") || "foryou"; } catch (_) {}
+const DISCOVER_NOTE = {
+  foryou: "Persoonlijke suggesties van AH, afgestemd op je lijst",
+  frequent: "Uit je laatste online bestellingen",
+  bonus: "Deze week in de bonus, voor jou",
+};
+// "on the list" is always derived from the current list, so it follows adds and removals
+const onList = (p) => items.some((i) => i.product_id && i.product_id === p.id);
+const pending = new Set();  // product ids being added right now
+function srow(p, idx, extra = "") {
+  const bits = [esc(p.unit_size || ""), p.price ? `<span class="price">${euro(p.price)}</span>` : "", extra,
+                p.is_bonus ? `<span class="badge">${esc(bonusLabel(p.bonus))}</span>` : ""].filter(Boolean);
+  const action = pending.has(p.id) ? `<span class="onlist"><span class="spinner"></span></span>`
+    : onList(p) ? `<span class="onlist">✓ op lijst</span>`
+    : `<button class="add" data-idx="${idx}" aria-label="Toevoegen: ${esc(p.title)}" title="Op de lijst" ${p.orderable === false ? "disabled" : ""}>+</button>`;
+  return `<div class="srow">
+    ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" loading="lazy">` : `<div class="ph"></div>`}
+    <div class="name"><span>${esc(p.title)}</span><small>${bits.join("<span>·</span>")}</small></div>
+    ${action}
+  </div>`;
+}
+let discoverData = null;  // {mode, ...data} of what's currently shown
+function renderDiscover() {
+  const d = discoverData;
+  if (!d || d.mode !== discover) return;
+  const scroll = $("#suggestions").parentElement.scrollTop;
+  if (d.mode === "foryou") {
+    suggestions = d.products;
+    $("#suggestions").innerHTML = d.products.length ? d.products.map((p, i) => srow(p, i)).join("") : `<div class="hint">Geen suggesties op dit moment.</div>`;
+  } else if (d.mode === "frequent") {
+    suggestions = d.products;
+    $("#suggestions").innerHTML = d.products.length
+      ? d.products.map((p, i) => srow(p, i, `<span class="freq">${p.times}× in ${p.orders}</span>`)).join("")
+      : `<div class="hint">Nog geen afgeleverde online bestellingen gevonden.</div>`;
+  } else {
+    const { personal, previously_bought } = d;
+    suggestions = [...personal, ...previously_bought];
+    let html = `<div class="subhead">Persoonlijke bonus</div>`;
+    html += personal.length ? personal.map((p, i) => srow(p, i)).join("") : `<div class="hint" style="padding:8px 0;text-align:left">Deze week geen persoonlijke bonus.</div>`;
+    html += `<div class="subhead">Eerder gekocht · nu in de bonus (${previously_bought.length})</div>`;
+    html += previously_bought.map((p, i) => srow(p, personal.length + i)).join("") || `<div class="hint">Niets gevonden.</div>`;
+    $("#suggestions").innerHTML = html;
+  }
+  $("#suggestions").parentElement.scrollTop = scroll;
+}
+async function loadSuggestions(refresh = false) {
+  const mode = discover;
+  document.querySelectorAll("#discoverTabs button").forEach((b) => b.classList.toggle("active", b.dataset.d === mode));
+  $("#discoverNote").textContent = DISCOVER_NOTE[mode];
+  if (!discoverData || discoverData.mode !== mode) $("#suggestions").innerHTML = `<div class="hint"><span class="spinner"></span></div>`;
+  const q = refresh ? "?refresh=1" : "";
+  try {
+    let data;
+    if (mode === "foryou") data = { products: (await api("api/suggestions")).products };
+    else if (mode === "frequent") data = { products: (await api("api/frequent" + q)).products };
+    else data = await api("api/bonus" + q);
+    if (mode !== discover) return;
+    discoverData = { mode, ...data };
+    renderDiscover();
+  } catch (err) { if (mode === discover) $("#suggestions").innerHTML = `<div class="hint">${esc(err.message)}</div>`; }
+}
+document.querySelectorAll("#discoverTabs button").forEach((b) => (b.onclick = () => {
+  discover = b.dataset.d; suggestions = [];
+  try { localStorage.setItem("appie-discover", discover); } catch (_) {}
+  loadSuggestions();
+}));
+$("#suggestions").addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-idx]");
+  if (!btn) return;
+  const p = suggestions[+btn.dataset.idx];
+  pending.add(p.id); renderDiscover();
+  try { await addItem(p.title, p.id, { keepSearch: true }); }  // reloads the list -> renderDiscover()
+  finally { pending.delete(p.id); renderDiscover(); }
+  if (discover === "foryou") loadSuggestions();  // AH adapts these to the list
+});
+$("#refreshSug").onclick = () => loadSuggestions(true);
+
+async function addItem(name, productId, opts = {}) {
+  if (opts.btn) { opts.btn.disabled = true; opts.btn.innerHTML = `<span class="spinner"></span>`; }
+  try {
+    await api("api/list/add", { name, product_id: productId, quantity: 1 });
+    toast(`${name} toegevoegd`);
+    if (!opts.keepSearch) { $("#searchInput").value = ""; $("#results").innerHTML = ""; renderFreeText(""); $("#searchHint").classList.remove("hidden"); }
+    await loadList();
+  } catch (err) { toast(err.message); }
+  if (opts.btn) { opts.btn.disabled = false; opts.btn.textContent = "✓ Toegevoegd"; setTimeout(() => { opts.btn.textContent = "+ Toevoegen"; }, 1500); }
+}
+
+// ---------------- barcode scanner ----------------
+// Live camera via the native BarcodeDetector (Chrome/Android) or ZXing (Safari/iOS, loaded on demand).
+// Falls back to taking a photo (works inside the HA app/iframe) or typing the code.
+const ZXING_URL = "https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js";
+const BARCODE_FORMATS = ["ean_13", "ean_8", "upc_a", "upc_e"];
+let scan = { stream: null, timer: null, zxing: null, busy: false };
+
+function loadZXing() {
+  if (window.ZXing) return Promise.resolve(window.ZXing);
+  return new Promise((ok, fail) => {
+    const s = document.createElement("script");
+    s.src = ZXING_URL; s.onload = () => ok(window.ZXing); s.onerror = () => fail(new Error("Barcodebibliotheek laden mislukt"));
+    document.head.appendChild(s);
+  });
+}
+async function nativeDetector() {
+  if (!("BarcodeDetector" in window)) return null;
+  try {
+    const supported = await BarcodeDetector.getSupportedFormats();
+    const formats = BARCODE_FORMATS.filter((f) => supported.includes(f));
+    return formats.length ? new BarcodeDetector({ formats }) : null;
+  } catch (_) { return null; }
+}
+function scanUI(live, msg) {
+  $("#scanVideo").classList.toggle("hidden", !live);
+  $("#scanFrame").classList.toggle("hidden", !live);
+  $("#scanLaser").classList.toggle("hidden", !live);
+  $("#scanMsg").classList.toggle("hidden", !!live);
+  if (msg) $("#scanMsg").innerHTML = msg;
+}
+function stopScan() {
+  clearInterval(scan.timer); scan.timer = null;
+  if (scan.zxing) { try { scan.zxing.reset(); } catch (_) {} scan.zxing = null; }
+  if (scan.stream) { scan.stream.getTracks().forEach((t) => t.stop()); scan.stream = null; }
+}
+const MODE_LABEL = { choose: "", in: "Inruimen +1", out: "Verbruiken −1" };
+function scanTitle() {
+  if (scan.target !== "inventory") return "Barcode scannen";
+  const m = invMode();
+  return `Scannen naar voorraad${m !== "choose" ? `<span class="modebadge ${m}">${MODE_LABEL[m]}</span>` : ""}`;
+}
+async function openScanner(target = "list") {
+  scan.target = target;
+  $("#scanTitle").innerHTML = scanTitle();
+  $("#scanModal").classList.remove("hidden");
+  $("#scanResult").innerHTML = ""; $("#scanCode").value = "";
+  await startLive();
+}
+function closeScanner() { stopScan(); $("#scanModal").classList.add("hidden"); }
+async function startLive() {
+  stopScan();
+  scanUI(false, "Camera starten…");
+  if (!navigator.mediaDevices?.getUserMedia || !window.isSecureContext) {
+    scanUI(false, "Live scannen kan hier niet (camera alleen via https).<br>Maak een foto van de barcode, of typ hem in.");
+    return;
+  }
+  const video = $("#scanVideo");
+  try {
+    const detector = await nativeDetector();
+    if (detector) {
+      scan.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
+      video.srcObject = scan.stream; await video.play();
+      scanUI(true);
+      scan.timer = setInterval(async () => {
+        if (scan.busy || video.readyState < 2) return;
+        scan.busy = true;
+        try { const codes = await detector.detect(video); if (codes.length) onCode(codes[0].rawValue); } catch (_) {}
+        scan.busy = false;
+      }, 250);
+    } else {
+      const ZX = await loadZXing();
+      scan.zxing = new ZX.BrowserMultiFormatReader();
+      scanUI(true);
+      await scan.zxing.decodeFromConstraints({ video: { facingMode: "environment" } }, video, (result) => { if (result) onCode(result.getText()); });
+    }
+  } catch (err) {
+    stopScan();
+    const denied = err && (err.name === "NotAllowedError" || err.name === "SecurityError");
+    scanUI(false, denied ? "Geen toegang tot de camera.<br>Maak een foto van de barcode, of typ hem in."
+                         : `Camera niet beschikbaar (${esc(err.message || err.name || err)}).<br>Maak een foto, of typ de barcode in.`);
+  }
+}
+async function decodePhoto(file) {
+  scanUI(false, `<span class="spinner"></span> Barcode zoeken in foto…`);
+  try {
+    const detector = await nativeDetector();
+    if (detector) {
+      const codes = await detector.detect(await createImageBitmap(file));
+      if (codes.length) return onCode(codes[0].rawValue);
+    } else {
+      const ZX = await loadZXing();
+      const url = URL.createObjectURL(file);
+      try { const r = await new ZX.BrowserMultiFormatReader().decodeFromImageUrl(url); return onCode(r.getText()); }
+      finally { URL.revokeObjectURL(url); }
+    }
+    throw new Error("geen barcode");
+  } catch (_) {
+    scanUI(false, "Geen barcode gevonden in de foto.<br>Probeer het van dichterbij en scherp, of typ de code in.");
+  }
+}
+async function onCode(code) {
+  code = String(code || "").replace(/\D/g, "");
+  if (!code) return;
+  const wasLive = !!(scan.stream || scan.zxing);
+  stopScan();
+  if (navigator.vibrate) navigator.vibrate(60);
+  $("#scanCode").value = code;
+  scanUI(false, `Barcode <b>${esc(code)}</b>`);
+  $("#scanResult").innerHTML = `<div class="hint"><span class="spinner"></span> Product opzoeken…</div>`;
+  if (scan.target === "inventory") return invOnCode(code, wasLive);
+  try {
+    const { product: p } = await api("api/barcode/" + code);
+    if (!p) {
+      $("#scanResult").innerHTML = `<div class="hint">Barcode ${esc(code)} is niet bekend bij AH.</div>
+        <div class="row"><button class="btn ghost" id="scanAgain" style="flex:1">Opnieuw scannen</button></div>`;
+    } else {
+      scan.product = p;
+      $("#scanResult").innerHTML = `<div class="scanresult">
+          ${p.image ? `<img src="${esc(p.image)}" alt="">` : ""}
+          <div class="name"><span><b>${esc(p.title)}</b></span><small>${[esc(p.unit_size || ""), p.price ? `<span class="price">${euro(p.price)}</span>` : "", p.is_bonus ? `<span class="badge">${esc(bonusLabel(p.bonus))}</span>` : ""].filter(Boolean).join("<span>·</span>")}</small></div>
+        </div>
+        <div class="row"><button class="btn" id="scanAdd" style="flex:2">+ Op de lijst</button><button class="btn ghost" id="scanAgain" style="flex:1">Nog een</button></div>`;
+      $("#scanAdd").onclick = async () => { await addItem(p.title, p.id, { keepSearch: true }); $("#scanAdd").textContent = "✓ Toegevoegd"; $("#scanAdd").disabled = true; };
+    }
+    const again = $("#scanAgain"); if (again) again.onclick = () => { $("#scanResult").innerHTML = ""; startLive(); };
+  } catch (err) { $("#scanResult").innerHTML = `<div class="hint">${esc(err.message)}</div>`; }
+}
+$("#scanBtn").onclick = () => openScanner("list");
+$("#scanClose").onclick = closeScanner;
+$("#scanModal").addEventListener("click", (e) => { if (e.target.id === "scanModal") closeScanner(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#scanModal").classList.contains("hidden")) closeScanner(); });
+$("#scanPhoto").addEventListener("change", (e) => { const f = e.target.files[0]; if (f) { stopScan(); decodePhoto(f); } e.target.value = ""; });
+$("#scanManual").addEventListener("submit", (e) => { e.preventDefault(); onCode($("#scanCode").value); });
+
+// ---------------- voorraad ----------------
+let inv = [], invSummary = {}, invResults = [], invLoaded = false;
+const invMode = () => { try { return localStorage.getItem("appie-scanmode") || "choose"; } catch (_) { return "choose"; } };
+function setInvMode(m) {
+  try { localStorage.setItem("appie-scanmode", m); } catch (_) {}
+  document.querySelectorAll("#scanModeSeg button").forEach((b) => b.classList.toggle("active", b.dataset.mode === m));
+}
+document.querySelectorAll("#scanModeSeg button").forEach((b) => (b.onclick = () => setInvMode(b.dataset.mode)));
+setInvMode(invMode());
+// on a phone the stock list matters most: start with "Bestelling uitpakken" folded
+if (matchMedia("(max-width: 767px)").matches) $("#unpackBox").open = false;
+
+async function loadInventory() {
+  const d = await api("api/inventory");
+  inv = d.items; invSummary = d.summary; invLoaded = true;
+  if (document.activeElement?.classList.contains("qtyinput")) return;  // don't interrupt typing a count
+  renderInventory();
+}
+function renderInventory() {
+  $("#ivProducts").textContent = invSummary.products ?? 0;
+  $("#ivUnits").textContent = invSummary.total_units ?? 0;
+  $("#ivEmpty").textContent = (invSummary.empty || []).length;
+  $("#invCount").textContent = invSummary.products ?? 0;
+  const f = $("#invFilter").value.trim().toLowerCase();
+  const shown = inv.filter((i) => !f || i.name.toLowerCase().includes(f));
+  $("#invFilterBox").classList.toggle("hidden", !inv.length);
+  if (!inv.length) {
+    $("#invList").innerHTML = `<div class="empty"><div style="font-size:40px">📦</div><div><b>Nog geen voorraad</b></div>
+      <div style="font-size:13px">Houd bij wat je in huis hebt: scan een barcode, zoek een product of pak een bezorging in één keer uit.</div>
+      <div class="actions"><button class="btn" data-inv-empty="scan">Barcode scannen</button><button class="btn ghost" data-inv-empty="unpack">Bezorging uitpakken</button></div></div>`;
+    return;
+  }
+  if (!shown.length) { $("#invList").innerHTML = `<div class="hint">Niets gevonden voor “${esc(f)}”.</div>`; return; }
+  const groups = new Map();
+  for (const i of shown) {
+    const cat = i.quantity <= 0 ? "Op" : (i.category || "Overig");
+    if (!groups.has(cat)) groups.set(cat, []);
+    groups.get(cat).push(i);
+  }
+  const order = [...groups.keys()].sort((a, b) => (a === "Op") - (b === "Op") || (a === "Overig") - (b === "Overig") || a.localeCompare(b));
+  $("#invList").innerHTML = order.map((cat) => `<div class="group">${esc(cat)}</div><ul class="items">${groups.get(cat).map(invRow).join("")}</ul>`).join("");
+}
+function invRow(i) {
+  const k = esc(i.key);
+  const img = i.image ? `<img class="thumb" src="${esc(i.image)}" alt="" loading="lazy">` : `<div class="ph">✎</div>`;
+  const bits = [esc(i.unit_size || ""), i.price ? euro(i.price) : "", i.is_bonus ? `<span class="badge">${esc(bonusLabel(i.bonus))}</span>` : "",
+                i.quantity <= 0 ? `<span class="oplabel">op</span>` : ""].filter(Boolean);
+  return `<li class="${i.quantity <= 0 ? "empty-stock" : ""}" data-key="${k}">
+    ${img}
+    <div class="name"><span>${esc(i.name)}</span>${bits.length ? `<small>${bits.join("<span>·</span>")}</small>` : ""}</div>
+    <div class="qty">
+      <button data-iact="dec" aria-label="Eén minder">−</button>
+      <button class="qtybtn" data-iact="edit" title="Aantal instellen">${i.quantity}</button>
+      <button data-iact="inc" aria-label="Eén meer">+</button>
+    </div>
+    <button class="tolist" data-iact="tolist" title="Op de boodschappenlijst" aria-label="Op de boodschappenlijst">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17 18a2 2 0 1 1 0 4 2 2 0 0 1 0-4M1 2h3.27l.94 2H20a1 1 0 0 1 1 1c0 .17-.05.34-.12.5l-3.58 6.47c-.34.61-1 1.03-1.75 1.03H8.1l-.9 1.63-.03.12a.25.25 0 0 0 .25.25H19v2H7a2 2 0 0 1-2-2c0-.35.09-.68.24-.96l1.36-2.45L3 4H1V2m6 16a2 2 0 1 1 0 4 2 2 0 0 1 0-4"/></svg>
+    </button>
+    <button class="del" data-iact="del" aria-label="Uit voorraad verwijderen">✕</button>
+  </li>`;
+}
+function invApply(item) {
+  // merge a changed item from the API into the local list
+  if (!item) return;
+  const idx = inv.findIndex((i) => i.key === item.key);
+  if (idx >= 0) inv[idx] = { ...inv[idx], ...item }; else inv.push(item);
+}
+async function invChange(path, body) {
+  const r = await api(path, body);
+  invApply(r.item);
+  loadInventory().catch(() => {});  // refresh summary/order in the background
+  renderInventory();
+  return r.item;
+}
+async function toList(key, name) {
+  try { await api("api/inventory/to-list", { key }); toast(`${name} op de boodschappenlijst`); loadList().catch(() => {}); }
+  catch (err) { toast(err.message); }
+}
+function emptyToast(item) {
+  toast(`${item.name} is op`, { label: "Op de lijst", fn: () => toList(item.key, item.name) });
+}
+$("#invList").addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-iact]");
+  if (!btn) return;
+  const li = btn.closest("li"), key = li.dataset.key, item = inv.find((i) => i.key === key);
+  if (!item) return;
+  const act = btn.dataset.iact;
+  try {
+    if (act === "inc" || act === "dec") {
+      const r = await invChange("api/inventory/adjust", { key, delta: act === "inc" ? 1 : -1 });
+      if (act === "dec" && r && r.quantity === 0 && r.before > 0) emptyToast(r);
+    } else if (act === "edit") {
+      const input = document.createElement("input");
+      input.type = "number"; input.min = "0"; input.inputMode = "numeric"; input.className = "qtyinput"; input.value = item.quantity;
+      btn.replaceWith(input); input.focus(); input.select();
+      let done = false;
+      const commit = async () => {
+        if (done) return; done = true;
+        const q = Math.max(0, parseInt(input.value, 10) || 0);
+        if (q === item.quantity) { renderInventory(); return; }
+        const r = await invChange("api/inventory/set", { key, quantity: q }).catch((err) => toast(err.message));
+        if (r && r.quantity === 0 && r.before > 0) emptyToast(r);
+      };
+      input.addEventListener("keydown", (ev) => { if (ev.key === "Enter") commit(); if (ev.key === "Escape") { done = true; renderInventory(); } });
+      input.addEventListener("blur", commit);
+    } else if (act === "tolist") {
+      await toList(key, item.name);
+    } else if (act === "del") {
+      if (!confirm(`${item.name} uit je voorraad verwijderen?`)) return;
+      inv = inv.filter((i) => i !== item); renderInventory();
+      await api("api/inventory/remove", { key }); loadInventory().catch(() => {});
+    }
+  } catch (err) { toast(err.message); }
+});
+$("#invFilter").addEventListener("input", renderInventory);
+$("#invList").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-inv-empty]");
+  if (!b) return;
+  if (b.dataset.invEmpty === "scan") return openScanner("inventory");
+  const box = $("#unpackBox"); box.open = true; box.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+// search -> add to stock
+let invTimer, invSeq = 0;
+$("#invSearch").addEventListener("input", () => {
+  clearTimeout(invTimer);
+  const q = $("#invSearch").value.trim();
+  const ft = $("#invFreeText");
+  ft.classList.toggle("hidden", !q);
+  ft.innerHTML = q ? `<a id="invAddFree">+ “${esc(q)}” als eigen product</a> <span class="muted">(Enter)</span>` : "";
+  const a = $("#invAddFree"); if (a) a.onclick = () => invAddName(q);
+  if (q.length < 2) { $("#invResults").innerHTML = ""; return; }
+  invTimer = setTimeout(async () => {
+    const seq = ++invSeq;
+    $("#invResults").innerHTML = `<div class="muted"><span class="spinner"></span> Zoeken…</div>`;
+    try {
+      const { products } = await api("api/search?q=" + encodeURIComponent(q));
+      if (seq !== invSeq) return;
+      invResults = products;
+      $("#invResults").innerHTML = products.length ? products.map((p, i) => productCard(p, i, "+ Voorraad")).join("") : `<div class="muted">Niets gevonden.</div>`;
+    } catch (err) { if (seq === invSeq) $("#invResults").innerHTML = `<div class="muted">${esc(err.message)}</div>`; }
+  }, 300);
+});
+$("#invSearchForm").addEventListener("submit", (e) => { e.preventDefault(); const q = $("#invSearch").value.trim(); if (q) invAddName(q); });
+async function invAddName(name) {
+  try {
+    const r = await invChange("api/inventory/adjust", { name, delta: 1 });
+    toast(`${r.name}: ${r.before} → ${r.quantity}`);
+    $("#invSearch").value = ""; $("#invResults").innerHTML = ""; $("#invFreeText").classList.add("hidden");
+  } catch (err) { toast(err.message); }
+}
+$("#invResults").addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-idx]");
+  if (!btn) return;
+  const p = invResults[+btn.dataset.idx];
+  btn.disabled = true;
+  try {
+    const r = await invChange("api/inventory/adjust", { product: p, delta: 1 });
+    btn.textContent = `✓ ${r.quantity} op voorraad`;
+    toast(`${r.name}: ${r.before} → ${r.quantity}`);
+  } catch (err) { toast(err.message); btn.textContent = "+ Voorraad"; }
+  btn.disabled = false;
+});
+
+// unpack a delivered order
+async function loadOrders() {
+  try {
+    const { orders } = await api("api/inventory/orders");
+    $("#invOrders").innerHTML = orders.length ? orders.map((o) => {
+      const d = new Date(o.date + "T12:00:00").toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" });
+      return `<div class="orow">
+        <div class="name"><span><b>${esc(d)}</b></span><small class="muted">${o.products} producten · ${o.items} stuks</small></div>
+        ${o.unpacked ? `<span class="onlist">✓ uitgepakt</span>` : `<button class="btn sm" data-order="${o.order_id}" data-items="${o.items}" data-date="${esc(d)}">Uitpakken</button>`}
+      </div>`;
+    }).join("") : `<div class="hint">Geen afgeleverde bestellingen gevonden.</div>`;
+  } catch (err) { $("#invOrders").innerHTML = `<div class="hint">${esc(err.message)}</div>`; }
+}
+$("#invOrders").addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-order]");
+  if (!btn) return;
+  if (!confirm(`Alle ${btn.dataset.items} artikelen van de bezorging van ${btn.dataset.date} aan je voorraad toevoegen?`)) return;
+  btn.disabled = true; btn.innerHTML = `<span class="spinner"></span>`;
+  try {
+    const r = await api("api/inventory/unpack", { order_id: +btn.dataset.order });
+    toast(r.already ? "Deze bestelling was al uitgepakt" : `${r.added} artikelen (${r.products} producten) toegevoegd`);
+    await Promise.all([loadInventory(), loadOrders()]);
+  } catch (err) { toast(err.message); btn.disabled = false; btn.textContent = "Uitpakken"; }
+});
+
+// barcode -> stock
+$("#invScanBtn").onclick = () => openScanner("inventory");
+$("#invScanBig").onclick = () => openScanner("inventory");
+function invProductCard(name, image, sub, qty) {
+  return `<div class="scanresult">
+    ${image ? `<img src="${esc(image)}" alt="">` : ""}
+    <div class="name"><span><b>${esc(name)}</b></span>${sub ? `<small>${sub}</small>` : ""}</div>
+    <div style="text-align:center;flex:none"><div class="qtybig" id="scanQty">${qty}</div><div class="muted" style="font-size:11px">op voorraad</div></div>
+  </div>`;
+}
+function continueScanning(wasLive) {
+  if (!wasLive) return;
+  setTimeout(() => { if (!$("#scanModal").classList.contains("hidden") && scan.target === "inventory") startLive(); }, 1200);
+}
+async function invOnCode(code, wasLive) {
+  let r;
+  try { r = await api("api/inventory/scan/" + code); }
+  catch (err) { $("#scanResult").innerHTML = `<div class="hint">${esc(err.message)}</div>`; return; }
+  const item = r.item, p = r.product;
+  const again = () => { const b = $("#scanAgain"); if (b) b.onclick = () => { $("#scanResult").innerHTML = ""; startLive(); }; };
+
+  if (!item && !p) {  // unknown barcode: let the user name it
+    $("#scanResult").innerHTML = `<div class="hint" style="text-align:left;padding:10px 0 0">Barcode <b>${esc(code)}</b> is onbekend. <b>Wat is dit?</b> De volgende keer wordt hij herkend.</div>
+      <form class="row" id="linkForm"><input type="text" id="linkName" placeholder="Naam, bijv. Zelfgemaakte jam" required><button class="btn">+1 opslaan</button></form>
+      <div class="row"><input type="text" id="linkSearch" placeholder="…of zoek het AH-product"></div>
+      <div id="linkResults"></div>
+      <div class="row"><button class="btn ghost" id="scanAgain" style="flex:1">Overslaan, volgende scannen</button></div>`;
+    again();
+    $("#linkName").focus();
+    const link = async (body) => {
+      const res = await api("api/inventory/link", { gtin: code, delta: 1, ...body });
+      invApply(res.item); loadInventory().catch(() => {});
+      $("#scanResult").innerHTML = invProductCard(res.item.name, res.item.image, "Barcode gekoppeld", res.item.quantity)
+        + `<div class="row"><button class="btn ghost" id="scanAgain" style="flex:1">Volgende scannen</button></div>`;
+      again(); toast(`${res.item.name}: ${res.item.before} → ${res.item.quantity}`);
+    };
+    $("#linkForm").onsubmit = (e) => { e.preventDefault(); const n = $("#linkName").value.trim(); if (n) link({ name: n }).catch((err) => toast(err.message)); };
+    let t; $("#linkSearch").oninput = () => {
+      clearTimeout(t); const q = $("#linkSearch").value.trim();
+      if (q.length < 2) { $("#linkResults").innerHTML = ""; return; }
+      t = setTimeout(async () => {
+        const { products } = await api("api/search?q=" + encodeURIComponent(q)).catch(() => ({ products: [] }));
+        $("#linkResults").innerHTML = products.slice(0, 5).map((pr, i) => `<div class="srow">
+            ${pr.image ? `<img class="thumb" src="${esc(pr.image)}" alt="">` : `<div class="ph"></div>`}
+            <div class="name"><span>${esc(pr.title)}</span><small>${esc(pr.unit_size || "")}</small></div>
+            <button class="add" data-li="${i}" aria-label="Kiezen">✓</button></div>`).join("");
+        $("#linkResults").onclick = (e) => { const b = e.target.closest("[data-li]"); if (b) link({ product: products[+b.dataset.li] }).catch((err) => toast(err.message)); };
+      }, 300);
+    };
+    return;
+  }
+
+  const name = item?.name || p.title, image = item?.image || p?.image;
+  const sub = [esc(item?.unit_size || p?.unit_size || ""), (p?.price || item?.price) ? euro(p?.price || item?.price) : ""].filter(Boolean).join(" · ");
+  const target = item ? { key: item.key } : { product: p };
+  const mode = invMode();
+
+  if (mode === "in" || mode === "out") {
+    const delta = mode === "in" ? 1 : -1;
+    if (delta < 0 && (!item || item.quantity <= 0)) {
+      $("#scanResult").innerHTML = invProductCard(name, image, sub, item ? item.quantity : 0)
+        + `<div class="hint">Niet op voorraad, niets afgeboekt.</div><div class="row"><button class="btn ghost" id="scanAgain" style="flex:1">Volgende scannen</button></div>`;
+      again(); continueScanning(wasLive); return;
+    }
+    try {
+      const res = await invChange("api/inventory/adjust", { ...target, delta, gtin: code });
+      $("#scanResult").innerHTML = invProductCard(res.name, image, sub, res.quantity)
+        + `<div class="row"><button class="btn ghost" id="scanAgain" style="flex:1">Volgende scannen</button></div>`;
+      $("#scanQty").parentElement.parentElement.classList.add("flash");
+      again();
+      if (res.quantity === 0 && res.before > 0) emptyToast(res); else toast(`${res.name}: ${res.before} → ${res.quantity}`);
+      continueScanning(wasLive);
+    } catch (err) { $("#scanResult").innerHTML = `<div class="hint">${esc(err.message)}</div>`; }
+    return;
+  }
+
+  // choose per scan: +1 / -1 / set
+  $("#scanResult").innerHTML = invProductCard(name, image, sub, item ? item.quantity : 0) + `
+    <div class="row">
+      <button class="btn" data-sact="in" style="flex:1">+1 erbij</button>
+      <button class="btn ghost" data-sact="out" style="flex:1" ${!item || item.quantity <= 0 ? "disabled" : ""}>−1 op</button>
+    </div>
+    <form class="row" id="setForm"><input type="number" min="0" inputmode="numeric" id="setQty" placeholder="Aantal tellen" value="${item ? item.quantity : ""}"><button class="btn ghost">Aantal opslaan</button></form>
+    <div class="row"><button class="btn ghost" id="scanAgain" style="flex:1">Volgende scannen</button></div>`;
+  again();
+  let current = item ? { ...item } : null;
+  const show = (res) => {
+    current = res; $("#scanQty").textContent = res.quantity;
+    $("#scanQty").parentElement.parentElement.classList.remove("flash"); void $("#scanQty").offsetWidth;
+    $("#scanQty").parentElement.parentElement.classList.add("flash");
+    $("[data-sact=out]").disabled = res.quantity <= 0; $("#setQty").value = res.quantity;
+  };
+  $("#scanResult").querySelectorAll("[data-sact]").forEach((b) => (b.onclick = async () => {
+    const delta = b.dataset.sact === "in" ? 1 : -1;
+    try {
+      const res = await invChange("api/inventory/adjust", { ...(current ? { key: current.key } : target), delta, gtin: code });
+      show(res);
+      if (res.quantity === 0 && res.before > 0) emptyToast(res); else toast(`${res.name}: ${res.before} → ${res.quantity}`);
+    } catch (err) { toast(err.message); }
+  }));
+  $("#setForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const q = Math.max(0, parseInt($("#setQty").value, 10) || 0);
+    try {
+      let res;
+      if (current) res = await invChange("api/inventory/set", { key: current.key, quantity: q });
+      else { res = await invChange("api/inventory/adjust", { product: p, delta: q, gtin: code }); }
+      show(res); toast(`${res.name}: ${res.quantity} op voorraad`);
+    } catch (err) { toast(err.message); }
+  };
+}
+
+// view switching (desktop/tablet switch, phone tab)
+function setView(view) {
+  document.body.dataset.view = view;
+  document.querySelectorAll("#viewSwitch button").forEach((b) => b.classList.toggle("active", b.dataset.view === view));
+  $("#brandTitle").textContent = view === "inv" ? "HAppie · Voorraad" : "HAppie";
+  try { localStorage.setItem("appie-view", view); } catch (_) {}
+  if (view === "inv" && status.logged_in !== undefined) {
+    loadInventory().catch((e) => toast(e.message));
+    loadOrders();
+  }
+}
+document.querySelectorAll("#viewSwitch button").forEach((b) => (b.onclick = () => {
+  setView(b.dataset.view);
+  if (matchMedia("(max-width: 767px)").matches) setTab(b.dataset.view === "inv" ? "inv" : "list");
+}));
+
+// ---------------- tabs (phone) + keyboard ----------------
+function setTab(tab) {
+  document.body.dataset.tab = tab;
+  // on a phone the tab bar decides the view; on larger screens the header switch does
+  const view = tab === "inv" ? "inv" : "shop";
+  if (matchMedia("(max-width: 767px)").matches && document.body.dataset.view !== view) setView(view);
+  document.querySelectorAll(".tabbar button").forEach((b) => b.classList.toggle("active", b.dataset.tab === tab));
+  try { localStorage.setItem("appie-tab", tab); } catch (_) {}
+  if (tab === "search") setTimeout(() => $("#searchInput").focus(), 50);
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll(".tabbar button").forEach((b) => (b.onclick = () => setTab(b.dataset.tab)));
+try { const t = localStorage.getItem("appie-tab"); if (t && t !== "search") setTab(t); } catch (_) {}
+document.addEventListener("keydown", (e) => {
+  if (e.key === "/" && !/input|textarea/i.test(document.activeElement.tagName)) {
+    e.preventDefault();
+    if (matchMedia("(max-width: 767px)").matches) setTab("search"); else $("#searchInput").focus();
+  }
+});
+
+// ---------------- login ----------------
+$("#loginBtn").onclick = async () => {
+  const btn = $("#loginBtn");
+  btn.disabled = true; btn.innerHTML = `<span class="spinner"></span>`;
+  try {
+    await api("api/login", { code: $("#codeInput").value });
+    $("#codeInput").value = ""; forceLogin = false;
+    toast("Gekoppeld met Albert Heijn");
+    await refresh(); loadSuggestions(); loadDelivery(true);
+  } catch (err) { toast(err.message); }
+  btn.disabled = false; btn.textContent = "Koppelen";
+};
+
+// ---------------- boot ----------------
+async function refresh() {
+  await loadStatus();
+  if (status.logged_in) await loadList().catch((e) => toast(e.message));
+}
+try { const v = localStorage.getItem("appie-view"); if (v === "inv" && !matchMedia("(max-width: 767px)").matches) document.body.dataset.view = "inv"; } catch (_) {}
+if (document.body.dataset.view !== "inv") document.body.dataset.view = document.body.dataset.tab === "inv" ? "inv" : "shop";
+refresh().then(() => {
+  if (!status.logged_in) return;
+  loadSuggestions(); loadDelivery(); loadSpending();
+  setView(document.body.dataset.view);
+}).catch((e) => toast(e.message));
+setInterval(() => {
+  if (document.hidden) return;
+  refresh().catch(() => {});
+  if (document.body.dataset.view === "inv" && status.logged_in) loadInventory().catch(() => {});
+}, 20000);
+setInterval(() => { if (!document.hidden && status.logged_in) { loadDelivery(); loadSpending(); } }, 300000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) refresh().catch(() => {}); });
+</script>
+</body>
+</html>

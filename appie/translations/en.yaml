@@ -1,0 +1,21 @@
+configuration:
+  todo_entity:
+    name: To-do list
+    description: The Home Assistant to-do entity that is synced with your AH list (e.g. todo.boodschappen). Create it via Settings > Devices & services > Add integration > Local To-do.
+  sync_interval:
+    name: Sync interval (seconds)
+    description: How often the AH list is polled. Changes in Home Assistant are pushed immediately.
+  auto_match_products:
+    name: Auto-match products
+    description: When an item is added in Home Assistant (e.g. by voice), search the best matching AH product and add that instead of free text.
+  bonus_notifications:
+    name: Bonus notifications
+    description: Notify when something on your list, or something you buy often, is in the bonus (once per offer).
+  notify_service:
+    name: Notify service
+    description: Optional, e.g. notify.mobile_app_phone to also send notifications to your phone. Empty = Home Assistant notification only.
+  week_budget:
+    name: Weekly budget (EUR)
+    description: Optional. Notify when what you spent at AH this week plus your shopping list goes over this amount. 0 = off.
+  log_level:
+    name: Log level

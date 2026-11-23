@@ -1,0 +1,48 @@
+# Changelog
+
+## 0.6.0
+- Te installeren via GitHub: voeg https://github.com/emile-bodin/HAppie toe als repository in de App-winkel. Kant-en-klare images voor amd64, aarch64 en armv7 worden automatisch gebouwd.
+- Nieuwe naam: **HAppie** (HA + Appie). In de zijbalk heet het paneel nu *HAppie*. Entiteiten (`sensor.appie_*`) en de slug blijven gelijk, dus je automations blijven werken.
+- **Uitgavenoverzicht**: wat je per week en per maand bij AH uitgeeft, uit je online bestellingen én je kassabonnen uit de winkel.
+  - Nieuwe tegel *Uitgegeven deze week* bovenaan. Klik erop voor een staafgrafiek (per week of per maand, online en winkel apart), kerncijfers en je laatste aankopen.
+  - Sensoren `sensor.appie_uitgaven_week` en `sensor.appie_uitgaven_maand` (EUR, met online/winkel, vorige periode en weekgemiddelde als attributen). Ze tellen mee in de langetermijnstatistiek van HA.
+- **Verwachte bezorgtijd**: is je bestelling onderweg, dan toont de bezorgtegel het nauwere venster dat AH doorgeeft (bijv. *Verwacht 20:40–21:40*). Op `sensor.appie_volgende_bezorging` staan `eta_window`, `eta_start`, `eta_end` en `eta_message`, handig voor een melding als de boodschappen bijna komen.
+- **Je bestelling bekijken**: klik op de bezorgtegel voor alle artikelen van je volgende bezorging, per categorie met foto en aantal, en het totaal met korting. Producten die ook nog op je boodschappenlijst staan krijgen een markering. Met de tabbladen bekijk je ook eerdere bestellingen, en een bezorgde bestelling pak je hier direct uit naar je voorraad. `sensor.appie_volgende_bezorging` heeft nu ook de artikelen als attribuut `products`.
+- **Weekbudget** (optie `week_budget`, 0 = uit): de tegel laat zien hoeveel je nog over hebt als je je lijst erbij optelt. Kom je erboven, dan zie je een waarschuwing in het paneel en krijg je één melding per week. Plus `binary_sensor.appie_boven_budget` voor automations.
+- **Voorraadbeheer**: a new *Voorraad* view (a switch in the top bar; on phones a 4th tab).
+  - Add products by **searching** or **scanning the barcode** (camera, photo or typed code).
+  - Scan modes: *Kiezen* (choose +1 / −1 / set a count per scan), *Inruimen +1* and *Verbruiken −1* for scanning quickly in a row (live scanning restarts on its own).
+  - Unknown barcodes (e.g. non-AH products) can be linked once to a name or AH product and are recognised from then on.
+  - **Bestelling uitpakken**: add everything from a delivered order to your stock in one go (each order only once).
+  - Stock grouped by category, with a filter, −/+, tap a count to change it, and a button to put an item on your shopping list. When something runs out you get a notice with **Op de lijst**.
+- New sensor `sensor.appie_voorraad` (products in stock; items, total units and empty products as attributes).
+
+## 0.5.1
+- Bonusprijzen worden nu meegerekend, zowel per regel als in de geschatte kosten (dashboard en sensor). Ondersteund: "2 voor 3.99", "2 + 1 gratis", "2e halve prijs", "25% korting", "VOOR 1.99", "1 euro korting", en prijzen waar AH de korting al in verwerkt (bijv. "volume voordeel").
+- Bonusvoordeel staat bij de geschatte kosten, en als `bonus_saving` op `sensor.appie_geschatte_kosten`.
+- Een hint als je nog iets extra moet pakken voor de bonus, bijv. "nog 1 voor 2 voor 3.99".
+- "✓ op lijst" in Ontdekken volgt nu je actuele lijst.
+
+## 0.5.0
+- Paneel "Ontdekken" met drie tabbladen: *Voor jou* (AH-suggesties), *Vaak gekocht* (uit je laatste 8 online bestellingen) en *Bonus* (persoonlijke bonus, plus eerder gekochte producten die nu in de bonus zijn).
+- Barcode scannen: live met de camera, via een foto, of door de code in te typen.
+- Sensoren: `sensor.appie_lijst_items`, `sensor.appie_geschatte_kosten`, `sensor.appie_bonus_items`.
+- Melding in HA als je AH-sessie verloopt. Die verdwijnt weer zodra je opnieuw inlogt.
+- Bonusmeldingen: één keer per aanbieding, voor items op je lijst en producten die je vaak koopt. Optioneel ook naar je telefoon via `notify_service`.
+- Volgende bezorging werkt nu ook voor bevestigde bestellingen.
+
+## 0.4.0
+- Volgende bezorging in het dashboard: dag, tijdvak, tot wanneer je kunt wijzigen, aantal artikelen en totaalbedrag.
+- Nieuwe sensor `sensor.appie_volgende_bezorging` in Home Assistant (tijdstempel van het begin van het tijdvak, met de details als attributen), te gebruiken in automations.
+- Staat een bestelling open voor wijzigingen, dan vergrendelt AH de boodschappenlijst. De sync pauzeert dan zonder iets te verwijderen, en het dashboard legt uit waarom.
+
+## 0.3.0
+- Nieuw dashboard dat zich aanpast aan je scherm: drie kolommen op een computer, twee op een tablet, tabbladen op een telefoon.
+- Bovenaan cijfers: te halen, geschatte kosten, bonusitems en hoeveel er al is afgevinkt.
+- Je AH-accountnaam en inlogstatus in de bovenbalk, met een menu om te synchroniseren, uit te loggen of opnieuw in te loggen.
+
+## 0.2.0
+- "Suggesties voor jou": persoonlijke AH-suggesties in het paneel, met één klik op de lijst.
+
+## 0.1.0
+- Eerste versie: paneel met AH-productzoeker en lijstbeheer, tweewegsync met een HA-to-do-lijst.

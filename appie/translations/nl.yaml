@@ -1,0 +1,21 @@
+configuration:
+  todo_entity:
+    name: To-do-lijst
+    description: De to-do-entiteit in Home Assistant die met je AH-lijst gesynchroniseerd wordt (bijv. todo.boodschappen). Maak hem aan via Instellingen > Apparaten & diensten > Integratie toevoegen > Lokale to-do.
+  sync_interval:
+    name: Sync-interval (seconden)
+    description: Hoe vaak de AH-lijst opgehaald wordt. Wijzigingen in Home Assistant worden direct doorgezet.
+  auto_match_products:
+    name: Automatisch product koppelen
+    description: Als je in Home Assistant iets toevoegt (bijv. via spraak), zoek dan het best passende AH-product en zet dat op de lijst in plaats van losse tekst.
+  bonus_notifications:
+    name: Bonusmeldingen
+    description: Melding als iets op je lijst, of iets wat je vaak koopt, in de bonus komt (één keer per aanbieding).
+  notify_service:
+    name: Meldingsdienst
+    description: Optioneel, bijv. notify.mobile_app_telefoon om meldingen ook naar je telefoon te sturen. Leeg = alleen een melding in Home Assistant.
+  week_budget:
+    name: Weekbudget (EUR)
+    description: Optioneel. Je krijgt een melding als wat je deze week bij AH uitgaf plus je boodschappenlijst hierboven komt. 0 = uit.
+  log_level:
+    name: Logniveau

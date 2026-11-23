@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "appie-mock",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["appie/app/main.py"],
+      "env": { "APPIE_MOCK": "1", "DATA_DIR": ".devdata", "PORT": "8099" },
+      "port": 8099
+    }
+  ]
+}

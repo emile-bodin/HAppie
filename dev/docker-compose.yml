@@ -1,0 +1,17 @@
+# Lokale Home Assistant Core om de add-on tegen te testen.
+# Start (in WSL):  docker compose -f dev/docker-compose.yml up -d
+# Config staat in een docker-volume (niet in OneDrive, dat botst met de database).
+services:
+  homeassistant:
+    container_name: appie-dev-ha
+    image: ghcr.io/home-assistant/home-assistant:stable
+    restart: unless-stopped
+    ports:
+      - "8123:8123"
+    environment:
+      TZ: Europe/Amsterdam
+    volumes:
+      - ha-config:/config
+
+volumes:
+  ha-config:

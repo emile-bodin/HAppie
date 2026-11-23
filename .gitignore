@@ -1,0 +1,6 @@
+.devdata/
+dev/.env
+__pycache__/
+*.pyc
+*.tmp
+.claude/settings.local.json
