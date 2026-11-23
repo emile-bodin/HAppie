@@ -1,0 +1,27 @@
+name: Idee of wens
+description: Stel een nieuwe functie of verbetering voor.
+title: "[Wens] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: probleem
+    attributes:
+      label: Wat wil je kunnen?
+      description: Beschrijf wat je mist of wat beter kan, en waarom.
+    validations:
+      required: true
+  - type: textarea
+    id: oplossing
+    attributes:
+      label: Hoe zou het eruit kunnen zien?
+      description: Een idee voor de oplossing, als je die hebt.
+  - type: textarea
+    id: alternatieven
+    attributes:
+      label: Andere manieren
+      description: Heb je al iets anders geprobeerd, bijvoorbeeld een automation?
+  - type: textarea
+    id: extra
+    attributes:
+      label: Verder nog iets?
+      description: Voorbeelden, schetsen of schermafbeeldingen.
