@@ -7,8 +7,9 @@ import tempfile
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "happie", "app"))
 os.environ["DATA_DIR"] = tempfile.mkdtemp()
 
-import main  # noqa: E402
-from ah_client import AHAuthError, ListItem  # noqa: E402
+import config  # noqa: E402
+from server.app import App  # noqa: E402
+from ah import AHAuthError, ListItem  # noqa: E402
 
 
 class FakeHA:
@@ -26,8 +27,8 @@ class FakeHA:
 
 
 async def run():
-    opts = main.load_options()
-    app = main.App(None, opts)
+    opts = config.load_options()
+    app = App(None, opts)
     ha = app.ha = FakeHA()
     app.ah._refresh_token = "x"  # pretend logged in
 
@@ -47,12 +48,12 @@ async def run():
     }
     items = [ListItem("Pesto", 2, False, 1), ListItem("Melk", 1, True, 2), ListItem("Brood", 1, False, None)]
     await app.publish_list_sensors(items)
-    assert ha.states[main.LIST_SENSOR][0] == "2"
-    assert ha.states[main.COST_SENSOR][0] == "3.99", ha.states[main.COST_SENSOR]  # 2 voor 3.99 applied
-    assert ha.states[main.COST_SENSOR][1]["bonus_saving"] == 0.39
-    assert ha.states[main.COST_SENSOR][1]["items_without_price"] == 1
-    assert ha.states[main.BONUS_SENSOR][0] == "1"
-    assert ha.states[main.BONUS_SENSOR][1]["products"] == ["Pesto (2 voor 3.99)"]
+    assert ha.states[config.LIST_SENSOR][0] == "2"
+    assert ha.states[config.COST_SENSOR][0] == "3.99", ha.states[config.COST_SENSOR]  # 2 voor 3.99 applied
+    assert ha.states[config.COST_SENSOR][1]["bonus_saving"] == 0.39
+    assert ha.states[config.COST_SENSOR][1]["items_without_price"] == 1
+    assert ha.states[config.BONUS_SENSOR][0] == "1"
+    assert ha.states[config.BONUS_SENSOR][1]["products"] == ["Pesto (2 voor 3.99)"]
 
     # --- 6. bonus notifications: once per offer
     app.sync.last_items = items

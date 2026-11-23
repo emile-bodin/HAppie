@@ -4,7 +4,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "happie", "app"))
 
-from ah_client import bonus_line  # noqa: E402
+from ah import bonus_line  # noqa: E402
 
 
 def check(price, before, qty, mech, total, hint=None):

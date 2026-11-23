@@ -13,8 +13,8 @@ import os
 import time
 from typing import Any
 
-from ah_client import AHClient, AHOrderModeError, ListItem, normalize
-from ha_client import HAClient, TodoItem
+from ah import AHClient, AHOrderModeError, ListItem, normalize
+from ha.client import HAClient, TodoItem
 
 _LOGGER = logging.getLogger(__name__)
 

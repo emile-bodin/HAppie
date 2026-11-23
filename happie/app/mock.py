@@ -9,8 +9,8 @@ import logging
 import random
 from datetime import date, timedelta
 
-from ah_client import ListItem, normalize
-from ha_client import TodoItem
+from ah import ListItem, normalize
+from ha.client import TodoItem
 
 _LOGGER = logging.getLogger(__name__)
 

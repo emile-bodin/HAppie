@@ -8,10 +8,11 @@ from datetime import date
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "happie", "app"))
 os.environ["DATA_DIR"] = tempfile.mkdtemp()
 
-import main  # noqa: E402
-import spending  # noqa: E402
-from ah_client import AHClient, ListItem  # noqa: E402
-from spending import SpendingStore, aggregate, budget_status, summary  # noqa: E402
+import config  # noqa: E402
+from server.app import App  # noqa: E402
+from services import spending  # noqa: E402
+from ah import AHClient, AHError, ListItem  # noqa: E402
+from services.spending import SpendingStore, aggregate, budget_status, summary  # noqa: E402
 
 TODAY = date(2026, 11, 20)  # Friday, ISO week 47
 
@@ -99,8 +100,8 @@ class FakeHA:
 
 
 async def test_app_sensors_and_budget_warning():
-    opts = {**main.load_options(), "week_budget": 100}
-    app = main.App(None, opts)
+    opts = {**config.load_options(), "week_budget": 100}
+    app = App(None, opts)
     ha = app.ha = FakeHA()
     app.ah._refresh_token = "x"
     today = date.today()
@@ -121,11 +122,11 @@ async def test_app_sensors_and_budget_warning():
     app._product_cache = {1: {"id": 1, "title": "Kaas", "price": 7.5, "is_bonus": False}}
     await app.publish_list_sensors([ListItem("Kaas", 2, False, 1)])
     await app.publish_spending_sensors()
-    week_state, week_attrs = ha.states[main.SPEND_WEEK_SENSOR]
+    week_state, week_attrs = ha.states[config.SPEND_WEEK_SENSOR]
     assert week_state == "90.0" and week_attrs["online"] == 80.0 and week_attrs["winkel"] == 10.0
     assert week_attrs["state_class"] == "total" and week_attrs["last_reset"].startswith(monday)
     assert week_attrs["budget_remaining"] == -5.0
-    assert ha.states[main.BUDGET_SENSOR][0] == "on"
+    assert ha.states[config.BUDGET_SENSOR][0] == "on"
 
     await app.check_budget_notification()
     await app.check_budget_notification()
@@ -137,7 +138,7 @@ async def test_app_sensors_and_budget_warning():
     await app.check_budget_notification()
     assert ha.dismissed == ["happie_budget"]
     await app.publish_spending_sensors()
-    assert ha.states[main.BUDGET_SENSOR][0] == "off"
+    assert ha.states[config.BUDGET_SENSOR][0] == "off"
 
     # over again in the same week: no second notification
     await app.publish_list_sensors([ListItem("Kaas", 3, False, 1)])
@@ -146,7 +147,7 @@ async def test_app_sensors_and_budget_warning():
 
     # receipts failing -> online only, flagged
     async def broken(since, known=None, **kw):
-        raise main.AHError("404")
+        raise AHError("404")
 
     app.ah.store_purchases = broken
     await app.refresh_spending()

@@ -7,7 +7,7 @@ import re
 import time
 from typing import Any
 
-from ah_client import normalize
+from ah import normalize
 
 
 def clean_gtin(gtin: str | None) -> str:
