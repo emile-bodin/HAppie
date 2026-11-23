@@ -20,6 +20,7 @@ jobs:
       architectures: ${{ steps.info.outputs.architectures }}
       build_matrix: ${{ steps.matrix.outputs.matrix }}
       image_name: ${{ steps.normalize.outputs.image_name }}
+      per_arch: ${{ steps.normalize.outputs.per_arch }}
       name: ${{ steps.normalize.outputs.name }}
       description: ${{ steps.normalize.outputs.description }}
       url: ${{ steps.normalize.outputs.url }}
@@ -55,7 +56,15 @@ jobs:
           name=$(unq "$NAME")
           description=$(unq "$DESCRIPTION")
           url=$(unq "$URL")
-          echo "image_name=${image##*/}" >> "$GITHUB_OUTPUT"
+          # image: ghcr.io/<owner>/{arch}-<name> (per-arch images, no manifest) or ghcr.io/<owner>/<name> (multi-arch)
+          name_part=${image##*/}
+          if [[ "$name_part" == "{arch}-"* ]]; then
+            echo "per_arch=true" >> "$GITHUB_OUTPUT"
+            name_part=${name_part#"{arch}-"}
+          else
+            echo "per_arch=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "image_name=${name_part}" >> "$GITHUB_OUTPUT"
           echo "registry_prefix=${image%/*}" >> "$GITHUB_OUTPUT"
           echo "version=${version}" >> "$GITHUB_OUTPUT"
           echo "name=${name}" >> "$GITHUB_OUTPUT"
@@ -110,10 +119,12 @@ jobs:
           skip-existing: ${{ needs.prepare.outputs.version }}
           version: ${{ needs.prepare.outputs.version }}
 
+  # Only for a multi-arch image name in config.yaml. Note: GHCR refuses (403) to create a
+  # new package for a manifest with GITHUB_TOKEN; create it once by hand and give the repo access.
   manifest:
     name: Publish multi-arch manifest
     needs: [prepare, build]
-    if: inputs.publish
+    if: inputs.publish && needs.prepare.outputs.per_arch != 'true'
     runs-on: ubuntu-latest
     permissions:
       id-token: write

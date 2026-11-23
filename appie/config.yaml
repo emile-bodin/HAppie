@@ -3,7 +3,7 @@ version: "0.6.1"
 slug: appie
 description: Albert Heijn-boodschappenlijst in Home Assistant, met sync naar de Appie-app
 url: https://github.com/emile-bodin/HAppie
-image: ghcr.io/emile-bodin/happie
+image: ghcr.io/emile-bodin/{arch}-happie
 arch:
   - aarch64
   - amd64
