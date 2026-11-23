@@ -5,7 +5,7 @@ import tempfile
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "happie", "app"))
 
-from inventory import Inventory  # noqa: E402
+from services.inventory import Inventory  # noqa: E402
 
 path = os.path.join(tempfile.mkdtemp(), "inv.json")
 inv = Inventory(path)

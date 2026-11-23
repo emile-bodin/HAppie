@@ -9,8 +9,9 @@ from datetime import date, timedelta
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "happie", "app"))
 os.environ["DATA_DIR"] = tempfile.mkdtemp()
 
-import main  # noqa: E402
-from ah_client import ListItem, parse_eta  # noqa: E402
+import config  # noqa: E402
+from server.app import App  # noqa: E402
+from ah import ListItem, parse_eta  # noqa: E402
 
 
 class Req:
@@ -31,7 +32,7 @@ def product(pid, title, price, cat="Zuivel"):
 
 
 async def run():
-    app = main.App(None, main.load_options())
+    app = App(None, config.load_options())
     today = date.today()
     summaries = [
         {"orderId": 1, "deliveryDate": (today + timedelta(days=2)).isoformat(), "state": "CONFIRMED",
@@ -95,7 +96,7 @@ async def run():
 
     app.ah.get_next_delivery = next_delivery
     await app.refresh_delivery()
-    attrs = ha.states[main.DELIVERY_SENSOR][1]
+    attrs = ha.states[config.DELIVERY_SENSOR][1]
     assert attrs["products"] == ["2× Melk", "Brood"], attrs
     assert attrs["eta_window"] == "18:40–19:40" and attrs["eta_start"].startswith(f"{today}T18:40:00")
     assert attrs["eta_end"].startswith(f"{today}T19:40:00") and "bezorger" in attrs["eta_message"]

@@ -7,9 +7,9 @@ from types import SimpleNamespace
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "happie", "app"))
 
-from ah_client import AHClient  # noqa: E402
+from ah import AHClient  # noqa: E402
 from mock import FakeHA, install_mocks  # noqa: E402
-from sync import SyncEngine  # noqa: E402
+from services.sync import SyncEngine  # noqa: E402
 
 
 def make():
@@ -92,7 +92,7 @@ async def main():
     app.ah._patch = orig
 
     # 10. order mode (412): sync pauses without touching either side
-    from ah_client import AHOrderModeError
+    from ah import AHOrderModeError
 
     before = (await names_ah(app), names_ha(app))
     orig_get = app.ah.get_list

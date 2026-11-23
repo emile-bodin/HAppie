@@ -73,14 +73,14 @@ happie/
   DOCS.md, CHANGELOG.md  gebruikersdocumentatie
   translations/          teksten bij de opties (nl/en)
   app/
-    main.py              webserver, API voor het paneel, sensoren, meldingen
-    ah_client.py         client voor de AH-API (lijst, zoeken, bestellingen, bonus, barcode, bonusberekening)
-    ha_client.py         HA via de Supervisor (to-do, states, meldingen, websocket)
-    sync.py              tweewegsync: AH-lijst ↔ HA-to-do-lijst
-    spending.py          uitgaven per week/maand en weekbudget
-    inventory.py         voorraad (JSON in /data): aantallen, barcodekoppelingen, uitgepakte bestellingen
+    main.py              opstarten: webserver en achtergrondtaken
+    config.py            paden, entiteits-ID's, intervallen, opties
+    ah/                  client voor de AH-API: inloggen, lijst, bestellingen, aankopen, producten, bonusberekening
+    ha/                  HA via de Supervisor (to-do, states, meldingen, websocket)
+    services/            sync (AH-lijst ↔ HA-to-do), uitgaven en weekbudget, voorraad
+    server/              API voor het paneel, sensoren en meldingen, per onderwerp
     mock.py              nep-AH en nep-HA voor ontwikkeling
-    static/index.html    het dashboard (één bestand, zonder build-stap)
+    static/              het dashboard: index.html, css/ en js/ (zonder build-stap)
 dev/                     lokale HA in Docker + scripts
 tests/                   automatische tests
 ```
@@ -130,14 +130,13 @@ python dev/e2e_test.py              # end-to-end tegen de lokale HA (naast run_a
 ## Bekende beperkingen
 
 - De AH-API is onofficieel. Wat met een echt account getest is, staat in de changelog.
-- Inloggen gaat nog met de hand: je kopieert de code via F12 uit het netwerkverkeer.
+- Inloggen vraagt eenmalig een bladwijzer (*HAppie-koppelen*) in een computerbrowser; lukt dat niet, dan kopieer je de code via de ontwikkelaarstools (F12).
 - Zolang een bestelling openstaat voor wijzigingen, kan de add-on de lijst niet lezen of wijzigen.
 - Live barcode scannen werkt alleen via https. **Foto maken** werkt altijd.
 
 ## Ideeën voor later
 
 - Producten direct aan een openstaande bestelling toevoegen.
-- Makkelijker inloggen, zonder F12.
 
 ## Credits
 
