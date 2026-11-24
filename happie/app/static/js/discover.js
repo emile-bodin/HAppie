@@ -14,7 +14,7 @@ function srow(p, idx, extra = "") {
                 p.is_bonus ? `<span class="badge">${esc(bonusLabel(p.bonus))}</span>` : ""].filter(Boolean);
   const action = pending.has(p.id) ? `<span class="onlist"><span class="spinner"></span></span>`
     : onList(p) ? `<span class="onlist">✓ op lijst</span>`
-    : `<button class="add" data-idx="${idx}" aria-label="Toevoegen: ${esc(p.title)}" title="Op de lijst" ${p.orderable === false ? "disabled" : ""}>+</button>`;
+    : `<button class="add" data-idx="${idx}" aria-label="Toevoegen: ${esc(p.title)}" title="Op de lijst" ${p.orderable === false ? "disabled" : ""}><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M7 2v10M2 7h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>`;
   return `<div class="srow">
     ${p.image ? `<img class="thumb" src="${esc(p.image)}" alt="" loading="lazy">` : `<div class="ph"></div>`}
     <div class="name"><span>${esc(p.title)}</span><small>${bits.join("<span>·</span>")}</small></div>

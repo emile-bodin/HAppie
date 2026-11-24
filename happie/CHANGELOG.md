@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.3
+- De +-knoppen bij Ontdekken zijn kleiner en het plusje staat precies in het midden.
+- In de tegels bovenaan staan getal, tekst en voortgangsbalk niet meer zo dicht op elkaar.
+- Uitgaven: de budgetlijn blijft zichtbaar over de staven heen; het budgetbedrag staat nu in de legenda.
+- Uitgaven: onder de grafiek een overzichtelijke kaart per week (online, winkel, aantal aankopen) en een apart blok voor het weekbudget met balk.
+
 ## 0.7.2
 - De zoekbalk valt bij het typen niet meer half onder de kop: de bovenrand blijft zichtbaar.
 - Het barcodeknopje in de zoekbalk staat weer netjes gecentreerd en heeft weer de juiste kleur.

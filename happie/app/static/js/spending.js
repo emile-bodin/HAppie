@@ -61,13 +61,15 @@ function spendChartSvg(buckets, budget) {
     const x = L + i * bw, w = Math.min(bw * 0.62, 38), bx = x + (bw - w) / 2;
     const cur = i === n - 1;
     svg += `<g data-i="${i}" class="${spendSel === i ? "sel" : ""}"><rect class="hit" x="${x}" y="${T}" width="${bw}" height="${H - T - B}" rx="6"/>`;
-    if (spendSel === i && b.total) svg += `<text class="vl" x="${x + bw / 2}" y="${Math.max(T + 10, y(b.total) - 5)}" text-anchor="middle">€${Math.round(b.total)}</text>`;
     if (b.online) svg += `<rect class="b-online" x="${bx}" y="${y(b.online)}" width="${w}" height="${y(0) - y(b.online)}" rx="2"${cur ? ' opacity=".75"' : ""}/>`;
     if (b.winkel) svg += `<rect class="b-winkel" x="${bx}" y="${y(b.online + b.winkel)}" width="${w}" height="${y(b.online) - y(b.online + b.winkel)}" rx="2"${cur ? ' opacity=".75"' : ""}/>`;
     const showLabel = bw >= 38 || (n - 1 - i) % 2 === 0;  // narrow: every other label, always the current one
     svg += (showLabel ? `<text class="al${cur ? " cur" : ""}" x="${x + bw / 2}" y="${H - 7}" text-anchor="middle">${esc(b.label)}</text>` : "") + "</g>";
   });
-  if (budget) svg += `<line class="bl" x1="${L}" x2="${W - R}" y1="${y(budget)}" y2="${y(budget)}"/><text class="bt" x="${W - R}" y="${y(budget) - 4}" text-anchor="end">budget ${euro(budget)}</text>`;
+  // budget on top of the bars, with a halo so it stays visible across them; its amount is in the legend
+  if (budget) svg += `<line class="bl-halo" x1="${L}" x2="${W - R}" y1="${y(budget)}" y2="${y(budget)}"/><line class="bl" x1="${L}" x2="${W - R}" y1="${y(budget)}" y2="${y(budget)}"/>`;
+  const sel = buckets[spendSel];
+  if (sel?.total) svg += `<text class="vl" x="${L + spendSel * bw + bw / 2}" y="${Math.max(T + 10, y(sel.total) - 5)}" text-anchor="middle">€${Math.round(sel.total)}</text>`;
   return svg + "</svg>";
 }
 const spendTipRange = (b) => spendPeriod === "week"
@@ -76,11 +78,11 @@ const spendTipRange = (b) => spendPeriod === "week"
 function spendTip(i) {
   const b = spendVisible()[i];
   if (!b) return "";
-  const range = spendTipRange(b);
-  const parts = [`online ${euro(b.online)}`];
-  if (spend.receipts_ok !== false) parts.push(`winkel ${euro(b.winkel)}`);
-  parts.push(`${b.count} ${b.count === 1 ? "aankoop" : "aankopen"}`);
-  return `<b>${esc(range)}: ${euro(b.total)}</b> <span class="muted">· ${parts.join(" · ")}</span>`;
+  const cell = (v, l, dot = "") => `<div>${dot ? `<i style="background:${dot}"></i>` : ""}<b>${v}</b><small>${l}</small></div>`;
+  const cells = [cell(euro(b.online), "Online", "var(--brand)")];
+  if (spend.receipts_ok !== false) cells.push(cell(euro(b.winkel), "Winkel", "var(--bonus)"));
+  cells.push(cell(b.count, b.count === 1 ? "Aankoop" : "Aankopen"));
+  return `<div class="tip-head"><span>${esc(spendTipRange(b))}</span><b>${euro(b.total)}</b></div><div class="tip-cells">${cells.join("")}</div>`;
 }
 function renderSpendModal() {
   const s = spend.summary, b = budgetNow(), week = spendPeriod === "week";
@@ -101,12 +103,15 @@ function renderSpendModal() {
     + shown.map((x) => `<tr><td>${esc(spendTipRange(x))}</td><td>${euro(x.total)}</td><td>${euro(x.online)}</td><td>${euro(x.winkel)}</td></tr>`).join("");
   const leg = [`<span><i style="background:var(--brand)"></i>Online bestellingen</span>`];
   if (spend.receipts_ok !== false) leg.push(`<span><i style="background:var(--bonus)"></i>Winkel (kassabonnen)</span>`);
-  if (spendPeriod === "week" && b) leg.push(`<span><i style="background:var(--danger);height:2px;vertical-align:3px"></i>Weekbudget</span>`);
+  if (spendPeriod === "week" && b) leg.push(`<span><i class="dash"></i>Weekbudget ${euro(b.budget)}</span>`);
   $("#spendLegend").innerHTML = leg.join("");
   $("#spendTip").innerHTML = spendTip(spendSel);
+  const pct = (v) => (Math.min(v, Math.max(b.budget, b.projected)) / (Math.max(b.budget, b.projected) || 1) * 100).toFixed(1) + "%";
   $("#spendBudget").innerHTML = b
-    ? `<div class="budgetbox ${b.over ? "over" : b.warn ? "warn" : ""}">Deze week <b>${euro(b.spent)}</b> + lijst ${euro(b.list)} = <b>${euro(b.projected)}</b> van ${euro(b.budget)}.
-       ${b.over ? `<b>${euro(-b.remaining)} boven budget.</b>` : `Nog ${euro(b.remaining)} over.`}</div>`
+    ? `<div class="budgetbox ${b.over ? "over" : b.warn ? "warn" : ""}">
+         <div class="bb-head"><span>Weekbudget</span><b>${b.over ? `${euro(-b.remaining)} boven budget` : `Nog ${euro(b.remaining)} over`}</b></div>
+         <div class="budgetbar"><i style="width:${pct(b.spent)}"></i><i class="list" style="width:${pct(b.list)}"></i></div>
+         <div class="bb-foot"><span>Uitgegeven ${euro(b.spent)} + lijst ${euro(b.list)}</span><span>${euro(b.projected)} van ${euro(b.budget)}</span></div></div>`
     : `<div class="muted" style="font-size:13px;margin-top:8px">Wil je zien hoeveel je deze week nog kunt uitgeven? Stel een weekbudget in bij de instellingen van HAppie (Instellingen › Apps › HAppie › Configuratie).</div>`;
   $("#spendRecent").innerHTML = (spend.recent || []).map((p) =>
     `<li><span>${esc(shortDate(p.date))}<span class="src ${p.source}">${p.source === "online" ? "online" : "winkel"}</span></span><b>${euro(p.total)}</b></li>`).join("")
