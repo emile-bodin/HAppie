@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.8.1
+- De HAppie-integratie heeft nu een eigen icoon en logo (vanaf Home Assistant 2026.3), en heet overal "HAppie" in plaats van "happie". Na de update vraagt de app om nog één herstart.
+
 ## 0.8.0
 - Nieuw: de HAppie-integratie. De app installeert die zelf in Home Assistant; na één herstart verschijnt HAppie onder Apparaten & diensten. Klik op Toevoegen.
 - Met de integratie zijn de sensoren echte entiteiten op een apparaat "HAppie": je kunt ze hernoemen, in een ruimte zetten en ze blijven bestaan na een herstart van Home Assistant. De entiteits-ID's blijven hetzelfde, dus je automations blijven werken.
