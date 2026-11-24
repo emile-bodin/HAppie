@@ -3,8 +3,8 @@ async function refresh() {
   await loadStatus();
   if (status.logged_in) await loadList().catch((e) => toast(e.message));
 }
-try { const v = localStorage.getItem("happie-view"); if (v === "inv" && !matchMedia("(max-width: 767px)").matches) document.body.dataset.view = "inv"; } catch (_) {}
-if (document.body.dataset.view !== "inv") document.body.dataset.view = document.body.dataset.tab === "inv" ? "inv" : "shop";
+try { const v = localStorage.getItem("happie-view"); if ((v === "inv" || v === "spend") && !isPhone()) document.body.dataset.view = v; } catch (_) {}
+if (!VIEW_TITLES[document.body.dataset.view]) document.body.dataset.view = viewForTab(document.body.dataset.tab);
 refresh().then(() => {
   if (!status.logged_in) return;
   loadSuggestions(); loadDelivery(); loadSpending();

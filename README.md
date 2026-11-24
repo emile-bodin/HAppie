@@ -16,7 +16,7 @@ Huidige versie: **0.7.3**. Zie de [changelog](happie/CHANGELOG.md) en de [gebrui
 - **Ontdekken:** *Voor jou* (AH-suggesties), *Vaak gekocht* (uit je laatste 8 bestellingen) en *Bonus* (je persoonlijke bonus, plus eerder gekochte producten die nu in de bonus zijn).
 - **Account:** je naam en inlogstatus. Is je sessie verlopen, dan zie je dat meteen.
 - **Bestellingen:** klik op de bezorgtegel voor alle artikelen van je bestelling, ook van eerdere bezorgingen.
-- **Uitgaven:** wat je per week of maand bij AH uitgeeft (online bestellingen en kassabonnen) als grafiek, met een optioneel weekbudget.
+- **Uitgaven:** een eigen pagina met wat je per week of maand bij AH uitgeeft (online bestellingen en kassabonnen), je week- en maandbudget, wat je het meest koopt, uitgaven per categorie en de artikelen per aankoop.
 
 **Voorraad** (switch *Boodschappen | Voorraad* in the top bar; on phones a 4th tab)
 - Add by **searching** or **scanning**, with scan modes *Kiezen* (+1 / −1 / set a count per scan), *Inruimen +1* and *Verbruiken −1* for scanning quickly in a row.
@@ -125,6 +125,7 @@ python tests/test_inventory.py      # voorraad: +/−, tellen, barcodes koppelen
 python tests/test_notifications.py  # sensoren, melding bij verlopen sessie, bonusmeldingen
 python tests/test_orders.py         # bestellingen: overzicht, artikelen, ook-op-lijst, sensorattribuut
 python tests/test_spending.py       # uitgaven per week/maand, weekbudget, budgetmelding
+python tests/test_purchase_items.py # artikelen per aankoop: meest gekocht, categorieën, bonregels koppelen
 python tests/test_integration.py    # integratie: installeren, herstartmelding, sensoren overdragen en terugnemen
 python dev/e2e_test.py              # end-to-end tegen de lokale HA (naast run_addon.py --mock-ah)
 ```

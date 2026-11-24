@@ -1,5 +1,5 @@
 name: HAppie
-version: "0.8.1"
+version: "0.9.0"
 slug: happie
 description: Albert Heijn-boodschappenlijst in Home Assistant, met sync naar de AH-app
 url: https://github.com/emile-bodin/HAppie
@@ -24,6 +24,7 @@ options:
   bonus_notifications: true
   notify_service: ""
   week_budget: 0
+  month_budget: 0
   log_level: info
 schema:
   todo_entity: str
@@ -32,4 +33,5 @@ schema:
   bonus_notifications: bool
   notify_service: str?
   week_budget: float(0,)
+  month_budget: float(0,)
   log_level: list(debug|info|warning|error)

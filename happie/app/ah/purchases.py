@@ -62,3 +62,25 @@ class PurchasesMixin:
             if done or len(receipts) < page_size or (known is not None and not new_on_page):
                 break
         return out
+
+    async def receipt_lines(self, receipt_id: str) -> list[dict[str, Any]]:
+        """Lines of an in-store receipt: [{hq_id, name, quantity, amount}].
+
+        `name` is the short receipt text ("AH KIPFILET"), `hq_id` the product's hqId (not its webshopId)
+        and `amount` what was paid for the line, before receipt-wide discounts.
+        """
+        query = ("query($id: String!) { posReceiptDetails(id: $id) "
+                 "{ products { id name quantity amount { amount } } } }")
+        data = await self._raw("POST", "/graphql", json_body={"query": query, "variables": {"id": receipt_id}})
+        if isinstance(data, dict) and data.get("errors") and not data.get("data"):
+            raise AHError(str(data["errors"][0].get("message")))
+        details = ((data or {}).get("data") or {}).get("posReceiptDetails") or {}
+        out = []
+        for p in details.get("products") or []:
+            name = str(p.get("name") or "").strip()
+            if not name:
+                continue
+            amount = (p.get("amount") or {}).get("amount")
+            out.append({"hq_id": p.get("id") or None, "name": name, "quantity": float(p.get("quantity") or 1),
+                        "amount": round(float(amount), 2) if amount is not None else None})
+        return out

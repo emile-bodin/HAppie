@@ -138,8 +138,33 @@ def install_mocks(app, mock_ha: bool = True) -> None:
     async def delivered_orders(n=8):
         return [{"orderId": 1001, "deliveryDate": "2026-11-16"}, {"orderId": 1000, "deliveryDate": "2026-11-09"}][:n]
 
+    found: dict[str, list] = {}
+
+    async def cached_search(term, size=8):
+        if term not in found:
+            found[term] = await ah.search(term, size=size)
+        return found[term]
+
     async def order_lines(order_id):
-        return [{"product": p, "quantity": 1 + n % 3} for n, p in enumerate(await ah.search("ontbijt", size=8))]
+        rnd = random.Random(str(order_id))
+        terms = rnd.sample(["ontbijt", "melk", "groente", "kaas", "brood", "fruit", "chips"], 3)
+        products = [p for t in terms for p in (await cached_search(t))[:rnd.randint(2, 5)]]
+        return [{"product": p, "quantity": 1 + n % 3} for n, p in enumerate(products)]
+
+    receipt_texts = ["AH HALFVOLLE", "AH BANANEN", "AH KIPFILET", "AH EIEREN", "TONY CHOCO", "AH CROISSANT",
+                     "SPA ROOD", "STATIEGELD", "AH TAS PAPIER", "BAKKERIJ DIV"]
+    unknown = {"STATIEGELD", "AH TAS PAPIER", "BAKKERIJ DIV"}
+
+    async def receipt_lines(receipt_id):
+        rnd = random.Random(receipt_id)
+        return [{"hq_id": 1000 + receipt_texts.index(t), "name": t, "quantity": 1.0, "amount": round(rnd.uniform(0.25, 6), 2)}
+                for t in rnd.sample(receipt_texts, rnd.randint(2, 6))]
+
+    async def product_by_hq_id(hq_id, name):
+        if name in unknown:
+            return None, "Bakkerij" if "BAKKERIJ" in name else None
+        hits = await cached_search(name.replace("AH ", ""), size=1)
+        return (hits[0], None) if hits else (None, None)
 
     async def online_purchases():
         return [p for p in fake_purchases() if p["source"] == "online"]
@@ -167,6 +192,8 @@ def install_mocks(app, mock_ha: bool = True) -> None:
     ah.order_summaries = order_summaries
     ah.online_purchases = online_purchases
     ah.store_purchases = store_purchases
+    ah.receipt_lines = receipt_lines
+    ah.product_by_hq_id = product_by_hq_id
     ah.delivered_orders = delivered_orders
     ah.order_lines = mock_order_lines
     ah.frequent_products = frequent_products

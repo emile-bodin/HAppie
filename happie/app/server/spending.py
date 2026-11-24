@@ -40,6 +40,7 @@ class SpendingMixin:
     def spending_overview(self) -> dict[str, Any]:
         s = spending_summary(self.spending.list())
         s["budget"] = budget_status(s["this_week"], self._list_cost, float(self.options.get("week_budget") or 0))
+        s["month_budget"] = budget_status(s["this_month"], self._list_cost, float(self.options.get("month_budget") or 0))
         return s
 
     @staticmethod
@@ -111,6 +112,6 @@ class SpendingMixin:
             "summary": self.spending_overview(),
             "receipts_ok": self.spending.receipts_ok,
             "updated_at": self.spending.updated_at or None,
-            "recent": sorted(purchases, key=lambda p: p["date"], reverse=True)[:8],
+            "recent": sorted(purchases, key=lambda p: p["date"], reverse=True)[:300],
             "sensors": sensors if self.ha else [],
         })
