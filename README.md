@@ -4,7 +4,7 @@ Een Home Assistant-add-on waarmee je je **Albert Heijn-boodschappenlijst** vanui
 
 > ⚠️ Gebruikt de onofficiële API van de AH-app. AH kan die zonder aankondiging wijzigen.
 
-Huidige versie: **0.7.0**. Zie de [changelog](happie/CHANGELOG.md) en de [gebruikersdocumentatie](happie/DOCS.md).
+Huidige versie: **0.7.3**. Zie de [changelog](happie/CHANGELOG.md) en de [gebruikersdocumentatie](happie/DOCS.md).
 
 ## Functies
 
