@@ -37,4 +37,5 @@ def setup_routes(web_app: web.Application, app: App) -> None:
     r.add_post("/api/inventory/to-list", app.inv_to_list)
     r.add_get("/api/spending", app.spending_api)
     r.add_post("/api/sync", app.sync_now)
+    r.add_get("/api/entities", app.entities_api)
     r.add_static("/static", STATIC_DIR)

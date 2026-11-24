@@ -8,7 +8,16 @@ from typing import Any
 
 DATA_DIR = Path(os.environ.get("DATA_DIR", "/data"))
 STATIC_DIR = Path(__file__).parent / "static"
+# The bundled HAppie integration, installed into HA's config folder (map: homeassistant_config)
+INTEGRATION_SRC = Path(__file__).parent / "custom_components" / "happie"
+HA_CONFIG_DIR = Path(os.environ.get("HA_CONFIG_DIR", "/homeassistant"))
+INTEGRATION_NOTIFICATION = "happie_integration"
 INGRESS_IP = "172.30.32.2"
+# Home Assistant Core on the Supervisor network; the companion integration polls from there
+CORE_IP = os.environ.get("HAPPIE_CORE_IP", "172.30.32.1")
+INTEGRATION_HEADER = "X-HAppie-Integration"
+INTEGRATION_TIMEOUT = 300  # seconds without a poll before the app sets the sensors itself again
+ENTITIES_API = 1  # version of /api/entities, bump on incompatible changes
 DELIVERY_SENSOR = "sensor.happie_volgende_bezorging"
 DELIVERY_REFRESH = 300  # seconds
 LIST_SENSOR = "sensor.happie_lijst_items"

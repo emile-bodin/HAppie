@@ -66,7 +66,7 @@ class OrdersMixin:
                     _LOGGER.debug("Producten van bestelling ophalen mislukt: %s", err)
             state = (d or {}).get("start_utc") or ((d or {}).get("date") and f"{d['date']}T00:00:00+01:00") or "unknown"
             try:
-                await self.ha.set_state(DELIVERY_SENSOR, state, attrs)
+                await self._set_state_if_changed(DELIVERY_SENSOR, state, attrs)
             except Exception as err:  # noqa: BLE001
                 _LOGGER.warning("Sensor %s bijwerken mislukt: %s", DELIVERY_SENSOR, err)
         return self._delivery

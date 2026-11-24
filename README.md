@@ -39,6 +39,8 @@ Huidige versie: **0.7.3**. Zie de [changelog](happie/CHANGELOG.md) en de [gebrui
   | `binary_sensor.happie_boven_budget` | uitgegeven + lijst boven je weekbudget |
   | `sensor.happie_voorraad` | aantal producten op voorraad |
 
+  De app installeert zelf een kleine integratie in Home Assistant (`custom_components/happie`). Daarmee worden dit echte entiteiten op een apparaat *HAppie*, met dezelfde entiteits-ID's. Zonder die integratie zet de app ze zelf met `set_state`.
+
 - Meldingen: als je AH-sessie verloopt, als iets op je lijst of iets wat je vaak koopt in de bonus komt (één keer per aanbieding), en als je boven je weekbudget komt (één keer per week). Met `notify_service` gaan ze ook naar je telefoon.
 
 ## Installeren
@@ -77,6 +79,7 @@ happie/
     ha/                  HA via de Supervisor (to-do, states, meldingen, websocket)
     services/            sync (AH-lijst ↔ HA-to-do), uitgaven en weekbudget, voorraad
     server/              API voor het paneel, sensoren en meldingen, per onderwerp
+    custom_components/happie/   de HAppie-integratie; de app installeert die in HA en geeft de sensoren eraan over
     mock.py              nep-AH en nep-HA voor ontwikkeling
     static/              het dashboard: index.html, css/ en js/ (zonder build-stap)
 dev/                     lokale HA in Docker + scripts
@@ -122,6 +125,7 @@ python tests/test_inventory.py      # voorraad: +/−, tellen, barcodes koppelen
 python tests/test_notifications.py  # sensoren, melding bij verlopen sessie, bonusmeldingen
 python tests/test_orders.py         # bestellingen: overzicht, artikelen, ook-op-lijst, sensorattribuut
 python tests/test_spending.py       # uitgaven per week/maand, weekbudget, budgetmelding
+python tests/test_integration.py    # integratie: installeren, herstartmelding, sensoren overdragen en terugnemen
 python dev/e2e_test.py              # end-to-end tegen de lokale HA (naast run_addon.py --mock-ah)
 ```
 

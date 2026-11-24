@@ -16,6 +16,7 @@ from config import BONUS_CHECK_INTERVAL, DATA_DIR, DELIVERY_REFRESH, SPENDING_RE
 from ha.client import HAClient
 from server.account import AccountMixin
 from server.discover import DiscoverMixin
+from server.integration import IntegrationMixin
 from server.inventory import InventoryMixin
 from server.orders import OrdersMixin as AppOrdersMixin
 from server.shopping_list import ListMixin
@@ -27,7 +28,7 @@ from services.sync import SyncEngine
 _LOGGER = logging.getLogger("happie")
 
 
-class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin, InventoryMixin):
+class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin, InventoryMixin, IntegrationMixin):
     """State shared by all parts of the app; the API handlers live in the mixins."""
 
     def __init__(self, session: aiohttp.ClientSession, options: dict[str, Any]) -> None:
@@ -48,6 +49,9 @@ class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin,
         self._bonus_checked_at: float = 0
         self._login_notified = False
         self._published: dict[str, Any] = {}
+        self.entities: dict[str, dict[str, Any]] = {}  # everything published, served to the integration
+        self._restart_pending = False  # integration copied, HA not restarted yet
+        self._load_integration_state()
         self._sync_event = asyncio.Event()
         self.inventory = Inventory(str(DATA_DIR / "inventory.json"))
         self.inv_lock = asyncio.Lock()
@@ -93,6 +97,7 @@ class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin,
     async def after_sync(self) -> None:
         if not self.ha:
             return
+        await self.check_integration_handover()
         await self.check_login_notification()
         if self.sync.last_exc is None and not self.sync.order_mode and self.sync.last_items is not None:
             await self.publish_list_sensors(self.sync.last_items)
@@ -120,6 +125,9 @@ class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin,
                 _LOGGER.debug("Productinfo ophalen mislukt: %s", err)
 
     async def _set_state_if_changed(self, entity_id: str, state: Any, attrs: dict[str, Any]) -> None:
+        self.entities[entity_id] = {"state": str(state), "attributes": attrs}
+        if self.integration_active:
+            return  # the HAppie integration owns the entities now
         key = json.dumps([state, attrs], sort_keys=True, default=str)
         if self._published.get(entity_id) == key:
             return
