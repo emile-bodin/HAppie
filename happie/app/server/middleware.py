@@ -1,4 +1,4 @@
-"""aiohttp middlewares: ingress-only access, JSON errors, no stale panel files."""
+"""aiohttp middlewares: ingress-only access (plus read-only sensors for HA Core), JSON errors, no stale panel files."""
 from __future__ import annotations
 
 import logging
@@ -7,7 +7,7 @@ import os
 from aiohttp import web
 
 from ah.errors import AHAuthError, AHError, AHOrderModeError
-from config import INGRESS_IP
+from config import CORE_IP, INGRESS_IP
 
 _LOGGER = logging.getLogger("happie")
 
@@ -15,7 +15,9 @@ _LOGGER = logging.getLogger("happie")
 @web.middleware
 async def ingress_only(request: web.Request, handler):
     if os.environ.get("SUPERVISOR_TOKEN") and request.remote not in (INGRESS_IP, "127.0.0.1", "::1"):
-        raise web.HTTPForbidden()
+        # HA Core itself may only read the sensor values (for the HAppie integration)
+        if not (request.remote == CORE_IP and request.method == "GET" and request.path == "/api/entities"):
+            raise web.HTTPForbidden()
     return await handler(request)
 
 

@@ -10,7 +10,7 @@ _Je Albert Heijn-boodschappenlijst in Home Assistant, met sync naar de AH-app._
 - **Bestellingen**: je volgende bezorging met verwachte bezorgtijd en alle artikelen.
 - **Uitgaven** per week en maand uit bestellingen en kassabonnen, met een optioneel weekbudget.
 - **Voorraad** bijhouden, en een bezorging in één keer uitpakken.
-- **Sensoren en meldingen**, onder andere voor de bezorging, je lijst, bonus en uitgaven.
+- **Sensoren en meldingen**, onder andere voor de bezorging, je lijst, bonus en uitgaven. De app installeert zelf een integratie, zodat de sensoren echte entiteiten op een apparaat *HAppie* worden.
 
 > Gebruikt de onofficiële API van de AH-app. AH kan die zonder aankondiging wijzigen. HAppie is geen product van Albert Heijn.
 

@@ -1,0 +1,54 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "HAppie",
+        "description": "Address of the HAppie app. Home Assistant usually finds the app by itself; only fill this in if it doesn't. For an app installed from a local folder it is http://local-happie:8099.",
+        "data": {
+          "url": "URL"
+        }
+      },
+      "hassio_confirm": {
+        "title": "HAppie",
+        "description": "The HAppie app was found. Add its sensors as real entities? They keep the same entity IDs."
+      }
+    },
+    "error": {
+      "cannot_connect": "Can't reach the HAppie app. Is it running?"
+    },
+    "abort": {
+      "already_configured": "HAppie is already configured",
+      "single_instance_allowed": "HAppie is already configured"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "lijst_items": {
+        "name": "Shopping list"
+      },
+      "geschatte_kosten": {
+        "name": "Estimated cost"
+      },
+      "bonus_items": {
+        "name": "Bonus items on list"
+      },
+      "volgende_bezorging": {
+        "name": "Next delivery"
+      },
+      "voorraad": {
+        "name": "Inventory"
+      },
+      "uitgaven_week": {
+        "name": "Spending this week"
+      },
+      "uitgaven_maand": {
+        "name": "Spending this month"
+      }
+    },
+    "binary_sensor": {
+      "boven_budget": {
+        "name": "Over week budget"
+      }
+    }
+  }
+}

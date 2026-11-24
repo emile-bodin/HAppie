@@ -46,6 +46,8 @@ async def main() -> None:
             tasks.append(asyncio.create_task(app.ha.listen(lambda: _set(app))))
         app.request_sync()
         await app.publish_inventory_sensor()
+        await app.install_integration()
+        await app.announce_integration()
         await asyncio.gather(*tasks)
 
 

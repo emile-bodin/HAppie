@@ -1,5 +1,5 @@
 name: HAppie
-version: "0.7.3"
+version: "0.8.0"
 slug: happie
 description: Albert Heijn-boodschappenlijst in Home Assistant, met sync naar de AH-app
 url: https://github.com/emile-bodin/HAppie
@@ -12,6 +12,11 @@ ingress: true
 panel_icon: mdi:cart
 panel_title: HAppie
 homeassistant_api: true
+discovery:
+  - happie
+map:
+  - type: homeassistant_config
+    read_only: false
 options:
   todo_entity: todo.boodschappen
   sync_interval: 60

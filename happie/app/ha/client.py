@@ -120,6 +120,15 @@ class HAClient:
             # phones don't render markdown
             await self._service("notify", name, {"title": title, "message": message.replace("**", "")})
 
+    async def announce(self, service: str, config: dict[str, Any]) -> None:
+        """Supervisor discovery: HA offers to set up the integration `service` with `config`."""
+        async with self._session.post(
+            "http://supervisor/discovery", json={"service": service, "config": config},
+            headers=self._headers(), timeout=aiohttp.ClientTimeout(total=10),
+        ) as resp:
+            if resp.status >= 400:
+                raise HAError(f"discovery gaf {resp.status}: {(await resp.text())[:200]}")
+
     async def dismiss(self, notification_id: str) -> None:
         await self._service("persistent_notification", "dismiss", {"notification_id": notification_id})
 

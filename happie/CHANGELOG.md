@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.8.0
+- Nieuw: de HAppie-integratie. De app installeert die zelf in Home Assistant; na één herstart verschijnt HAppie onder Apparaten & diensten. Klik op Toevoegen.
+- Met de integratie zijn de sensoren echte entiteiten op een apparaat "HAppie": je kunt ze hernoemen, in een ruimte zetten en ze blijven bestaan na een herstart van Home Assistant. De entiteits-ID's blijven hetzelfde, dus je automations blijven werken.
+- Lange lijsten in de attributen (items, producten) komen niet meer in de geschiedenisdatabase.
+- De app vraagt nu schrijftoegang tot de configuratiemap van Home Assistant, om de integratie te installeren.
+
 ## 0.7.3
 - De +-knoppen bij Ontdekken zijn kleiner en het plusje staat precies in het midden.
 - In de tegels bovenaan staan getal, tekst en voortgangsbalk niet meer zo dicht op elkaar.

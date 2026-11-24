@@ -1,0 +1,54 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "HAppie",
+        "description": "Adres van de HAppie-app. Meestal vindt Home Assistant de app vanzelf; vul dit alleen in als dat niet gebeurt. Bij een app die je uit een eigen map hebt geïnstalleerd is het http://local-happie:8099.",
+        "data": {
+          "url": "URL"
+        }
+      },
+      "hassio_confirm": {
+        "title": "HAppie",
+        "description": "De HAppie-app is gevonden. Wil je de sensoren als echte entiteiten toevoegen? Ze houden dezelfde entiteits-ID's."
+      }
+    },
+    "error": {
+      "cannot_connect": "Kan de HAppie-app niet bereiken. Draait de app?"
+    },
+    "abort": {
+      "already_configured": "HAppie is al ingesteld",
+      "single_instance_allowed": "HAppie is al ingesteld"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "lijst_items": {
+        "name": "Boodschappenlijst"
+      },
+      "geschatte_kosten": {
+        "name": "Geschatte kosten"
+      },
+      "bonus_items": {
+        "name": "Bonusitems op lijst"
+      },
+      "volgende_bezorging": {
+        "name": "Volgende bezorging"
+      },
+      "voorraad": {
+        "name": "Voorraad"
+      },
+      "uitgaven_week": {
+        "name": "Uitgaven deze week"
+      },
+      "uitgaven_maand": {
+        "name": "Uitgaven deze maand"
+      }
+    },
+    "binary_sensor": {
+      "boven_budget": {
+        "name": "Boven weekbudget"
+      }
+    }
+  }
+}

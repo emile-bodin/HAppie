@@ -61,6 +61,19 @@ Daarna ververst de add-on de token zelf. Je wachtwoord wordt nooit opgeslagen.
 | `sensor.happie_uitgaven_maand` | Uitgegeven deze maand (EUR); `online`, `winkel` en `previous` als attributen |
 | `binary_sensor.happie_boven_budget` | `on` als uitgegeven deze week + je lijst boven `week_budget` komt (alleen met een budget) |
 
+## Integratie
+
+De app installeert bij het starten de **HAppie-integratie** in Home Assistant (in `custom_components/happie`). Daarvoor heeft hij schrijftoegang tot de configuratiemap. Je hoeft niets te downloaden of via HACS te installeren.
+
+1. Na de eerste start krijg je een melding: **herstart Home Assistant** (Instellingen › Systeem › Herstarten).
+2. Daarna staat HAppie onder **Instellingen › Apparaten & diensten** als gevonden. Klik op **Toevoegen**.
+
+Wat het oplevert: dezelfde sensoren als hierboven, met dezelfde entiteits-ID's, maar nu als echte entiteiten op een apparaat *HAppie*. Je kunt ze hernoemen en in een ruimte zetten, en ze blijven bestaan als Home Assistant herstart. Zonder de integratie maakt de app de sensoren zelf, zoals voorheen.
+
+- Bij een update van de app wordt de integratie ook bijgewerkt; je krijgt dan opnieuw een melding om te herstarten.
+- Verschijnt HAppie niet vanzelf, voeg dan de integratie *HAppie* zelf toe en vul het adres van de app in: `http://<slug>-happie:8099`, waarbij `<slug>` de code is die in de adresbalk staat op de pagina van de app (`.../hassio/addon/<slug>_happie`). Bij een app uit een eigen map is het `http://local-happie:8099`.
+- Weghalen: verwijder de integratie onder Apparaten & diensten. Na vijf minuten maakt de app de sensoren weer zelf. Verwijder je de app, haal dan ook de map `custom_components/happie` weg en herstart.
+
 ## Bestellingen
 
 Klik op de bezorgtegel bovenaan voor je bestelling:
