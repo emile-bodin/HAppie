@@ -34,6 +34,9 @@ SPEND_MONTH_SENSOR = "sensor.happie_uitgaven_maand"
 BUDGET_SENSOR = "binary_sensor.happie_boven_budget"
 BUDGET_NOTIFICATION = "happie_budget"
 SPENDING_REFRESH = 6 * 3600
+ITEMS_HISTORY_DAYS = 365  # articles are fetched for purchases this far back
+ITEMS_BATCH = 20  # purchases fetched per round (saved after each round)
+ITEMS_RETRY = 6 * 3600  # wait this long before trying a purchase again that gave no articles
 ORDER_LINES_TTL = 300  # open orders can still change; delivered ones are cached for good
 DONE_STATES = ("DELIVERED", "COMPLETED")
 CANCELLED_STATES = ("CANCELLED", "CANCELED")
@@ -47,6 +50,7 @@ def load_options() -> dict[str, Any]:
         "bonus_notifications": True,
         "notify_service": "",
         "week_budget": 0,
+        "month_budget": 0,
         "log_level": "info",
     }
     try:

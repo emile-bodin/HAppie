@@ -32,7 +32,7 @@ async function loadStatus() {
   $("#loginView").classList.toggle("hidden", !showLogin);
   $("#loginTitle").textContent = st === "expired" ? "Je AH-sessie is verlopen" : "Koppel je Albert Heijn-account";
   $("#loginCancel").classList.toggle("hidden", !status.logged_in);
-  for (const id of ["#stats", "#grid", "#tabbar", "#invStats", "#invGrid", "#viewSwitch"]) $(id).classList.toggle("hidden", showLogin);
+  for (const id of ["#stats", "#grid", "#tabbar", "#invStats", "#invGrid", "#spendPage", "#viewSwitch"]) $(id).classList.toggle("hidden", showLogin);
   $("#loginLink").href = status.login_url;
 
   const b = [];

@@ -16,6 +16,7 @@
   <div class="viewswitch hidden" id="viewSwitch" role="tablist">
     <button data-view="shop" class="active">Boodschappen</button>
     <button data-view="inv">Voorraad</button>
+    <button data-view="spend">Uitgaven</button>
   </div>
   <button class="chip hidden" id="syncChip" title="Nu synchroniseren"><span class="dot" id="syncDot"></span><span class="txt" id="syncTxt"></span>
     <svg id="syncIco" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 4V1L8 5l4 4V6a6 6 0 0 1 6 6 6 6 0 0 1-.7 2.8l1.46 1.46A8 8 0 0 0 20 12a8 8 0 0 0-8-8m0 14a6 6 0 0 1-6-6c0-1 .25-1.97.7-2.8L5.24 7.74A8 8 0 0 0 4 12a8 8 0 0 0 8 8v3l4-4-4-4z"/></svg>
@@ -207,6 +208,53 @@
       <div class="body" id="invList"></div>
     </section>
   </main>
+
+  <!-- Uitgaven -->
+  <section class="spendpage hidden" id="spendPage" aria-labelledby="spTitle">
+    <div class="sp-head">
+      <h2 id="spTitle">Uitgaven</h2>
+      <div class="sp-tools">
+        <div class="seg" id="spendTabs" role="tablist"><button data-p="week" class="active">Per week</button><button data-p="month">Per maand</button></div>
+        <div class="sp-nav"><button id="spPrev" aria-label="Vorige periode">‹</button><span id="spNavLbl"></span><button id="spNext" aria-label="Volgende periode">›</button></div>
+        <button class="btn ghost sm" id="spendRefresh" title="Opnieuw ophalen bij AH">↻ Bijwerken</button>
+      </div>
+    </div>
+    <div class="sp-fresh" id="spendFresh"></div>
+    <div class="sp-kpis" id="spendKpis"></div>
+    <div class="sp-grid">
+      <section class="panel sp-chart">
+        <header><h2 id="spChartTitle">Uitgaven per week</h2></header>
+        <div class="body">
+          <div class="chart" id="spendChart" aria-describedby="spendTable"><div class="hint"><span class="spinner"></span></div></div>
+          <div class="legend" id="spendLegend"></div>
+          <div class="chart-tip" id="spendTip" aria-live="polite"></div>
+          <table class="sr-only" id="spendTable"></table>
+        </div>
+      </section>
+      <section class="panel sp-budget">
+        <header><h2>Budget</h2><span class="muted sp-sub" id="spBudgetFor"></span></header>
+        <div class="body" id="spendBudget"></div>
+      </section>
+      <section class="panel sp-top">
+        <header><h2>Meest gekocht</h2>
+          <div class="seg sm" id="spRange"><button data-r="3">3 mnd</button><button data-r="12" class="active">12 mnd</button></div></header>
+        <div class="body"><ul class="sp-prod" id="spTop"><li class="hint"><span class="spinner"></span></li></ul><div class="sp-note" id="spItemsNote"></div></div>
+      </section>
+      <section class="panel sp-cats">
+        <header><h2>Per categorie</h2><span class="muted sp-sub" id="spCatsFor"></span></header>
+        <div class="body" id="spCats"></div>
+      </section>
+      <section class="panel sp-purch">
+        <header><h2>Aankopen</h2>
+          <div class="seg sm" id="spSrc"><button data-s="all" class="active">Alle</button><button data-s="online">Online</button><button data-s="winkel">Winkel</button></div></header>
+        <div class="body"><div id="spendRecent"></div><div class="sp-note" id="spendNote"></div></div>
+      </section>
+      <section class="panel sp-ins">
+        <header><h2>Inzichten</h2></header>
+        <div class="body"><div class="sp-insights" id="spInsights"></div><div class="sp-heat-lbl">Gemiddeld per weekdag, laatste 12 weken</div><div class="sp-heat" id="spHeat"></div></div>
+      </section>
+    </div>
+  </section>
 </div>
 
 <nav class="tabbar hidden" id="tabbar">
@@ -222,6 +270,9 @@
   <button data-tab="inv">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2m0 2v6h10V4zm0 8v8h10v-8zm1-6h2v3H8zm0 8h2v3H8z"/></svg>
     Voorraad</button>
+  <button data-tab="spend">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21v-8h4v8zm7 0V3h4v18zm7 0v-12h4v12z"/></svg>
+    Uitgaven</button>
 </nav>
 
 <div class="modal hidden" id="orderModal" role="dialog" aria-modal="true" aria-labelledby="orderTitle">
@@ -232,24 +283,6 @@
     <div id="orderSum"></div>
     <div class="ordertools hidden" id="orderTools"><input type="search" id="orderFilter" placeholder="Zoek in deze bestelling…"><span class="muted" id="orderCount" style="font-size:13px;white-space:nowrap"></span></div>
     <div id="orderBody"><div class="hint"><span class="spinner"></span></div></div>
-  </div>
-</div>
-
-<div class="modal hidden" id="spendModal" role="dialog" aria-modal="true" aria-labelledby="spendTitle">
-  <div class="box wide">
-    <header><h3 id="spendTitle">Uitgaven bij AH</h3>
-      <div style="display:flex;gap:6px;align-items:center"><button class="btn ghost sm" id="spendRefresh" title="Opnieuw ophalen bij AH">↻</button><button class="del" id="spendClose" aria-label="Sluiten">✕</button></div></header>
-    <div class="seg" id="spendTabs" role="tablist" style="margin:0 0 12px"><button data-p="week" class="active">Per week</button><button data-p="month">Per maand</button></div>
-    <div class="spend-kpis" id="spendKpis"></div>
-    <div class="spend-fresh" id="spendFresh"></div>
-    <div class="chart" id="spendChart" aria-describedby="spendTable"><div class="hint"><span class="spinner"></span></div></div>
-    <div class="legend" id="spendLegend"></div>
-    <div class="chart-tip" id="spendTip" aria-live="polite"></div>
-    <table class="sr-only" id="spendTable"></table>
-    <div id="spendBudget"></div>
-    <h4 style="margin:16px 0 0;font-size:14px">Laatste aankopen</h4>
-    <ul class="recent" id="spendRecent"></ul>
-    <div class="muted" id="spendNote" style="font-size:12px;margin-top:10px"></div>
   </div>
 </div>
 

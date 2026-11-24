@@ -19,16 +19,19 @@ from server.discover import DiscoverMixin
 from server.integration import IntegrationMixin
 from server.inventory import InventoryMixin
 from server.orders import OrdersMixin as AppOrdersMixin
+from server.purchase_items import PurchaseItemsMixin
 from server.shopping_list import ListMixin
 from server.spending import SpendingMixin
 from services.inventory import Inventory
+from services.purchase_items import PurchaseItems
 from services.spending import SpendingStore
 from services.sync import SyncEngine
 
 _LOGGER = logging.getLogger("happie")
 
 
-class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin, InventoryMixin, IntegrationMixin):
+class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin, PurchaseItemsMixin, InventoryMixin,
+          IntegrationMixin):
     """State shared by all parts of the app; the API handlers live in the mixins."""
 
     def __init__(self, session: aiohttp.ClientSession, options: dict[str, Any]) -> None:
@@ -60,6 +63,9 @@ class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin,
         self._list_cost: float | None = None
         self._order_lines: dict[str, tuple[float, bool, list[dict[str, Any]]]] = {}
         self._spending_stale = False
+        self.items = PurchaseItems(str(DATA_DIR / "purchase_items.json"))
+        self._items_task: asyncio.Task | None = None
+        self._items_failed: dict[str, float] = {}
 
     # -------------------------------------------------------- background
     def request_sync(self) -> None:
@@ -88,6 +94,8 @@ class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin,
                     await self.refresh_spending()
                 except Exception as err:  # noqa: BLE001
                     _LOGGER.warning("Uitgaven ophalen mislukt: %s", err)
+            if self.spending.updated_at:
+                self.start_items_refresh()
             try:
                 await self.after_sync()
             except Exception as err:  # noqa: BLE001

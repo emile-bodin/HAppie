@@ -119,6 +119,21 @@ class ProductsMixin:
             raise
         return parse_product(data) if isinstance(data, dict) and data.get("webshopId") else None
 
+    async def product_by_hq_id(self, hq_id: int | None, name: str) -> tuple[dict[str, Any] | None, str | None]:
+        """Find the webshop product of a receipt line: search its receipt text and match the hqId.
+
+        Returns (product or None, the category of the best search hit as a guess when nothing matched).
+        """
+        data = await self._raw(
+            "GET", "/mobile-services/product/search/v2",
+            params={"query": name, "page": 0, "size": 30, "sortOn": "RELEVANCE"}, auth="any",
+        )
+        hits = (data or {}).get("products") or []
+        match = next((p for p in hits if hq_id and p.get("hqId") == hq_id), None)
+        if match:
+            return parse_product(match), None
+        return None, (hits[0].get("mainCategory") if hits else None)
+
     async def products_by_id(self, ids: list[int]) -> list[dict[str, Any]]:
         if not ids:
             return []

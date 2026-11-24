@@ -9,6 +9,13 @@
       "port": 8099
     },
     {
+      "name": "happie-mock-spend",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["happie/app/main.py"],
+      "env": { "HAPPIE_MOCK": "1", "DATA_DIR": ".devdata/mock-spend", "PORT": "8102" },
+      "port": 8102
+    },
+    {
       "name": "happie-logintest",
       "runtimeExecutable": "python",
       "runtimeArgs": ["happie/app/main.py"],

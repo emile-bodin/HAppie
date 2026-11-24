@@ -46,6 +46,7 @@ Daarna ververst de add-on de token zelf. Je wachtwoord wordt nooit opgeslagen.
 | `bonus_notifications` | Melding als iets op je lijst, of iets wat je vaak koopt, in de bonus komt. Je krijgt per aanbieding één melding. |
 | `notify_service` | Optioneel, bijv. `notify.mobile_app_telefoon`. Dan gaan meldingen ook naar je telefoon. |
 | `week_budget` | Optioneel weekbudget in euro (0 = uit). Je krijgt een waarschuwing als wat je deze week uitgaf plus je lijst erboven komt. |
+| `month_budget` | Optioneel maandbudget in euro (0 = uit). De pagina Uitgaven toont dan per maand hoeveel je nog over hebt, met je lijst erbij. |
 | `log_level` | Hoeveel er gelogd wordt. |
 
 ## Sensoren
@@ -85,10 +86,20 @@ Klik op de bezorgtegel bovenaan voor je bestelling:
 
 ## Uitgaven
 
-Bovenaan staat de tegel *Uitgegeven deze week*. Klik erop voor het overzicht: een staafgrafiek per week of per maand (online bestellingen en winkelaankopen apart), je gemiddelde per week en je laatste aankopen.
+Kies bovenaan **Uitgaven** (op een telefoon het tabblad *Uitgaven*), of klik op de tegel *Uitgegeven deze week*. Je ziet:
+
+- **Grafiek** per week of per maand, met online bestellingen en winkelaankopen apart, je gemiddelde, je budget en wat er nu op je lijst staat. Klik op een staaf of gebruik ‹ › om de cijfers van een eerdere periode te zien.
+- **Budget**: hoeveel je nog over hebt met je lijst erbij, en voor de laatste 8 weken of maanden of je binnen je budget bleef.
+- **Meest gekocht** in de laatste 3 of 12 maanden, online en in de winkel samen: hoe vaak, ongeveer om de hoeveel dagen, of het in de bonus is en of het misschien bijna op is. Met **+ Lijst** zet je het op je lijst.
+- **Per categorie**: waar je geld naartoe gaat. Klik op een categorie voor de producten. Bonregels die niet bij een AH-product horen (statiegeld, tasjes, "bakkerij div") staan onder *Niet herkend*. Met **Koppel** kies je zelf een categorie; HAppie onthoudt dat voor dezelfde bonregel.
+- **Aankopen**: al je bezorgingen en kassabonnen. Klik erop voor de artikelen.
+- **Inzichten**: een prognose voor de maand, wat winkelbezoeken per week kosten, wat een bezorging gemiddeld kost en op welke dag je het meest uitgeeft.
+
+Bedragen per artikel: op een kassabon staat wat je per artikel betaald hebt. Bij een online bestelling geeft AH alleen het totaal, dus daar is het bedrag per artikel een schatting met de huidige prijs (met ± ervoor).
 
 - **Bronnen**: afgeleverde online bestellingen (het betaalde totaal) en je kassabonnen uit de winkel, net als in de AH-app onder *Kassabonnen*. Daarvoor moet je bonuskaart aan je account gekoppeld zijn. Lukt het ophalen van kassabonnen niet, dan zie je alleen online bestellingen en staat dat in het overzicht.
-- **Verversen**: elke 6 uur, direct nadat een bestelling is afgeleverd, en met ↻ in het overzicht. De add-on bewaart ruim een jaar aan aankopen.
+- **Verversen**: elke 6 uur, direct nadat een bestelling is afgeleverd, en met *Bijwerken* op de pagina. De app bewaart ruim een jaar aan aankopen. De artikelen van die aankopen haalt hij op de achtergrond op, elke aankoop één keer; de eerste keer duurt dat een paar minuten.
+- **Maandbudget**: zet `month_budget` in de configuratie. De pagina Uitgaven toont het bij *Per maand*.
 - **Weekbudget**: zet `week_budget` in de configuratie. De tegel toont dan hoeveel je nog over hebt als je je lijst erbij optelt. Kom je erboven, dan zie je een waarschuwing in het paneel en krijg je één melding per week (ook op je telefoon met `notify_service`). De melding verdwijnt weer als je eronder zakt.
 
 ## Voorraad

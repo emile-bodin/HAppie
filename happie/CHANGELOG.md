@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.9.0
+- Nieuw: een eigen pagina Uitgaven (bovenaan naast Boodschappen en Voorraad, op een telefoon een vijfde tabblad). De tegel *Uitgegeven deze week* opent hem nu, in plaats van het venster van eerst.
+- Per week of maand: grafiek met online en winkel, je gemiddelde, wat er op je lijst staat en je budget. Klik op een staaf of gebruik ‹ › om een eerdere periode te bekijken.
+- Budget: hoeveel er nog over is met je lijst erbij, en per week of maand of je binnen je budget bleef. Nieuwe optie: een maandbudget (`month_budget`).
+- Meest gekocht: wat je het vaakst koopt, online én in de winkel, hoe vaak, ongeveer om de hoeveel dagen en of het nu in de bonus is. Met "+ Lijst" zet je het meteen op je lijst.
+- Per categorie: waar je geld naartoe gaat. Klik op een categorie voor de producten. Bonregels die HAppie niet herkent (statiegeld, tasjes) staan apart; met Koppel zet je ze zelf in een categorie.
+- Aankopen: klik op een bezorging of kassabon voor de artikelen. Bij kassabonnen zie je wat je per artikel betaald hebt.
+- Inzichten: prognose voor de maand, wat winkelbezoeken per week kosten, en op welke dag je het meest uitgeeft.
+- De artikelen van je aankopen van het afgelopen jaar worden op de achtergrond opgehaald; de eerste keer duurt dat een paar minuten.
+
 ## 0.8.1
 - De HAppie-integratie heeft nu een eigen icoon en logo (vanaf Home Assistant 2026.3), en heet overal "HAppie" in plaats van "happie". Na de update vraagt de app om nog één herstart.
 
