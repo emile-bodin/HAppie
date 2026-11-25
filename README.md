@@ -126,7 +126,7 @@ python tests/test_notifications.py  # sensoren, melding bij verlopen sessie, bon
 python tests/test_orders.py         # bestellingen: overzicht, artikelen, ook-op-lijst, sensorattribuut
 python tests/test_spending.py       # uitgaven per week/maand, weekbudget, budgetmelding
 python tests/test_purchase_items.py # artikelen per aankoop: meest gekocht, categorieën, bonregels koppelen
-python tests/test_integration.py    # integratie: installeren, herstartmelding, sensoren overdragen en terugnemen
+python tests/test_integration.py    # integratie: installeren, herstartmelding, sensoren overdragen, versie gelijk aan de app
 python dev/e2e_test.py              # end-to-end tegen de lokale HA (naast run_addon.py --mock-ah)
 ```
 

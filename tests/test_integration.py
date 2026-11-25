@@ -120,4 +120,20 @@ async def run():
     print("all integration tests passed")
 
 
+def test_versions_match():
+    """The app ships the integration: its manifest version must be the app version.
+
+    HA shows the manifest version under the integration, and the app only copies a changed integration
+    (and closes the restart notification) when that version changes.
+    """
+    import re
+    from server.integration import integration_version
+    with open(os.path.join(os.path.dirname(__file__), "..", "happie", "config.yaml"), encoding="utf-8") as fh:
+        app_version = re.search(r'^version:\s*"?([^"\s]+)"?', fh.read(), re.M).group(1)
+    manifest = integration_version(config.INTEGRATION_SRC)
+    assert manifest == app_version, (
+        f"custom_components/happie/manifest.json heeft versie {manifest}, de app {app_version}: maak ze gelijk")
+
+
+test_versions_match()
 asyncio.run(run())
