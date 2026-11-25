@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "happie", "app"
 
 from ah import AHClient  # noqa: E402
 from mock import FakeHA, install_mocks  # noqa: E402
-from services.sync import SyncEngine, backoff_delay  # noqa: E402
+from services.sync import SyncEngine, backoff_delay, sync_wait  # noqa: E402
 
 
 def make():
@@ -133,6 +133,12 @@ async def main():
     assert backoff_delay(60, 10, 900) == 900
     assert backoff_delay(60, 10_000, 900) == 900
     assert backoff_delay(1800, 2, 900) == 1800
+
+    # "only manual" (0): wake for delivery/spending, but a timeout is no sync
+    assert sync_wait(60, 0, 900, 300) == (60, True)
+    assert sync_wait(60, 2, 900, 300) == (240, True)
+    assert sync_wait(0, 0, 900, 300) == (300, False)
+    assert sync_wait(0, 5, 900, 300) == (300, False)
 
     print("all sync tests passed")
 

@@ -16,6 +16,8 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class FakeHA:
+    under_supervisor = False  # settings are saved to <DATA_DIR>/options.json
+
     def __init__(self, entity_id: str) -> None:
         self.entity_id = entity_id
         self.items: list[TodoItem] = [TodoItem("1", "Bananen", False), TodoItem("2", "Wc-papier", False)]

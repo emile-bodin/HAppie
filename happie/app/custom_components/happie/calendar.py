@@ -7,15 +7,19 @@ from typing import Any
 from homeassistant.components.calendar import CalendarEntity, CalendarEvent
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import EntityDescription
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from . import HAppieConfigEntry
 from .entity import HAppieEntity
 
+try:  # HA 2026.11+: a calendar entity reads initial_color from its description
+    from homeassistant.components.calendar import CalendarEntityDescription
+except ImportError:  # older HA
+    from homeassistant.helpers.entity import EntityDescription as CalendarEntityDescription
+
 DELIVERY_SENSOR = "sensor.happie_volgende_bezorging"
-CALENDAR = EntityDescription(key="bezorging", icon="mdi:truck-delivery")
+CALENDAR = CalendarEntityDescription(key="bezorging", icon="mdi:truck-delivery")
 
 
 async def async_setup_entry(

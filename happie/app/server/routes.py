@@ -40,5 +40,7 @@ def setup_routes(web_app: web.Application, app: App) -> None:
     r.add_get("/api/spending/purchase/{purchase_id}", app.spending_purchase_api)
     r.add_post("/api/spending/link", app.spending_link_api)
     r.add_post("/api/sync", app.sync_now)
+    r.add_get("/api/settings", app.settings_api)
+    r.add_post("/api/settings", app.save_settings_api)
     r.add_get("/api/entities", app.entities_api)
     r.add_static("/static", STATIC_DIR)

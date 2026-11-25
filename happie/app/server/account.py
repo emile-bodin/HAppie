@@ -73,6 +73,7 @@ class AccountMixin:
                 "warnings": self.sync.warnings,
                 "order_mode": self.sync.order_mode,
                 "auto_match": self.options["auto_match_products"],
+                "sync_interval": int(self.options["sync_interval"]),
             }
         )
 

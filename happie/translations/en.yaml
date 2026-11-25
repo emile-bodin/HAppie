@@ -4,7 +4,7 @@ configuration:
     description: The Home Assistant to-do entity that is synced with your AH list (e.g. todo.boodschappen). Create it via Settings > Devices & services > Add integration > Local To-do.
   sync_interval:
     name: Sync interval (seconds)
-    description: How often the AH list is polled. Changes in Home Assistant are pushed immediately.
+    description: How often the AH list is polled (15 to 3600), or 0 for manual only. Changes in Home Assistant are pushed immediately. You can also set this in the panel, under your profile › Automatisch.
   auto_match_products:
     name: Auto-match products
     description: When an item is added in Home Assistant (e.g. by voice), search the best matching AH product and add that instead of free text.

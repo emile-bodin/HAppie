@@ -36,7 +36,11 @@
     <dt>Status</dt><dd id="menuState"></dd>
     <dt>Home Assistant</dt><dd id="menuHa"></dd>
     <dt>Laatste sync</dt><dd id="menuSync"></dd>
+    <dt><label for="setAuto">Automatisch</label></dt>
+    <dd><label class="switch"><input type="checkbox" role="switch" id="setAuto" aria-describedby="setHelp"><span></span></label></dd>
+    <dt class="setrow"><label for="setInterval">Interval</label></dt><dd class="setrow"><select id="setInterval" class="setsel"></select></dd>
   </dl>
+  <p class="sethelp" id="setHelp"></p>
   <div class="actions">
     <button class="btn sm" id="menuSyncBtn">Nu synchroniseren</button>
     <button class="btn ghost sm" id="menuLogout">Uitloggen</button>
@@ -323,6 +327,7 @@
 <script src="static/js/inventory.js"></script>
 <script src="static/js/views.js"></script>
 <script src="static/js/login.js"></script>
+<script src="static/js/settings.js"></script>
 <script src="static/js/boot.js"></script>
 </body>
 </html>

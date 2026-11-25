@@ -26,7 +26,7 @@ button { font: inherit; color: inherit; }
         border-radius: 999px; padding: 6px 12px; font-size: 13px; cursor: pointer; white-space: nowrap; }
 .chip:hover { background: rgba(255,255,255,.26); }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: #c8d0d6; flex: none; }
-.dot.ok { background: #6be38f; } .dot.bad { background: #ff8a80; } .dot.busy { background: #ffd54f; }
+.dot.ok { background: #6be38f; } .dot.bad { background: #ff8a80; } .dot.busy { background: #ffd54f; } .dot.manual { background: #ffa94d; }
 .avatar { width: 28px; height: 28px; border-radius: 50%; background: #fff; color: var(--brand-dark); display: grid; place-items: center;
           font-weight: 700; font-size: 12px; flex: none; }
 .account-chip { padding: 3px 12px 3px 3px; }
@@ -42,7 +42,7 @@ button { font: inherit; color: inherit; }
 .menu .head .avatar { width: 42px; height: 42px; font-size: 15px; background: var(--brand); color: #fff; }
 .menu dl { margin: 0 0 12px; font-size: 13px; display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; }
 .menu dt { color: var(--muted); } .menu dd { margin: 0; display: flex; align-items: center; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
-.menu .actions { display: flex; gap: 8px; }
+.menu .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* ---------- layout ---------- */
 .page { padding: 16px; display: flex; flex-direction: column; gap: 16px; max-width: 1600px; margin: 0 auto; }
@@ -277,6 +277,20 @@ ul.items li .oq small { display: block; font-weight: 400; color: var(--danger); 
 .budgetbar i { background: var(--brand); } .budgetbar i.list { background: color-mix(in srgb, var(--brand) 40%, transparent); }
 .stat.spend.over .budgetbar i { background: var(--danger); } .stat.spend.over .budgetbar i.list { background: color-mix(in srgb, var(--danger) 45%, transparent); }
 .modal .box.wide { max-width: 720px; }
+.menu dt:has(+ dd .switch), .menu dt.setrow { align-self: center; }
+.menu .setsel { width: auto; max-width: 100%; padding: 4px 8px; font: inherit; font-size: 13px; font-weight: 600; color: var(--brand); background: transparent; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+.menu .setsel:hover { background: var(--brand-soft); }
+.menu .setrow.hidden { display: none; }
+.switch { position: relative; display: inline-flex; width: 36px; height: 20px; flex: none; cursor: pointer; }
+.switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.switch span { width: 100%; height: 100%; border-radius: 999px; background: var(--line); transition: background .15s; }
+.switch span::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .15s; }
+.switch input:checked + span { background: var(--brand); }
+.switch input:checked + span::after { transform: translateX(16px); }
+.switch input:focus-visible + span { outline: 2px solid var(--brand); outline-offset: 2px; }
+.switch input:disabled + span { opacity: .5; }
+.menu .sethelp { margin: -4px 0 12px; font-size: 12px; color: var(--muted); }
+.menu .sethelp:empty { display: none; }
 .chart svg { width: 100%; height: auto; display: block; touch-action: manipulation; }
 .chart .b-online { fill: var(--brand); } .chart .b-winkel { fill: var(--bonus); }
 .chart .gl { stroke: var(--line); } .chart .al { fill: var(--muted); font-size: 11px; }

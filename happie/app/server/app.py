@@ -20,18 +20,19 @@ from server.integration import IntegrationMixin
 from server.inventory import InventoryMixin
 from server.orders import OrdersMixin as AppOrdersMixin
 from server.purchase_items import PurchaseItemsMixin
+from server.settings import SettingsMixin
 from server.shopping_list import ListMixin
 from server.spending import SpendingMixin
 from services.inventory import Inventory
 from services.purchase_items import PurchaseItems
 from services.spending import SpendingStore
-from services.sync import SyncEngine, backoff_delay
+from services.sync import SyncEngine, sync_wait
 
 _LOGGER = logging.getLogger("happie")
 
 
 class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin, PurchaseItemsMixin, InventoryMixin,
-          IntegrationMixin):
+          IntegrationMixin, SettingsMixin):
     """State shared by all parts of the app; the API handlers live in the mixins."""
 
     def __init__(self, session: aiohttp.ClientSession, options: dict[str, Any]) -> None:
@@ -72,26 +73,21 @@ class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin,
         self._sync_event.set()
 
     async def sync_loop(self) -> None:
-        interval = int(self.options["sync_interval"])
         while True:
-            # wait longer while syncs keep failing; a change or "Nu synchroniseren" still wakes us
-            delay = backoff_delay(interval, self.sync.failures, SYNC_BACKOFF_MAX)
+            # read every round: the interval can be changed in the panel. Wait longer while syncs keep
+            # failing; a change or "Nu synchroniseren" still wakes us
+            delay, periodic = sync_wait(
+                int(self.options["sync_interval"]), self.sync.failures, SYNC_BACKOFF_MAX, DELIVERY_REFRESH
+            )
+            woken = True
             try:
                 await asyncio.wait_for(self._sync_event.wait(), timeout=delay)
                 await asyncio.sleep(1.5)  # debounce bursts of changes
             except asyncio.TimeoutError:
-                pass
+                woken = False
             self._sync_event.clear()
-            previous_error = self.sync.last_error
-            try:
-                await self.sync.sync()
-                if previous_error:
-                    _LOGGER.info("Sync werkt weer")
-            except Exception as err:  # noqa: BLE001
-                if str(err) != previous_error:
-                    _LOGGER.warning("Sync mislukt: %s", err)
-                else:  # same error as last time: don't fill the log
-                    _LOGGER.debug("Sync mislukt (%d keer achter elkaar): %s", self.sync.failures, err)
+            if woken or periodic:  # "only manual": a timeout only refreshes delivery, spending, sensors
+                await self._run_sync()
             if self.ah.logged_in and time.time() - self._delivery_at > DELIVERY_REFRESH:
                 try:
                     await self.refresh_delivery()
@@ -108,6 +104,18 @@ class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin,
                 await self.after_sync()
             except Exception as err:  # noqa: BLE001
                 _LOGGER.warning("Sensoren/meldingen bijwerken mislukt: %s", err)
+
+    async def _run_sync(self) -> None:
+        previous_error = self.sync.last_error
+        try:
+            await self.sync.sync()
+            if previous_error:
+                _LOGGER.info("Sync werkt weer")
+        except Exception as err:  # noqa: BLE001
+            if str(err) != previous_error:
+                _LOGGER.warning("Sync mislukt: %s", err)
+            else:  # same error as last time: don't fill the log
+                _LOGGER.debug("Sync mislukt (%d keer achter elkaar): %s", self.sync.failures, err)
 
     # ------------------------------------------------ sensors + notifications
     async def after_sync(self) -> None:

@@ -26,6 +26,17 @@ def backoff_delay(interval: float, failures: int, cap: float) -> float:
     return max(interval, min(interval * 2 ** min(failures, 16), cap))
 
 
+def sync_wait(interval: float, failures: int, cap: float, heartbeat: float) -> tuple[float, bool]:
+    """How long the sync loop waits, and whether a timeout means "sync now".
+
+    interval 0 is "only manual": the loop still wakes every `heartbeat` seconds to refresh the
+    delivery, spending and sensors, but only a change or "Nu synchroniseren" runs a sync.
+    """
+    if interval <= 0:
+        return heartbeat, False
+    return backoff_delay(interval, failures, cap), True
+
+
 class SyncEngine:
     def __init__(
         self, ah: AHClient, ha: HAClient | None, state_file: str, auto_match: bool = False

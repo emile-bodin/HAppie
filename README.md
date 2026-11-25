@@ -4,7 +4,7 @@ Een Home Assistant-app waarmee je je **Albert Heijn-boodschappenlijst** vanuit H
 
 > ⚠️ Gebruikt de onofficiële API van de AH-app. AH kan die zonder aankondiging wijzigen.
 
-Huidige versie: **0.10.0**. Zie de [changelog](happie/CHANGELOG.md) en de [gebruikersdocumentatie](happie/DOCS.md).
+Huidige versie: **0.11.0**. Zie de [changelog](happie/CHANGELOG.md) en de [gebruikersdocumentatie](happie/DOCS.md).
 
 ## Functies
 
@@ -15,6 +15,7 @@ Huidige versie: **0.10.0**. Zie de [changelog](happie/CHANGELOG.md) en de [gebru
 - **Mijn lijst:** gegroepeerd per categorie. Per regel zie je de bonusprijs ("2 voor 3.99" → ~~€ 5,98~~ € 3,99), en een hint als je nog iets extra moet pakken voor de bonus.
 - **Ontdekken:** *Voor jou* (AH-suggesties), *Vaak gekocht* (uit je laatste 8 bestellingen) en *Bonus* (je persoonlijke bonus, plus eerder gekochte producten die nu in de bonus zijn).
 - **Account:** je naam en inlogstatus. Is je sessie verlopen, dan zie je dat meteen.
+- **Automatisch synchroniseren** (in het profielmenu): aan met een interval naar keuze, of uit en dan met de knop *Nu synchroniseren*. Wordt opgeslagen in de configuratie van de app.
 - **Bestellingen:** klik op de bezorgtegel voor alle artikelen van je bestelling, ook van eerdere bezorgingen.
 - **Uitgaven:** een eigen pagina met wat je per week of maand bij AH uitgeeft (online bestellingen en kassabonnen), je week- en maandbudget, wat je het meest koopt, uitgaven per categorie en de artikelen per aankoop.
 
@@ -126,6 +127,7 @@ python tests/test_bonus.py          # bonusberekening ("2 voor", "+ gratis", %, 
 python tests/test_inventory.py      # voorraad: +/−, tellen, barcodes koppelen, bestelling uitpakken
 python tests/test_notifications.py  # sensoren, melding bij verlopen sessie, bonusmeldingen
 python tests/test_orders.py         # bestellingen: overzicht, artikelen, ook-op-lijst, sensorattribuut
+python tests/test_settings.py       # instellingen: sync-interval of alleen handmatig, opslaan in de app-configuratie
 python tests/test_spending.py       # uitgaven per week/maand, week- en maandbudget, budgetmeldingen
 python tests/test_purchase_items.py # artikelen per aankoop: meest gekocht, categorieën, bonregels koppelen
 python tests/test_integration.py    # integratie: installeren, herstartmelding, sensoren overdragen, versie gelijk aan de app
