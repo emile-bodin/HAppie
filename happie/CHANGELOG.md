@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.1
+- De HAppie-integratie heeft weer hetzelfde versienummer als de app; onder Apparaten & diensten stond nog 0.8.1. Na de update vraagt de app om één herstart.
+- Het apparaat HAppie toont nu de huidige versie onder Apparaten & diensten.
+- "Bezoeken" bij het apparaat HAppie opent nu de pagina van de app (log, configuratie) in plaats van het paneel.
+
 ## 0.9.0
 - Nieuw: een eigen pagina Uitgaven (bovenaan naast Boodschappen en Voorraad, op een telefoon een vijfde tabblad). De tegel *Uitgegeven deze week* opent hem nu, in plaats van het venster van eerst.
 - Per week of maand: grafiek met online en winkel, je gemiddelde, wat er op je lijst staat en je budget. Klik op een staaf of gebruik ‹ › om een eerdere periode te bekijken.

@@ -36,7 +36,9 @@ class HAppieEntity(CoordinatorEntity[HAppieCoordinator]):
             name="HAppie",
             manufacturer="HAppie",
             entry_type=DeviceEntryType.SERVICE,
-            configuration_url=f"homeassistant://hassio/ingress/{slug}" if slug else None,
+            sw_version=coordinator.version or None,  # the app ships this integration, so it is the app version too
+            # The app's page (log, configuration); the panel itself is already in the sidebar
+            configuration_url=f"homeassistant://hassio/addon/{slug}/info" if slug else None,
         )
 
     @property
@@ -62,7 +64,7 @@ class HAppieEntity(CoordinatorEntity[HAppieCoordinator]):
 
 
 def _app_slug(url: str) -> str | None:
-    """http://a1b2c3d4-happie:8099 -> a1b2c3d4_happie (the app's slug, for the panel link)."""
+    """http://a1b2c3d4-happie:8099 -> a1b2c3d4_happie (the app's slug, for the link to its page)."""
     host = url.split("://", 1)[-1].split("/", 1)[0].split(":", 1)[0]
     return host.replace("-", "_") if host.endswith("-happie") else None
 
