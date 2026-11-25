@@ -154,6 +154,42 @@ async def test_app_sensors_and_budget_warning():
     assert app.spending.receipts_ok is False and "receipt:a" in app.spending.purchases  # cached ones stay
 
 
+async def test_month_budget_warning():
+    app = App(None, {**config.load_options(), "week_budget": 0})
+    ha = app.ha = FakeHA()
+    app.ah._refresh_token = "x"
+
+    async def online():
+        return [p("order:m1", "online", date.today().isoformat(), 40.0)]
+
+    async def store(since, known=None, **kw):
+        return []
+
+    app.ah.online_purchases = online
+    app.ah.store_purchases = store
+    await app.refresh_spending()
+    month = app.spending_overview()["this_month"]
+    app.options["month_budget"] = month + 10  # list of 15 goes 5 over
+
+    app._product_cache = {1: {"id": 1, "title": "Kaas", "price": 7.5, "is_bonus": False}}
+    await app.publish_list_sensors([ListItem("Kaas", 2, False, 1)])
+    await app.publish_spending_sensors()
+    assert ha.states[config.SPEND_MONTH_SENSOR][1]["budget_remaining"] == -5.0
+
+    await app.check_budget_notification()
+    await app.check_budget_notification()
+    assert [n[0] for n in ha.notes] == ["happie_budget_maand"], ha.notes
+    assert "maandbudget" in ha.notes[0][1] and "Deze maand" in ha.notes[0][2]
+
+    # back under -> dismissed; over again in the same month -> no second notification
+    await app.publish_list_sensors([ListItem("Kaas", 1, False, 1)])
+    await app.check_budget_notification()
+    assert "happie_budget_maand" in ha.dismissed
+    await app.publish_list_sensors([ListItem("Kaas", 3, False, 1)])
+    await app.check_budget_notification()
+    assert len(ha.notes) == 1
+
+
 if __name__ == "__main__":
     test_aggregate_weeks()
     test_aggregate_months_and_year_boundary()
@@ -162,4 +198,5 @@ if __name__ == "__main__":
     test_store()
     test_order_total()
     asyncio.run(test_app_sensors_and_budget_warning())
+    asyncio.run(test_month_budget_warning())
     print("all spending tests passed")

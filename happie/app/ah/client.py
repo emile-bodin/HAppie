@@ -4,6 +4,7 @@ Authentication and HTTP live here; the endpoints are grouped in mixins per topic
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import logging
 import os
@@ -31,6 +32,9 @@ class AHClient(ShoppingListMixin, OrdersMixin, PurchasesMixin, ProductsMixin):
         self._expires_at: float = 0
         self._anon_token: str | None = None
         self._anon_expires_at: float = 0
+        # one refresh at a time: AH may rotate the refresh token, so a second
+        # concurrent refresh would send an already-used token and log us out
+        self._refresh_lock = asyncio.Lock()
         self._load_tokens()
 
     # ------------------------------------------------------------------ auth
@@ -112,7 +116,10 @@ class AHClient(ShoppingListMixin, OrdersMixin, PurchasesMixin, ProductsMixin):
         if not self.logged_in:
             raise AHAuthError("Niet ingelogd bij Albert Heijn")
         if not self._access_token or time.time() >= self._expires_at:
-            await self._refresh()
+            async with self._refresh_lock:
+                # another caller may have refreshed while we waited
+                if not self._access_token or time.time() >= self._expires_at:
+                    await self._refresh()
         return self._access_token  # type: ignore[return-value]
 
     async def _any_token(self) -> str:

@@ -5,3 +5,5 @@ __pycache__/
 *.tmp
 .claude/settings.local.json
 AGENTS.md
+.codegraph/
+dev/mockups/

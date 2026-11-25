@@ -1,10 +1,10 @@
 # HAppie: je AH-boodschappen in Home Assistant
 
-Een Home Assistant-add-on waarmee je je **Albert Heijn-boodschappenlijst** vanuit HA beheert. Je lijst blijft in twee richtingen gelijk met de **AH-app** en met een **To-do-lijst in HA**.
+Een Home Assistant-app waarmee je je **Albert Heijn-boodschappenlijst** vanuit HA beheert. Je lijst blijft in twee richtingen gelijk met de **AH-app** en met een **To-do-lijst in HA**.
 
 > ⚠️ Gebruikt de onofficiële API van de AH-app. AH kan die zonder aankondiging wijzigen.
 
-Huidige versie: **0.7.3**. Zie de [changelog](happie/CHANGELOG.md) en de [gebruikersdocumentatie](happie/DOCS.md).
+Huidige versie: **0.10.0**. Zie de [changelog](happie/CHANGELOG.md) en de [gebruikersdocumentatie](happie/DOCS.md).
 
 ## Functies
 
@@ -18,11 +18,11 @@ Huidige versie: **0.7.3**. Zie de [changelog](happie/CHANGELOG.md) en de [gebrui
 - **Bestellingen:** klik op de bezorgtegel voor alle artikelen van je bestelling, ook van eerdere bezorgingen.
 - **Uitgaven:** een eigen pagina met wat je per week of maand bij AH uitgeeft (online bestellingen en kassabonnen), je week- en maandbudget, wat je het meest koopt, uitgaven per categorie en de artikelen per aankoop.
 
-**Voorraad** (switch *Boodschappen | Voorraad* in the top bar; on phones a 4th tab)
-- Add by **searching** or **scanning**, with scan modes *Kiezen* (+1 / −1 / set a count per scan), *Inruimen +1* and *Verbruiken −1* for scanning quickly in a row.
-- Unknown barcodes (e.g. non-AH products) can be linked once to a name or AH product.
-- **Bestelling uitpakken**: put a whole delivery into your stock with one click (each order only once).
-- Stock per category with a filter, −/+, a count you can tap to change, and a 🛒 button. When something runs out: **Op de lijst**.
+**Voorraad** (bovenaan naast *Boodschappen*; op een telefoon een eigen tabblad)
+- Toevoegen door te **zoeken** of te **scannen**, met de scanstanden *Kiezen* (per scan +1, −1 of een aantal), *Inruimen +1* en *Verbruiken −1* om snel achter elkaar te scannen.
+- Onbekende barcodes (bijvoorbeeld van producten die niet van AH zijn) koppel je één keer aan een naam of een AH-product.
+- **Bestelling uitpakken:** zet een hele bezorging met één klik in je voorraad (elke bestelling maar één keer).
+- Voorraad per categorie met een filter, −/+, een aantal dat je kunt aantikken om het te wijzigen, en een 🛒-knop. Is iets op, dan zet **Op de lijst** het op je boodschappenlijst.
 
 **Sync en Home Assistant**
 - Tweewegsync met een HA-to-do-lijst. Daardoor werken Assist (*"zet melk op Boodschappen"*), de To-do-kaart en automations.
@@ -38,16 +38,17 @@ Huidige versie: **0.7.3**. Zie de [changelog](happie/CHANGELOG.md) en de [gebrui
   | `sensor.happie_uitgaven_week` / `_maand` | uitgegeven deze week / maand (EUR) |
   | `binary_sensor.happie_boven_budget` | uitgegeven + lijst boven je weekbudget |
   | `sensor.happie_voorraad` | aantal producten op voorraad |
+  | `calendar.happie_bezorging` | je volgende bezorging als afspraak in de agenda (met de integratie) |
 
   De app installeert zelf een kleine integratie in Home Assistant (`custom_components/happie`). Daarmee worden dit echte entiteiten op een apparaat *HAppie*, met dezelfde entiteits-ID's. Zonder die integratie zet de app ze zelf met `set_state`.
 
-- Meldingen: als je AH-sessie verloopt, als iets op je lijst of iets wat je vaak koopt in de bonus komt (één keer per aanbieding), en als je boven je weekbudget komt (één keer per week). Met `notify_service` gaan ze ook naar je telefoon.
+- Meldingen: als je AH-sessie verloopt, als iets op je lijst of iets wat je vaak koopt in de bonus komt (één keer per aanbieding), en als je boven je week- of maandbudget komt (één keer per week of maand). Met `notify_service` gaan ze ook naar je telefoon.
 
 ## Installeren
 
 **Via GitHub (aanbevolen):** voeg `https://github.com/emile-bodin/HAppie` toe via **Instellingen › Apps › App-winkel › ⋮ › Repositories**. HAppie staat daarna in de winkel. Je HA downloadt een kant-en-klaar image voor jouw processor (amd64 of aarch64; 32-bit armv7 ondersteunt Home Assistant niet meer), dus installeren gaat snel.
 
-**Lokaal bouwen:** kopieer de map `happie/` naar `/addons/happie` op je HA-machine (via de Samba- of SSH-add-on). Kies dan in de Add-on-winkel **⋮ › Controleren op updates**. De add-on staat daarna onder *Lokale add-ons*. Haal dan wel de regel `image:` uit `config.yaml` weg, anders downloadt HA het image van GitHub in plaats van je lokale code te bouwen. Lokaal testen kan ook met `docker build happie/` (BuildKit).
+**Lokaal bouwen:** kopieer de map `happie/` naar `/addons/happie` op je HA-machine (via de Samba- of SSH-app). Kies dan in de App-winkel **⋮ › Controleren op updates**. De app staat daarna onder *Lokale apps*. Haal dan wel de regel `image:` uit `config.yaml` weg, anders downloadt HA het image van GitHub in plaats van je lokale code te bouwen. Lokaal testen kan ook met `docker build happie/` (BuildKit).
 
 **Automatische builds** (volgens het officiële [apps-example](https://github.com/home-assistant/apps-example)):
 - *Builder*: bij elke push en pull request naar `main` draaien de tests. Is er iets veranderd in `happie/config.yaml`, de `Dockerfile` of `happie/app/`, dan bouwt GitHub Actions de images voor amd64 en aarch64. Op `main` worden ze gepubliceerd als `ghcr.io/emile-bodin/happie:<versie>` (één multi-arch image) en wordt een GitHub Release `v<versie>` gemaakt met de tekst uit de changelog.
@@ -55,19 +56,19 @@ Huidige versie: **0.7.3**. Zie de [changelog](happie/CHANGELOG.md) en de [gebrui
 - *Lint*: controleert de app-configuratie, ook dagelijks.
 - Dependabot houdt de actions en de base image bij.
 
-**Een nieuwe versie uitbrengen:** verhoog `version` in `happie/config.yaml`, zet een sectie `## <versie>` bovenaan `happie/CHANGELOG.md` en push naar `main`. HA meldt de update dan vanzelf.
+**Een nieuwe versie uitbrengen:** versienummers volgen [Semantic Versioning](https://semver.org/): PATCH voor foutherstel, MINOR voor nieuwe functies, MAJOR voor veranderingen waarvoor gebruikers zelf iets moeten aanpassen (zolang de versie 0.x is, wordt dat een MINOR-versie). Verhoog `version` in `happie/config.yaml` en in `custom_components/happie/manifest.json`, zet een sectie `## <versie>` bovenaan `happie/CHANGELOG.md` en push naar `main`. HA meldt de update dan vanzelf.
 
 Na de installatie:
 1. Maak een to-do-lijst aan: **Instellingen › Apparaten & diensten › Integratie toevoegen › Lokale to-do** → `Boodschappen` (wordt `todo.boodschappen`).
-2. Start de add-on en open **HAppie** in de zijbalk.
+2. Start de app en open **HAppie** in de zijbalk.
 3. Koppel je AH-account. De stappen staan in het paneel en in [DOCS.md](happie/DOCS.md#ah-account-koppelen).
 
 ## Projectstructuur
 
 ```
-repository.yaml          add-on-repository voor HA
+repository.yaml          app-repository voor HA
 happie/
-  config.yaml            add-on: opties, ingress, versie
+  config.yaml            app: opties, ingress, versie
   Dockerfile             container (HA-base met Alpine + Python + aiohttp)
   README.md, icon.png, logo.png   beschrijving en afbeeldingen in de App-winkel
   DOCS.md, CHANGELOG.md  gebruikersdocumentatie
@@ -113,18 +114,19 @@ python dev/run_addon.py --mock-ah  # zelfde, maar met een nep-AH-lijst
 - HA: http://localhost:8123 (inloggegevens staan in `dev/.env`, dat niet in git komt)
 - Dashboard: http://localhost:8099
 - De eerste keer start je de container met `docker compose -f dev/docker-compose.yml up -d` in WSL. Daarna doet `run_addon.py` dat zelf.
-- WSL zet zichzelf uit als er niets meer draait, en dan stopt HA ook. `run_addon.py` houdt WSL actief zolang de add-on draait.
-- Gegevens van de add-on (tokens, sync-stand) staan in `.devdata/`.
+- WSL zet zichzelf uit als er niets meer draait, en dan stopt HA ook. `run_addon.py` houdt WSL actief zolang de app draait.
+- Gegevens van de app (tokens, sync-stand) staan in `.devdata/`.
 
 ### Tests
 
 ```bash
-python tests/test_sync.py           # sync: toevoegen, afvinken, verwijderen, eerste samenvoeging, vergrendelde lijst
+python tests/test_sync.py           # sync: toevoegen, afvinken, verwijderen, eerste samenvoeging, vergrendelde lijst, langer wachten na fouten
+python tests/test_auth.py           # inloggen: token maar één keer tegelijk vernieuwen
 python tests/test_bonus.py          # bonusberekening ("2 voor", "+ gratis", %, vaste prijs, ...)
 python tests/test_inventory.py      # voorraad: +/−, tellen, barcodes koppelen, bestelling uitpakken
 python tests/test_notifications.py  # sensoren, melding bij verlopen sessie, bonusmeldingen
 python tests/test_orders.py         # bestellingen: overzicht, artikelen, ook-op-lijst, sensorattribuut
-python tests/test_spending.py       # uitgaven per week/maand, weekbudget, budgetmelding
+python tests/test_spending.py       # uitgaven per week/maand, week- en maandbudget, budgetmeldingen
 python tests/test_purchase_items.py # artikelen per aankoop: meest gekocht, categorieën, bonregels koppelen
 python tests/test_integration.py    # integratie: installeren, herstartmelding, sensoren overdragen, versie gelijk aan de app
 python dev/e2e_test.py              # end-to-end tegen de lokale HA (naast run_addon.py --mock-ah)
@@ -134,12 +136,14 @@ python dev/e2e_test.py              # end-to-end tegen de lokale HA (naast run_a
 
 - De AH-API is onofficieel. Wat met een echt account getest is, staat in de changelog.
 - Inloggen vraagt eenmalig een bladwijzer (*HAppie-koppelen*) in een computerbrowser; lukt dat niet, dan kopieer je de code via de ontwikkelaarstools (F12).
-- Zolang een bestelling openstaat voor wijzigingen, kan de add-on de lijst niet lezen of wijzigen.
+- Zolang een bestelling openstaat voor wijzigingen, kan de app de lijst niet lezen of wijzigen.
 - Live barcode scannen werkt alleen via https. **Foto maken** werkt altijd.
 
 ## Ideeën voor later
 
 - Producten direct aan een openstaande bestelling toevoegen.
+- Acties in de HAppie-integratie, zoals `happie.add_product` (op zoekterm of barcode) en `happie.sync_now`, zodat automations en scripts echte producten op de lijst kunnen zetten.
+- Producten automatisch op de lijst zetten als de voorraad onder een ingesteld minimum komt.
 
 ## Credits
 

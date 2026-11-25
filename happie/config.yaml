@@ -1,5 +1,5 @@
 name: HAppie
-version: "0.9.1"
+version: "0.10.0"
 slug: happie
 description: Albert Heijn-boodschappenlijst in Home Assistant, met sync naar de AH-app
 url: https://github.com/emile-bodin/HAppie

@@ -13,7 +13,7 @@ from .const import DOMAIN
 
 from .coordinator import HAppieCoordinator
 
-PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR]
+PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.CALENDAR]
 
 type HAppieConfigEntry = ConfigEntry[HAppieCoordinator]
 
