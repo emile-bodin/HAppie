@@ -50,6 +50,11 @@
       "boven_budget": {
         "name": "Boven weekbudget"
       }
+    },
+    "calendar": {
+      "bezorging": {
+        "name": "Bezorging"
+      }
     }
   }
 }

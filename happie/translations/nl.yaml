@@ -19,6 +19,6 @@ configuration:
     description: Optioneel. Je krijgt een melding als wat je deze week bij AH uitgaf plus je boodschappenlijst hierboven komt. 0 = uit.
   month_budget:
     name: Maandbudget (EUR)
-    description: Optioneel. Op de pagina Uitgaven zie je hoeveel je deze maand nog over hebt, met je boodschappenlijst erbij. 0 = uit.
+    description: Optioneel. Op de pagina Uitgaven zie je hoeveel je deze maand nog over hebt, met je boodschappenlijst erbij, en je krijgt een melding als je erboven komt. 0 = uit.
   log_level:
     name: Logniveau

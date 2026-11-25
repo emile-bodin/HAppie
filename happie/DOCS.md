@@ -1,6 +1,6 @@
 # HAppie
 
-Beheer je Albert Heijn-boodschappenlijst vanuit Home Assistant. De add-on:
+Beheer je Albert Heijn-boodschappenlijst vanuit Home Assistant. De app:
 
 - voegt een **HAppie**-paneel toe aan de zijbalk, waarin je AH-producten zoekt (met foto, prijs en bonus) en je lijst beheert;
 - heeft een paneel **Ontdekken** met suggesties van AH, wat je *vaak koopt* (uit je online bestellingen) en wat er deze week *voor jou in de bonus* is;
@@ -9,12 +9,12 @@ Beheer je Albert Heijn-boodschappenlijst vanuit Home Assistant. De add-on:
 - stuurt een **melding** als je AH-sessie verloopt, en als iets op je lijst of iets wat je vaak koopt in de bonus komt;
 - houdt een **To-do-lijst in Home Assistant** in twee richtingen gelijk met de lijst in de **AH-app**. Daardoor werken Assist (*"zet melk op de boodschappenlijst"*), de standaard To-do-kaart en automations meteen.
 
-> ⚠️ De add-on gebruikt de onofficiële API van de AH-app. AH kan die zonder aankondiging wijzigen.
+> ⚠️ De app gebruikt de onofficiële API van de AH-app. AH kan die zonder aankondiging wijzigen.
 
 ## Installatie
 
 1. Maak eerst een to-do-lijst aan: **Instellingen › Apparaten & diensten › Integratie toevoegen › Lokale to-do**, met de naam `Boodschappen` (dat wordt `todo.boodschappen`).
-2. Installeer de add-on, kijk de configuratie na en start hem.
+2. Installeer de app, kijk de configuratie na en start hem.
 3. Open **HAppie** in de zijbalk en koppel je AH-account (zie hieronder).
 
 ## AH-account koppelen
@@ -34,7 +34,7 @@ Komt de code niet vanzelf aan, dan zie je hem in de blauwe balk met een knop **K
 2. Open in het paneel onder *Lukt het niet?* de AH-loginpagina in datzelfde tabblad en log in.
 3. Zoek in het Netwerk-tabblad met `Ctrl+F` (zoekt ook in de antwoorden) naar `login-exit`. Die tekst staat in het antwoord van het verzoek `ingelogd`. Kopieer `appie://login-exit?code=…` en plak het in het paneel.
 
-Daarna ververst de add-on de token zelf. Je wachtwoord wordt nooit opgeslagen.
+Daarna ververst de app de token zelf. Je wachtwoord wordt nooit opgeslagen.
 
 ## Configuratie
 
@@ -46,7 +46,7 @@ Daarna ververst de add-on de token zelf. Je wachtwoord wordt nooit opgeslagen.
 | `bonus_notifications` | Melding als iets op je lijst, of iets wat je vaak koopt, in de bonus komt. Je krijgt per aanbieding één melding. |
 | `notify_service` | Optioneel, bijv. `notify.mobile_app_telefoon`. Dan gaan meldingen ook naar je telefoon. |
 | `week_budget` | Optioneel weekbudget in euro (0 = uit). Je krijgt een waarschuwing als wat je deze week uitgaf plus je lijst erboven komt. |
-| `month_budget` | Optioneel maandbudget in euro (0 = uit). De pagina Uitgaven toont dan per maand hoeveel je nog over hebt, met je lijst erbij. |
+| `month_budget` | Optioneel maandbudget in euro (0 = uit). De pagina Uitgaven toont dan per maand hoeveel je nog over hebt, met je lijst erbij, en je krijgt een melding als je erboven komt. |
 | `log_level` | Hoeveel er gelogd wordt. |
 
 ## Sensoren
@@ -59,8 +59,9 @@ Daarna ververst de add-on de token zelf. Je wachtwoord wordt nooit opgeslagen.
 | `sensor.happie_bonus_items` | Aantal items op je lijst dat in de bonus is |
 | `sensor.happie_voorraad` | Aantal producten op voorraad; items, totaal en wat op is als attributen |
 | `sensor.happie_uitgaven_week` | Uitgegeven deze week (EUR, maandag t/m zondag); `online`, `winkel`, `previous`, `avg_week` en bij een budget `budget_remaining` als attributen |
-| `sensor.happie_uitgaven_maand` | Uitgegeven deze maand (EUR); `online`, `winkel` en `previous` als attributen |
+| `sensor.happie_uitgaven_maand` | Uitgegeven deze maand (EUR); `online`, `winkel`, `previous` en bij een maandbudget `budget_remaining` als attributen |
 | `binary_sensor.happie_boven_budget` | `on` als uitgegeven deze week + je lijst boven `week_budget` komt (alleen met een budget) |
+| `calendar.happie_bezorging` | Agenda met je volgende bezorging: het tijdvak als afspraak, met aantal artikelen, bedrag en wijzigtermijn in de beschrijving. Alleen de komende bezorging, en alleen met de HAppie-integratie |
 
 ## Integratie
 
@@ -99,20 +100,20 @@ Bedragen per artikel: op een kassabon staat wat je per artikel betaald hebt. Bij
 
 - **Bronnen**: afgeleverde online bestellingen (het betaalde totaal) en je kassabonnen uit de winkel, net als in de AH-app onder *Kassabonnen*. Daarvoor moet je bonuskaart aan je account gekoppeld zijn. Lukt het ophalen van kassabonnen niet, dan zie je alleen online bestellingen en staat dat in het overzicht.
 - **Verversen**: elke 6 uur, direct nadat een bestelling is afgeleverd, en met *Bijwerken* op de pagina. De app bewaart ruim een jaar aan aankopen. De artikelen van die aankopen haalt hij op de achtergrond op, elke aankoop één keer; de eerste keer duurt dat een paar minuten.
-- **Maandbudget**: zet `month_budget` in de configuratie. De pagina Uitgaven toont het bij *Per maand*.
+- **Maandbudget**: zet `month_budget` in de configuratie. De pagina Uitgaven toont het bij *Per maand*. Kom je er met je lijst erbij boven, dan krijg je één melding per maand, net als bij het weekbudget.
 - **Weekbudget**: zet `week_budget` in de configuratie. De tegel toont dan hoeveel je nog over hebt als je je lijst erbij optelt. Kom je erboven, dan zie je een waarschuwing in het paneel en krijg je één melding per week (ook op je telefoon met `notify_service`). De melding verdwijnt weer als je eronder zakt.
 
 ## Voorraad
 
-Switch to **Voorraad** at the top (on a phone: the *Voorraad* tab) to keep track of what you have at home.
+Ga bovenaan naar **Voorraad** (op een telefoon: het tabblad *Voorraad*) om bij te houden wat je in huis hebt.
 
-- **Adding**: search for a product, or press **Scannen**. A product without a barcode can be added as your own product.
-- **Scan mode**:
-  - *Kiezen*: after each scan you choose +1, −1 or a count.
-  - *Inruimen +1* / *Verbruiken −1*: every scan updates the stock right away, and live scanning carries on by itself. Handy when unpacking or keeping count.
-- **Unknown barcode**: give it a name, or pick the AH product. From then on the barcode is recognised.
-- **Bestelling uitpakken**: after a delivery, use *Uitpakken* to add every product from that order. An order can't be counted twice.
-- **Op**: when something reaches 0 you get a notice with **Op de lijst**. The 🛒 button on each row does the same.
+- **Toevoegen**: zoek een product, of druk op **Scannen**. Een product zonder barcode voeg je toe als eigen product.
+- **Scanstand**:
+  - *Kiezen*: na elke scan kies je +1, −1 of een aantal.
+  - *Inruimen +1* / *Verbruiken −1*: elke scan past de voorraad meteen aan, en live scannen gaat vanzelf door. Handig bij het uitpakken of tellen.
+- **Onbekende barcode**: geef hem een naam, of kies het AH-product. Daarna wordt de barcode herkend.
+- **Bestelling uitpakken**: zet na een bezorging met *Uitpakken* alle producten van die bestelling in je voorraad. Een bestelling telt maar één keer.
+- **Op**: staat iets op 0, dan zie je een melding met **Op de lijst**. De 🛒-knop bij elke regel doet hetzelfde.
 - In HA: `sensor.happie_voorraad`.
 
 ## Barcode scannen
@@ -151,7 +152,7 @@ actions:
 ## Hoe de sync werkt
 
 - Items worden gekoppeld op naam (hoofdletters maken niet uit).
-- Toevoegen, afvinken en verwijderen gaat in beide richtingen. De add-on onthoudt de vorige stand, zodat hij weet aan welke kant iets veranderd is.
+- Toevoegen, afvinken en verwijderen gaat in beide richtingen. De app onthoudt de vorige stand, zodat hij weet aan welke kant iets veranderd is.
 - Bij de eerste sync worden beide lijsten samengevoegd. Er wordt dan niets verwijderd.
 - Getest op 19-11-2026 met een echt account: toevoegen (product en tekst), afvinken en verwijderen werken in beide richtingen.
 - Werkt verwijderen bij AH ooit niet meer (de API is onofficieel), dan meldt het paneel dat. Haal het item dan weg in de AH-app.

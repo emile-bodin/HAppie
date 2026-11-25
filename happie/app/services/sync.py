@@ -19,6 +19,13 @@ from ha.client import HAClient, TodoItem
 _LOGGER = logging.getLogger(__name__)
 
 
+def backoff_delay(interval: float, failures: int, cap: float) -> float:
+    """Seconds until the next sync: the interval, doubled per failure in a row, at most `cap`."""
+    if failures <= 0:
+        return interval
+    return max(interval, min(interval * 2 ** min(failures, 16), cap))
+
+
 class SyncEngine:
     def __init__(
         self, ah: AHClient, ha: HAClient | None, state_file: str, auto_match: bool = False
@@ -32,6 +39,7 @@ class SyncEngine:
         self.last_error: str | None = None
         self.last_exc: Exception | None = None
         self.order_mode = False
+        self.failures = 0  # failed syncs in a row
         self.warnings: list[str] = []
         self.ha_available: bool | None = None
         self.last_items: list[ListItem] | None = None
@@ -100,14 +108,17 @@ class SyncEngine:
                 self.last_error = None
                 self.last_exc = None
                 self.order_mode = False
+                self.failures = 0
             except AHOrderModeError:
                 # AH locks the list while an order is reopened; pause, change nothing
                 self.order_mode = True
                 self.last_error = None
                 self.last_exc = None
+                self.failures = 0
             except Exception as err:
                 self.last_error = str(err)
                 self.last_exc = err
+                self.failures += 1
                 raise
             finally:
                 self.last_sync = time.time()

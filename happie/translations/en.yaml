@@ -19,6 +19,6 @@ configuration:
     description: Optional. Notify when what you spent at AH this week plus your shopping list goes over this amount. 0 = off.
   month_budget:
     name: Monthly budget (EUR)
-    description: Optional. The Uitgaven page shows how much is left this month, including your shopping list. 0 = off.
+    description: Optional. The Uitgaven page shows how much is left this month, including your shopping list, and you get a notification when you go over. 0 = off.
   log_level:
     name: Log level

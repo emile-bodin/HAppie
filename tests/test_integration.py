@@ -135,5 +135,20 @@ def test_versions_match():
         f"custom_components/happie/manifest.json heeft versie {manifest}, de app {app_version}: maak ze gelijk")
 
 
+def test_semver_changelog():
+    """config.yaml has a SemVer version, and the newest changelog section is that version."""
+    import re
+    root = os.path.join(os.path.dirname(__file__), "..", "happie")
+    with open(os.path.join(root, "config.yaml"), encoding="utf-8") as fh:
+        version = re.search(r'^version:\s*"?([^"\s]+)"?', fh.read(), re.M).group(1)
+    assert re.fullmatch(r"(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)", version), f"{version} is geen SemVer MAJOR.MINOR.PATCH"
+    with open(os.path.join(root, "CHANGELOG.md"), encoding="utf-8") as fh:
+        heads = re.findall(r"^## (\S+)", fh.read(), re.M)
+    assert heads and heads[0] == version, f"bovenste changelog-sectie is {heads[:1]}, de app {version}"
+    key = lambda v: tuple(int(x) for x in v.split("."))
+    assert all(key(a) > key(b) for a, b in zip(heads, heads[1:])), "changelog-secties staan niet van nieuw naar oud"
+
+
 test_versions_match()
+test_semver_changelog()
 asyncio.run(run())

@@ -1,5 +1,18 @@
 # Changelog
 
+Alle veranderingen per versie, de nieuwste bovenaan. HAppie volgt [Semantic Versioning](https://semver.org/lang/nl/) (`MAJOR.MINOR.PATCH`):
+
+- **PATCH** (0.9.**1**): alleen fouten hersteld; je hoeft niets te doen.
+- **MINOR** (0.**10**.0): nieuwe functies of opties; alles wat je had blijft werken.
+- **MAJOR** (**1**.0.0): veranderingen waarvoor je zelf iets moet aanpassen, zoals een andere entiteits-ID of een optie die verdwijnt. Zolang de versie met 0. begint, gebeurt zoiets in een MINOR-versie en staat het bovenaan die sectie.
+
+## 0.10.0
+- Nieuw: de agenda *HAppie Bezorging* (`calendar.happie_bezorging`) toont je volgende bezorging met het tijdvak, het aantal artikelen, het bedrag en tot wanneer je kunt wijzigen. Handig voor de agendakaart en voor automations zoals "een half uur van tevoren een melding". Na de update vraagt de app om één herstart.
+- Nieuw: een melding als je met je lijst erbij boven je maandbudget (`month_budget`) komt, één keer per maand. De sensor *Uitgaven deze maand* heeft nu ook `budget` en `budget_remaining`.
+- Je wordt niet meer onterecht uitgelogd als de app op meerdere plekken tegelijk je AH-sessie vernieuwt.
+- Is AH of Home Assistant even niet bereikbaar, dan wacht de app steeds langer tussen de pogingen (tot 15 minuten) en staat dezelfde fout niet elke minuut opnieuw in het log.
+- De documentatie over Voorraad is nu in het Nederlands.
+
 ## 0.9.1
 - De HAppie-integratie heeft weer hetzelfde versienummer als de app; onder Apparaten & diensten stond nog 0.8.1. Na de update vraagt de app om één herstart.
 - Het apparaat HAppie toont nu de huidige versie onder Apparaten & diensten.

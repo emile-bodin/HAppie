@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "happie", "app"
 
 from ah import AHClient  # noqa: E402
 from mock import FakeHA, install_mocks  # noqa: E402
-from services.sync import SyncEngine  # noqa: E402
+from services.sync import SyncEngine, backoff_delay  # noqa: E402
 
 
 def make():
@@ -110,6 +110,29 @@ async def main():
     assert not s.order_mode
     assert ("Tijdens bestelling", False) in await names_ah(app)  # pushed once the lock is gone
     assert set(before[0]) <= set(await names_ah(app))
+
+    # failed syncs in a row are counted and reset once a sync works again
+    async def down():
+        raise RuntimeError("AH niet bereikbaar")
+
+    app.ah.get_list = down
+    for n in (1, 2):
+        try:
+            await s.sync()
+        except RuntimeError:
+            pass
+        assert s.failures == n, s.failures
+    app.ah.get_list = orig_get
+    await s.sync()
+    assert s.failures == 0 and s.last_error is None
+
+    # wait time: the interval, doubled per failure, capped (never below the interval)
+    assert backoff_delay(60, 0, 900) == 60
+    assert backoff_delay(60, 1, 900) == 120
+    assert backoff_delay(60, 3, 900) == 480
+    assert backoff_delay(60, 10, 900) == 900
+    assert backoff_delay(60, 10_000, 900) == 900
+    assert backoff_delay(1800, 2, 900) == 1800
 
     print("all sync tests passed")
 

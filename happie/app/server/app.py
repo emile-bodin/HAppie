@@ -12,7 +12,7 @@ import aiohttp
 
 from ah.client import AHClient
 from ah.errors import AHError
-from config import BONUS_CHECK_INTERVAL, DATA_DIR, DELIVERY_REFRESH, SPENDING_REFRESH
+from config import BONUS_CHECK_INTERVAL, DATA_DIR, DELIVERY_REFRESH, SPENDING_REFRESH, SYNC_BACKOFF_MAX
 from ha.client import HAClient
 from server.account import AccountMixin
 from server.discover import DiscoverMixin
@@ -25,7 +25,7 @@ from server.spending import SpendingMixin
 from services.inventory import Inventory
 from services.purchase_items import PurchaseItems
 from services.spending import SpendingStore
-from services.sync import SyncEngine
+from services.sync import SyncEngine, backoff_delay
 
 _LOGGER = logging.getLogger("happie")
 
@@ -74,16 +74,24 @@ class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin,
     async def sync_loop(self) -> None:
         interval = int(self.options["sync_interval"])
         while True:
+            # wait longer while syncs keep failing; a change or "Nu synchroniseren" still wakes us
+            delay = backoff_delay(interval, self.sync.failures, SYNC_BACKOFF_MAX)
             try:
-                await asyncio.wait_for(self._sync_event.wait(), timeout=interval)
+                await asyncio.wait_for(self._sync_event.wait(), timeout=delay)
                 await asyncio.sleep(1.5)  # debounce bursts of changes
             except asyncio.TimeoutError:
                 pass
             self._sync_event.clear()
+            previous_error = self.sync.last_error
             try:
                 await self.sync.sync()
+                if previous_error:
+                    _LOGGER.info("Sync werkt weer")
             except Exception as err:  # noqa: BLE001
-                _LOGGER.warning("Sync mislukt: %s", err)
+                if str(err) != previous_error:
+                    _LOGGER.warning("Sync mislukt: %s", err)
+                else:  # same error as last time: don't fill the log
+                    _LOGGER.debug("Sync mislukt (%d keer achter elkaar): %s", self.sync.failures, err)
             if self.ah.logged_in and time.time() - self._delivery_at > DELIVERY_REFRESH:
                 try:
                     await self.refresh_delivery()

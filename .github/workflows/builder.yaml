@@ -39,6 +39,16 @@ jobs:
             python "$t"
           done
 
+      # the panel has no build step: check that every script parses and is loaded
+      - name: Check the panel scripts
+        run: |
+          set -e
+          cd happie/app/static
+          for f in js/*.js; do
+            node --check "$f"
+            grep -q "src=\"static/$f\"" index.html || { echo "$f is not loaded in index.html"; exit 1; }
+          done
+
   init:
     name: Initialize builds
     runs-on: ubuntu-latest
