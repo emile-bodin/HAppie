@@ -6,6 +6,9 @@ Alle veranderingen per versie, de nieuwste bovenaan. HAppie volgt [Semantic Vers
 - **MINOR** (0.**10**.0): nieuwe functies of opties; alles wat je had blijft werken.
 - **MAJOR** (**1**.0.0): veranderingen waarvoor je zelf iets moet aanpassen, zoals een andere entiteits-ID of een optie die verdwijnt. Zolang de versie met 0. begint, gebeurt zoiets in een MINOR-versie en staat het bovenaan die sectie.
 
+## 0.10.1
+- De agenda *HAppie Bezorging* (`calendar.happie_bezorging`) verschijnt nu ook echt; in Home Assistant 2026.11 werd hij door een fout niet toegevoegd. Na de update vraagt de app om één herstart.
+
 ## 0.10.0
 - Nieuw: de agenda *HAppie Bezorging* (`calendar.happie_bezorging`) toont je volgende bezorging met het tijdvak, het aantal artikelen, het bedrag en tot wanneer je kunt wijzigen. Handig voor de agendakaart en voor automations zoals "een half uur van tevoren een melding". Na de update vraagt de app om één herstart.
 - Nieuw: een melding als je met je lijst erbij boven je maandbudget (`month_budget`) komt, één keer per maand. De sensor *Uitgaven deze maand* heeft nu ook `budget` en `budget_remaining`.
