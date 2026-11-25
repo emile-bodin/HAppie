@@ -21,6 +21,10 @@ ENTITIES_API = 1  # version of /api/entities, bump on incompatible changes
 DELIVERY_SENSOR = "sensor.happie_volgende_bezorging"
 DELIVERY_REFRESH = 300  # seconds
 SYNC_BACKOFF_MAX = 900  # after failed syncs the wait doubles, up to this many seconds
+# sync_interval: 0 = only manual, else SYNC_MIN..SYNC_MAX seconds. The schema in config.yaml can only say
+# int(0,3600), so smaller values from the configuration page are raised to SYNC_MIN by sync_interval()
+SYNC_MIN, SYNC_MAX = 15, 3600
+OPTIONS_REFRESH = 300  # seconds between reads of the app configuration, for an interval changed there
 LIST_SENSOR = "sensor.happie_lijst_items"
 COST_SENSOR = "sensor.happie_geschatte_kosten"
 BONUS_SENSOR = "sensor.happie_bonus_items"
@@ -61,3 +65,12 @@ def load_options() -> dict[str, Any]:
     except (OSError, ValueError):
         pass
     return defaults
+
+
+def sync_interval(options: dict[str, Any]) -> int:
+    """The sync interval to use: 0 (only manual) or SYNC_MIN..SYNC_MAX seconds."""
+    try:
+        value = int(options.get("sync_interval", 60))
+    except (TypeError, ValueError):
+        return 60
+    return 0 if value <= 0 else min(max(value, SYNC_MIN), SYNC_MAX)

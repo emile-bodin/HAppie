@@ -134,6 +134,16 @@ class HAClient:
         """False in local development, where the app talks to HA Core directly."""
         return self._api.startswith("http://supervisor/")
 
+    async def get_app_options(self) -> dict[str, Any]:
+        """This app's options as saved on the configuration page, also when the app hasn't restarted since."""
+        async with self._session.get(
+            "http://supervisor/addons/self/info", headers=self._headers(), timeout=aiohttp.ClientTimeout(total=15),
+        ) as resp:
+            if resp.status >= 400:
+                raise HAError(f"App-configuratie lezen gaf {resp.status}: {(await resp.text())[:200]}")
+            data = await resp.json()
+        return dict((data.get("data") or {}).get("options") or {})
+
     async def set_app_options(self, options: dict[str, Any]) -> None:
         """Save this app's options (the configuration page in HA); Supervisor replaces all of them."""
         async with self._session.post(

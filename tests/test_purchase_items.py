@@ -94,7 +94,13 @@ def test_link_and_store():
 def test_weekday_average():
     ps = [p("a", "online", "2026-11-16", 24.0), p("b", "winkel", "2026-11-14", 12.0), p("c", "winkel", "2026-01-01", 99.0)]
     w = weekday_average(ps, TODAY, weeks=12)
-    assert w[0] == 2.0 and w[5] == 1.0 and sum(w) == 3.0, w  # Monday, Saturday; January is too long ago
+    # 12 Mondays, but only 11 Saturdays: this week's Saturday is still to come. January is too long ago
+    assert w[0] == 2.0 and w[5] == round(12 / 11, 2) and sum(w) == w[0] + w[5], w
+    # a short history: divided by the weeks since the first purchase, not by 12
+    w = weekday_average(ps[:2], TODAY, weeks=12)
+    assert w[0] == 12.0 and w[5] == 12.0, w  # 2 Mondays (09-11, 16-11), 1 Saturday so far (14-11)
+    # only a delivery still to come: nothing yet, and never negative
+    assert weekday_average([p("x", "online", "2026-11-30", 50.0)], TODAY) == [0.0] * 7
 
 
 async def test_app_fetches_items():
@@ -139,9 +145,48 @@ async def test_app_fetches_items():
     assert app.spending_overview()["month_budget"]["budget"] == 300
 
 
+async def test_no_double_fetches():
+    """Receipts fetched together share hqId lookups, and the panel waits for the background fetch of a purchase."""
+    app = App(None, config.load_options())
+    app.ah._refresh_token = "x"
+    app.spending.merge([p("receipt:c", "winkel", "2026-11-12"), p("receipt:d", "winkel", "2026-11-13")], TODAY)
+    calls = {"lines": [], "search": 0}
+
+    async def receipt_lines(rid):
+        calls["lines"].append(rid)
+        await asyncio.sleep(0.01)
+        return [{"hq_id": 555, "name": "AH KARNEMELK", "quantity": 1.0, "amount": 1.19}]
+
+    async def product_by_hq_id(hq_id, name):
+        calls["search"] += 1
+        await asyncio.sleep(0.01)
+        return product(9, "Karnemelk", "Zuivel, eieren", 0.99), None
+
+    app.ah.receipt_lines = receipt_lines
+    app.ah.product_by_hq_id = product_by_hq_id
+    app.start_items_refresh()
+    await asyncio.sleep(0)  # the background task has started on both receipts
+    resp = await app.spending_purchase_api(type("R", (), {"match_info": {"purchase_id": "receipt:c"}})())
+    await app._items_task
+    assert resp.status == 200
+    assert sorted(calls["lines"]) == ["c", "d"], calls  # receipt c fetched once, not again for the panel
+    assert calls["search"] == 1, calls  # one lookup for the hqId both receipts have
+    assert not app._items_inflight and not app._hq_inflight
+
+    # the background task is busy with other purchases: the panel doesn't wait for it
+    app.spending.merge([p("receipt:e", "winkel", "2026-11-14")], TODAY)
+    app._items_sem = asyncio.Semaphore(0)  # every background slot taken
+    app.start_items_refresh()
+    resp = await asyncio.wait_for(
+        app.spending_purchase_api(type("R", (), {"match_info": {"purchase_id": "receipt:e"}})()), 1)
+    assert resp.status == 200 and "e" in calls["lines"]
+    app._items_task.cancel()
+
+
 if __name__ == "__main__":
     test_overview()
     test_link_and_store()
     test_weekday_average()
     asyncio.run(test_app_fetches_items())
+    asyncio.run(test_no_double_fetches())
     print("all purchase item tests passed")

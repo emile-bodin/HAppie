@@ -1,10 +1,17 @@
 // ---------------- settings (in the account menu) ----------------
 const SYNC_CHOICES = [15, 30, 60, 120, 300, 600, 900, 1800, 3600];
 const SYNC_DEFAULT = 60;
+// allowed range, from api/settings (the server checks it too)
+const syncRange = { min: 15, max: 3600 };
+const inRange = (v) => v >= syncRange.min && v <= syncRange.max;
 const intervalLabel = (s) => s === 3600 ? "Elk uur" : s % 60 === 0 ? `Elke ${s / 60} min` : `Elke ${s} s`;
 // the interval to go back to when automatic sync is switched on again
 const lastInterval = {
-  get() { try { return +localStorage.getItem("happie-sync-interval") || SYNC_DEFAULT; } catch (_) { return SYNC_DEFAULT; } },
+  get() {
+    let v = 0;
+    try { v = +localStorage.getItem("happie-sync-interval"); } catch (_) {}
+    return inRange(v) ? v : SYNC_DEFAULT;
+  },
   set(v) { try { localStorage.setItem("happie-sync-interval", String(v)); } catch (_) {} },
 };
 
@@ -13,7 +20,7 @@ function renderSettings(interval) {
   $("#setAuto").checked = auto;
   for (const el of document.querySelectorAll("#accountMenu .setrow")) el.classList.toggle("hidden", !auto);
   const cur = auto ? interval : lastInterval.get();
-  const choices = [...new Set([...SYNC_CHOICES, cur])].sort((a, b) => a - b);
+  const choices = [...new Set([...SYNC_CHOICES.filter(inRange), cur])].sort((a, b) => a - b);
   $("#setInterval").innerHTML = choices.map((v) => `<option value="${v}">${esc(intervalLabel(v))}</option>`).join("");
   $("#setInterval").value = String(cur);
   $("#setHelp").textContent = auto ? "" : "Wat je in de AH-app verandert, haal je op met Nu synchroniseren. Wijzigingen in Home Assistant gaan wel meteen naar AH.";
@@ -21,6 +28,8 @@ function renderSettings(interval) {
 async function loadSettings() {
   try {
     const s = await api("api/settings");
+    if (s.min) syncRange.min = s.min;
+    if (s.max) syncRange.max = s.max;
     if (s.sync_interval > 0) lastInterval.set(s.sync_interval);
     renderSettings(s.sync_interval);
     $("#setAuto").closest(".switch").title = s.saved_in_ha ? "Wordt ook opgeslagen in de configuratie van de app" : "";

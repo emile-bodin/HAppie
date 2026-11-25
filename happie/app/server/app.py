@@ -12,7 +12,7 @@ import aiohttp
 
 from ah.client import AHClient
 from ah.errors import AHError
-from config import BONUS_CHECK_INTERVAL, DATA_DIR, DELIVERY_REFRESH, SPENDING_REFRESH, SYNC_BACKOFF_MAX
+from config import BONUS_CHECK_INTERVAL, DATA_DIR, DELIVERY_REFRESH, SPENDING_REFRESH, SYNC_BACKOFF_MAX, sync_interval
 from ha.client import HAClient
 from server.account import AccountMixin
 from server.discover import DiscoverMixin
@@ -56,7 +56,10 @@ class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin,
         self.entities: dict[str, dict[str, Any]] = {}  # everything published, served to the integration
         self._restart_pending = False  # integration copied, HA not restarted yet
         self._load_integration_state()
-        self._sync_event = asyncio.Event()
+        self._sync_event = asyncio.Event()  # wakes the sync loop
+        self._sync_requested = False  # set with the event when the wake-up is for a sync, not only a new interval
+        self._debounce = 1.5  # seconds to wait after a wake-up, so a burst of changes becomes one sync
+        self._options_at: float = 0  # when the app configuration was last read (refresh_live_options)
         self.inventory = Inventory(str(DATA_DIR / "inventory.json"))
         self.inv_lock = asyncio.Lock()
         self.spending = SpendingStore(str(DATA_DIR / "spending.json"))
@@ -67,28 +70,40 @@ class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin,
         self.items = PurchaseItems(str(DATA_DIR / "purchase_items.json"))
         self._items_task: asyncio.Task | None = None
         self._items_failed: dict[str, float] = {}
+        self._items_sem = asyncio.Semaphore(3)  # purchases the background task fetches at the same time
+        self._items_inflight: dict[str, asyncio.Task] = {}  # purchase id -> fetch of its lines
+        self._hq_inflight: dict[str, asyncio.Task] = {}  # hqId -> product lookup
 
     # -------------------------------------------------------- background
     def request_sync(self) -> None:
+        self._sync_requested = True
+        self._sync_event.set()
+
+    def reschedule_sync(self) -> None:
+        """Wake the sync loop so a new interval applies right away, without syncing."""
         self._sync_event.set()
 
     async def sync_loop(self) -> None:
         while True:
+            await self.refresh_live_options()
             # read every round: the interval can be changed in the panel. Wait longer while syncs keep
             # failing; a change or "Nu synchroniseren" still wakes us
             delay, periodic = sync_wait(
-                int(self.options["sync_interval"]), self.sync.failures, SYNC_BACKOFF_MAX, DELIVERY_REFRESH
+                sync_interval(self.options), self.sync.failures, SYNC_BACKOFF_MAX, DELIVERY_REFRESH
             )
-            woken = True
             try:
                 await asyncio.wait_for(self._sync_event.wait(), timeout=delay)
-                await asyncio.sleep(1.5)  # debounce bursts of changes
+                if not self._sync_requested:  # only a new interval: wait again with it
+                    self._sync_event.clear()
+                    continue
+                await asyncio.sleep(self._debounce)
             except asyncio.TimeoutError:
-                woken = False
+                pass
+            requested, self._sync_requested = self._sync_requested, False
             self._sync_event.clear()
-            if woken or periodic:  # "only manual": a timeout only refreshes delivery, spending, sensors
+            if requested or periodic:  # "only manual": a timeout only refreshes delivery, spending, sensors
                 await self._run_sync()
-            if self.ah.logged_in and time.time() - self._delivery_at > DELIVERY_REFRESH:
+            if self.ah.logged_in and self.delivery_stale():
                 try:
                     await self.refresh_delivery()
                 except Exception as err:  # noqa: BLE001
@@ -104,6 +119,10 @@ class App(AccountMixin, ListMixin, DiscoverMixin, AppOrdersMixin, SpendingMixin,
                 await self.after_sync()
             except Exception as err:  # noqa: BLE001
                 _LOGGER.warning("Sensoren/meldingen bijwerken mislukt: %s", err)
+
+    def delivery_stale(self) -> bool:
+        # a few seconds' slack: with automatic sync off the loop wakes exactly every DELIVERY_REFRESH seconds
+        return time.time() - self._delivery_at >= DELIVERY_REFRESH - 5
 
     async def _run_sync(self) -> None:
         previous_error = self.sync.last_error
