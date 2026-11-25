@@ -6,6 +6,12 @@ Alle veranderingen per versie, de nieuwste bovenaan. HAppie volgt [Semantic Vers
 - **MINOR** (0.**10**.0): nieuwe functies of opties; alles wat je had blijft werken.
 - **MAJOR** (**1**.0.0): veranderingen waarvoor je zelf iets moet aanpassen, zoals een andere entiteits-ID of een optie die verdwijnt. Zolang de versie met 0. begint, gebeurt zoiets in een MINOR-versie en staat het bovenaan die sectie.
 
+## 0.11.0
+- Nieuw: in het profielmenu zet je **Automatisch** synchroniseren aan of uit. Staat het aan, dan kies je hoe vaak HAppie wijzigingen uit de AH-app ophaalt (van elke 15 seconden tot elk uur); staat het uit, dan gebruik je *Nu synchroniseren*. Je keuze wordt opgeslagen in de configuratie van de app.
+- Staat het uit, dan gaan wijzigingen in Home Assistant en in het paneel nog wel meteen naar AH; wijzigingen in de AH-app haal je op met *Nu synchroniseren*. De sync-knop bovenaan toont dan "Sync handmatig" met een oranje stip, zonder tijd.
+- `sync_interval` mag nu ook 0 zijn (alleen handmatig). Een nieuw interval geldt meteen, zonder herstart.
+- De app vraagt nu toegang tot de Supervisor-API, om je instellingen in de configuratie van de app op te slaan.
+
 ## 0.10.1
 - De agenda *HAppie Bezorging* (`calendar.happie_bezorging`) verschijnt nu ook echt; in Home Assistant 2026.11 werd hij door een fout niet toegevoegd. Na de update vraagt de app om één herstart.
 

@@ -19,14 +19,20 @@ async function loadStatus() {
     : `<span class="dot"></span>Niet verbonden`;
   $("#menuSync").textContent = status.logged_in ? ago(status.last_sync) : "–";
   $("#menuLogout").classList.toggle("hidden", !status.logged_in);
-  $("#menuSyncBtn").classList.toggle("hidden", !status.logged_in);
+  // with automatic sync on, the interval is in the menu instead (the sync chip still syncs right away)
+  $("#menuSyncBtn").classList.toggle("hidden", !status.logged_in || status.sync_interval !== 0);
   $("#menuLogin").classList.toggle("hidden", status.logged_in && st !== "expired");
   $("#accountChip").title = `${name} · ${stateTxt}`;
 
   const syncBad = !!status.last_error;
   $("#syncChip").classList.toggle("hidden", !status.logged_in);
-  $("#syncDot").className = "dot " + (syncBad ? "bad" : status.order_mode ? "busy" : "ok");
-  $("#syncTxt").textContent = syncBad ? "Sync-fout" : status.order_mode ? "Sync gepauzeerd" : "Sync " + ago(status.last_sync);
+  $("#syncDot").className = "dot " + (syncBad ? "bad" : status.order_mode ? "busy" : status.sync_interval === 0 ? "manual" : "ok");
+  $("#syncTxt").textContent = syncBad ? "Sync-fout" : status.order_mode ? "Sync gepauzeerd"
+    : status.sync_interval === 0 ? "Sync handmatig" : "Sync " + ago(status.last_sync);
+  // with automatic sync off there is no running "x s ago": the last sync is in the account menu
+  $("#syncChip").title = status.sync_interval === 0
+    ? `Automatisch synchroniseren staat uit (laatste sync ${ago(status.last_sync)}); klik om nu te synchroniseren`
+    : "Klik om nu te synchroniseren";
 
   const showLogin = !status.logged_in || forceLogin;
   $("#loginView").classList.toggle("hidden", !showLogin);

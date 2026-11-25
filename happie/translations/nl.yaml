@@ -4,7 +4,7 @@ configuration:
     description: De to-do-entiteit in Home Assistant die met je AH-lijst gesynchroniseerd wordt (bijv. todo.boodschappen). Maak hem aan via Instellingen > Apparaten & diensten > Integratie toevoegen > Lokale to-do.
   sync_interval:
     name: Sync-interval (seconden)
-    description: Hoe vaak de AH-lijst opgehaald wordt. Wijzigingen in Home Assistant worden direct doorgezet.
+    description: Hoe vaak de AH-lijst opgehaald wordt (15 tot 3600), of 0 voor alleen handmatig. Wijzigingen in Home Assistant worden direct doorgezet. Je kunt dit ook in het paneel instellen, via je profiel › Automatisch.
   auto_match_products:
     name: Automatisch product koppelen
     description: Als je in Home Assistant iets toevoegt (bijv. via spraak), zoek dan het best passende AH-product en zet dat op de lijst in plaats van losse tekst.

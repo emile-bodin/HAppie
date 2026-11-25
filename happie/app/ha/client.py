@@ -129,6 +129,20 @@ class HAClient:
             if resp.status >= 400:
                 raise HAError(f"discovery gaf {resp.status}: {(await resp.text())[:200]}")
 
+    @property
+    def under_supervisor(self) -> bool:
+        """False in local development, where the app talks to HA Core directly."""
+        return self._api.startswith("http://supervisor/")
+
+    async def set_app_options(self, options: dict[str, Any]) -> None:
+        """Save this app's options (the configuration page in HA); Supervisor replaces all of them."""
+        async with self._session.post(
+            "http://supervisor/addons/self/options", json={"options": options},
+            headers=self._headers(), timeout=aiohttp.ClientTimeout(total=15),
+        ) as resp:
+            if resp.status >= 400:
+                raise HAError(f"Opslaan in de app-configuratie gaf {resp.status}: {(await resp.text())[:200]}")
+
     async def dismiss(self, notification_id: str) -> None:
         await self._service("persistent_notification", "dismiss", {"notification_id": notification_id})
 
