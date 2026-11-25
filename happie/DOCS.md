@@ -41,7 +41,7 @@ Daarna ververst de app de token zelf. Je wachtwoord wordt nooit opgeslagen.
 | Optie | Uitleg |
 |---|---|
 | `todo_entity` | De to-do-entiteit die gesynchroniseerd wordt. |
-| `sync_interval` | Hoe vaak (in seconden, 15 tot 3600) de AH-lijst opgehaald wordt, of `0` voor alleen handmatig. Wijzigingen in HA gaan meteen door. Ook in te stellen in het profielmenu van het paneel (zie hieronder). |
+| `sync_interval` | Hoe vaak (in seconden, 15 tot 3600) de AH-lijst opgehaald wordt, of `0` voor alleen handmatig. Een waarde onder 15 wordt 15. Wijzigingen in HA gaan meteen door. Ook in te stellen in het profielmenu van het paneel (zie hieronder). |
 | `auto_match_products` | Iets wat je in HA toevoegt (bijv. via spraak) wordt als het best passende AH-product op de lijst gezet, niet als losse tekst. |
 | `bonus_notifications` | Melding als iets op je lijst, of iets wat je vaak koopt, in de bonus komt. Je krijgt per aanbieding één melding. |
 | `notify_service` | Optioneel, bijv. `notify.mobile_app_telefoon`. Dan gaan meldingen ook naar je telefoon. |

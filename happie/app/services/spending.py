@@ -132,15 +132,26 @@ def summary(purchases: list[dict[str, Any]], today: date | None = None) -> dict[
 
 
 def weekday_average(purchases: list[dict[str, Any]], today: date | None = None, weeks: int = 12) -> list[float]:
-    """Average spent per weekday (Monday first) over the last `weeks` weeks, this week included."""
+    """Average spent per weekday (Monday first) over the last `weeks` weeks, this week included.
+
+    Each weekday is divided by how often that day occurred in the period, so a history shorter than `weeks`
+    or a weekday still to come this week doesn't pull the average down. The period starts no earlier than
+    the week of the first purchase up to today.
+    """
     today = today or date.today()
     start = week_start(today) - timedelta(days=7 * (weeks - 1))
+    dates = [d for d in (_parse(p.get("date")) for p in purchases) if d and d <= today]
+    if not dates:
+        return [0.0] * 7
+    start = max(start, week_start(min(dates)))
     totals = [0.0] * 7
     for p in purchases:
         d = _parse(p.get("date"))
         if d and start <= d <= today:
             totals[d.weekday()] += p["total"]
-    return [round(t / weeks, 2) for t in totals]
+    days = (today - start).days + 1
+    counts = [days // 7 + (1 if (i - start.weekday()) % 7 < days % 7 else 0) for i in range(7)]
+    return [round(t / n, 2) if n else 0.0 for t, n in zip(totals, counts)]
 
 
 def budget_status(spent: float, list_cost: float | None, budget: float) -> dict[str, Any] | None:

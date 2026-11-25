@@ -7,7 +7,7 @@ from aiohttp import web
 
 from ah.errors import AHAuthError
 from ah.models import LOGIN_URL
-from config import LOGIN_NOTIFICATION, STATIC_DIR
+from config import LOGIN_NOTIFICATION, STATIC_DIR, sync_interval
 
 _LOGGER = logging.getLogger("happie")
 
@@ -73,7 +73,7 @@ class AccountMixin:
                 "warnings": self.sync.warnings,
                 "order_mode": self.sync.order_mode,
                 "auto_match": self.options["auto_match_products"],
-                "sync_interval": int(self.options["sync_interval"]),
+                "sync_interval": sync_interval(self.options),
             }
         )
 

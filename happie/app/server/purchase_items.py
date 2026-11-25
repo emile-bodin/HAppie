@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 import time
 from datetime import date, timedelta
@@ -37,11 +38,10 @@ class PurchaseItemsMixin:
             self._items_task = asyncio.create_task(self._refresh_items())
 
     async def _refresh_items(self) -> None:
-        sem = asyncio.Semaphore(3)
         fetched = 0
         try:
             while todo := self._items_pending()[:ITEMS_BATCH]:
-                results = await asyncio.gather(*(self._fetch_items(p, sem) for p in todo), return_exceptions=True)
+                results = await asyncio.gather(*(self._background_lines(p) for p in todo), return_exceptions=True)
                 for p, r in zip(todo, results):
                     if isinstance(r, AHAuthError):
                         raise r
@@ -60,9 +60,38 @@ class PurchaseItemsMixin:
         if fetched:
             _LOGGER.info("Artikelen van %d aankopen opgehaald", fetched)
 
-    async def _fetch_items(self, purchase: dict[str, Any], sem: asyncio.Semaphore) -> list[dict[str, Any]]:
-        """Lines of one purchase: [{key, name, qty, amount}]. Raises when AH returns nothing, so it's tried again later."""
+    @staticmethod
+    async def _shared(inflight: dict[str, asyncio.Task], key: str, make) -> Any:
+        """Run make() once per key at a time: a second caller waits for the first one's result."""
+        task = inflight.get(key)
+        if task is None:
+            task = inflight[key] = asyncio.ensure_future(make())
+
+            def done(t: asyncio.Task) -> None:
+                inflight.pop(key, None)
+                if not t.cancelled():
+                    t.exception()  # retrieved: no asyncio error in the log when every caller went away
+
+            task.add_done_callback(done)
+        return await asyncio.shield(task)  # a caller that goes away doesn't cancel it for the others
+
+    async def _lines_for(self, purchase: dict[str, Any], sem: asyncio.Semaphore | None) -> list[dict[str, Any]]:
+        """Lines of one purchase, fetched once even when the panel and the background task ask at the same time."""
+        return await self._shared(self._items_inflight, purchase["id"], lambda: self._fetch_items(purchase, sem))
+
+    async def _background_lines(self, purchase: dict[str, Any]) -> list[dict[str, Any]]:
+        # a slot per purchase, taken before the fetch is registered: the panel then only ever waits for a
+        # fetch that is running, never for one still queued behind the rest of the batch
+        async with self._items_sem:
+            return await self._lines_for(purchase, None)
+
+    async def _fetch_items(self, purchase: dict[str, Any], sem: asyncio.Semaphore | None) -> list[dict[str, Any]]:
+        """Lines of one purchase: [{key, name, qty, amount}]. Raises when AH returns nothing, so it's tried again later.
+
+        `sem` limits the AH requests; None when the caller already holds a slot for the whole purchase.
+        """
         kind, _, pid = purchase["id"].partition(":")
+        sem = sem or contextlib.nullcontext()
         if kind == "order":
             async with sem:
                 lines = await self.ah.order_lines(pid)
@@ -77,16 +106,20 @@ class PurchaseItemsMixin:
             raise AHError("geen artikelen gevonden")
         return out
 
-    async def _receipt_line_key(self, line: dict[str, Any], sem: asyncio.Semaphore) -> str:
+    async def _receipt_line_key(self, line: dict[str, Any], sem: Any) -> str:
         """Product key of a receipt line, or a receipt key when no webshop product has its hqId."""
         hq = str(line["hq_id"]) if line.get("hq_id") else None
         if not hq:
             return receipt_key(None, line["name"])
         if hq not in self.items.hq:
-            async with sem:
-                product, guess = await self.ah.product_by_hq_id(line["hq_id"], line["name"])
-            self.items.hq[hq] = {"key": self.items.add_product(product) if product else None, "guess": guess}
+            # receipts fetched at the same time often share products: look each hqId up only once
+            await self._shared(self._hq_inflight, hq, lambda: self._lookup_hq(hq, line, sem))
         return self.items.hq[hq]["key"] or receipt_key(hq, line["name"])
+
+    async def _lookup_hq(self, hq: str, line: dict[str, Any], sem: Any) -> None:
+        async with sem:
+            product, guess = await self.ah.product_by_hq_id(line["hq_id"], line["name"])
+        self.items.hq[hq] = {"key": self.items.add_product(product) if product else None, "guess": guess}
 
     # ------------------------------------------------------------------ api
     async def spending_items_api(self, request: web.Request) -> web.Response:
@@ -112,7 +145,7 @@ class PurchaseItemsMixin:
             return web.json_response({"error": "Aankoop niet gevonden"}, status=404)
         lines = self.items.lines.get(pid)
         if lines is None:
-            lines = await self._fetch_items(purchase, asyncio.Semaphore(3))
+            lines = await self._lines_for(purchase, asyncio.Semaphore(3))  # its own slots: not behind the background
             self.items.lines[pid] = lines
             self.items.save()
         out = []

@@ -9,7 +9,7 @@ from typing import Any
 from aiohttp import web
 
 from ah.pricing import line_for
-from config import CANCELLED_STATES, DELIVERY_REFRESH, DELIVERY_SENSOR, DONE_STATES, ORDER_LINES_TTL
+from config import CANCELLED_STATES, DELIVERY_SENSOR, DONE_STATES, ORDER_LINES_TTL
 
 _LOGGER = logging.getLogger("happie")
 
@@ -136,6 +136,6 @@ class OrdersMixin:
         })
 
     async def delivery(self, request: web.Request) -> web.Response:
-        if request.query.get("refresh") or time.time() - self._delivery_at > DELIVERY_REFRESH:
+        if request.query.get("refresh") or self.delivery_stale():
             await self.refresh_delivery()
         return web.json_response({"delivery": self._delivery, "sensor": DELIVERY_SENSOR if self.ha else None})
