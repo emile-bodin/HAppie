@@ -102,7 +102,7 @@ Kies bovenaan **Uitgaven** (op een telefoon het tabblad *Uitgaven*), of klik op 
 - **Aankopen**: al je bezorgingen en kassabonnen. Klik erop voor de artikelen.
 - **Inzichten**: een prognose voor de maand, wat winkelbezoeken per week kosten, wat een bezorging gemiddeld kost en op welke dag je het meest uitgeeft.
 
-Bedragen per artikel: op een kassabon staat wat je per artikel betaald hebt. Bij een online bestelling geeft AH alleen het totaal, dus daar is het bedrag per artikel een schatting met de huidige prijs (met ± ervoor).
+Bedragen per artikel: op een kassabon staat wat je per artikel betaald hebt, na bonus. Een korting die AH niet aan een artikel koppelt (zoals Air Miles of een coupon) verdeelt HAppie naar verhouding over de hele bon, en statiegeld telt mee bij het artikel. Zo tellen de artikelen op tot wat je betaald hebt. Bij een online bestelling geeft AH alleen het totaal, dus daar is het bedrag per artikel een schatting met de huidige prijs (met ± ervoor).
 
 - **Bronnen**: afgeleverde online bestellingen (het betaalde totaal) en je kassabonnen uit de winkel, net als in de AH-app onder *Kassabonnen*. Daarvoor moet je bonuskaart aan je account gekoppeld zijn. Lukt het ophalen van kassabonnen niet, dan zie je alleen online bestellingen en staat dat in het overzicht.
 - **Verversen**: elke 6 uur, direct nadat een bestelling is afgeleverd, en met *Bijwerken* op de pagina. De app bewaart ruim een jaar aan aankopen. De artikelen van die aankopen haalt hij op de achtergrond op, elke aankoop één keer; de eerste keer duurt dat een paar minuten.

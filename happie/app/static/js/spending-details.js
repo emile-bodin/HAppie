@@ -18,19 +18,32 @@ function renderSpendPurchases() {
     : `<p class="muted sp-empty">Nog geen aankopen gevonden.</p>`;
   $("#spendNote").textContent = spend.receipts_ok === false ? "Kassabonnen konden niet opgehaald worden; je ziet alleen online bestellingen." : "";
 }
+const signedEuro = (n) => (n < 0 ? "−" : "") + euro(Math.abs(n));
+// a receipt line: its price after its own bonus, the price before it struck through
+function lineAmountHtml(l) {
+  if (l.amount == null) return "";
+  if (l.gross == null || !l.bonus) return euro(l.gross ?? l.amount);
+  return `<s class="was">${euro(l.gross)}</s>${euro(l.gross + l.bonus)}`;
+}
 function purchaseLinesHtml(id) {
-  const lines = purchaseLines[id];
-  if (!lines || lines instanceof Promise) return `<div class="hint"><span class="spinner"></span></div>`;
-  if (lines.error) return `<div class="hint">${esc(lines.error)}</div>`;
+  const p = purchaseLines[id];
+  if (!p || p instanceof Promise) return `<div class="hint"><span class="spinner"></span></div>`;
+  if (p.error) return `<div class="hint">${esc(p.error)}</div>`;
+  const lines = p.lines;
+  const extra = (label, amount, cls = "") => `<li class="extra ${cls}"><span class="nm"><span>${label}</span></span><b>${amount}</b></li>`;
+  const receipt = lines.some((l) => l.gross != null);
   return `<ul class="sp-sub-list">${lines.map((l) => `<li>${thumb(l.image)}
-      <div class="nm"><span>${esc(l.name)}</span><small>${l.quantity !== 1 ? `${+l.quantity.toFixed(2)}× · ` : ""}${esc(l.category)}${l.category === UNMATCHED || l.receipt_name === l.name ? "" : ` · bon: ${esc(l.receipt_name)}`}</small></div>
-      <b>${l.amount == null ? "" : euro(l.amount)}</b></li>`).join("")}</ul>
+      <div class="nm"><span>${esc(l.name)}</span><small>${l.quantity !== 1 ? `${+l.quantity.toFixed(2)}× · ` : ""}${l.bonus ? `<span class="tag bonus">Bonus</span> ` : ""}${esc(l.category)}${l.category === UNMATCHED || l.receipt_name === l.name ? "" : ` · bon: ${esc(l.receipt_name)}`}</small></div>
+      <b class="amt">${lineAmountHtml(l)}</b></li>`).join("")}
+    ${(p.discounts || []).map((d) => extra(`Korting <small>${esc(d.name)}</small>`, signedEuro(d.amount))).join("")}
+    ${p.deposit ? extra("Statiegeld", euro(p.deposit)) : ""}
+    ${receipt && p.total != null ? extra("Betaald", euro(p.total), "sum") : ""}</ul>
     ${lines.some((l) => l.amount == null) ? `<div class="sp-note">AH geeft bij bestellingen geen prijs per artikel.</div>` : ""}`;
 }
 async function loadPurchaseLines(id) {
   if (purchaseLines[id] && !purchaseLines[id].error) return;
   purchaseLines[id] = api(`api/spending/purchase/${encodeURIComponent(id)}`)
-    .then((r) => r.lines).catch((err) => ({ error: err.message }));
+    .catch((err) => ({ error: err.message }));
   purchaseLines[id] = await purchaseLines[id];
   // the list may have been drawn again meanwhile: look the row up now
   const box = document.querySelector(`#spendRecent details[data-id="${CSS.escape(id)}"] .plines`);

@@ -12,7 +12,7 @@ from aiohttp import web
 
 from ah.errors import AHAuthError, AHError
 from config import ITEMS_BATCH, ITEMS_HISTORY_DAYS, ITEMS_RETRY
-from services.purchase_items import overview, receipt_key
+from services.purchase_items import allocate_receipt, overview, receipt_key
 from services.spending import weekday_average
 
 _LOGGER = logging.getLogger("happie")
@@ -99,9 +99,13 @@ class PurchaseItemsMixin:
                     "qty": l["quantity"], "amount": None} for l in lines if l["quantity"] > 0]
         else:
             async with sem:
-                lines = await self.ah.receipt_lines(pid)
-            out = [{"key": await self._receipt_line_key(l, sem), "name": l["name"], "qty": l["quantity"],
-                    "amount": l["amount"]} for l in lines]
+                receipt = await self.ah.receipt_details(pid)
+            raw = [{"key": await self._receipt_line_key(l, sem), "name": l["name"], "qty": l["quantity"],
+                    "amount": l["amount"], "deposit": l.get("deposit")} for l in receipt["lines"]]
+            titles = [(self.items.products.get(l["key"]) or {}).get("title") for l in raw]
+            out, discounts = allocate_receipt(raw, receipt["discounts"], titles)
+            if out:
+                self.items.discounts[purchase["id"]] = discounts
         if not out:
             raise AHError("geen artikelen gevonden")
         return out
@@ -152,9 +156,14 @@ class PurchaseItemsMixin:
         for l in lines:
             product = self.items.products.get(l["key"]) or {}
             out.append({"name": product.get("title") or l["name"], "receipt_name": l["name"], "quantity": l["qty"],
-                        "amount": l["amount"], "category": self.items.category(l["key"]),
+                        "amount": l["amount"], "gross": l.get("gross"), "bonus": l.get("bonus") or 0,
+                        "deposit": l.get("deposit") or 0, "category": self.items.category(l["key"]),
                         "product_id": product.get("id"), "image": product.get("image")})
-        return web.json_response({"id": pid, "lines": out})
+        # on a receipt: the discounts that fit no line, and the statiegeld, as rows of their own
+        other = [d for d in self.items.discounts.get(pid) or [] if not d.get("matched")]
+        deposit = round(sum(l["deposit"] for l in out), 2)
+        return web.json_response({"id": pid, "lines": out, "discounts": other, "deposit": deposit,
+                                  "total": purchase.get("total")})
 
     async def spending_link_api(self, request: web.Request) -> web.Response:
         """Put an unrecognised receipt line in a category of your choice (empty category: undo)."""

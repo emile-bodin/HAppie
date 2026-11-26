@@ -63,24 +63,38 @@ class PurchasesMixin:
                 break
         return out
 
-    async def receipt_lines(self, receipt_id: str) -> list[dict[str, Any]]:
-        """Lines of an in-store receipt: [{hq_id, name, quantity, amount}].
+    async def receipt_details(self, receipt_id: str) -> dict[str, Any]:
+        """Lines and discounts of an in-store receipt: {lines: [...], discounts: [...]}.
 
-        `name` is the short receipt text ("AH KIPFILET"), `hq_id` the product's hqId (not its webshopId)
-        and `amount` what was paid for the line, before receipt-wide discounts.
+        lines:     [{hq_id, name, quantity, amount, deposit}]; `name` is the short receipt text ("AH KIPFILET"),
+                   `hq_id` the product's hqId (not its webshopId), `amount` the line's price before discounts
+                   and `deposit` its statiegeld
+        discounts: [{name, type, amount}]; `name` is a short promotion text ("ALLEROBIJN"), `type` e.g. BONUS,
+                   COUPON or "35% K", `amount` negative. Discounts aren't tied to a line.
+
+        The lines plus deposits plus discounts add up to the receipt's total.
         """
         query = ("query($id: String!) { posReceiptDetails(id: $id) "
-                 "{ products { id name quantity amount { amount } } } }")
+                 "{ products { id name quantity amount { amount } deposit { amount } } "
+                 "discounts { name type amount { amount } } } }")
         data = await self._raw("POST", "/graphql", json_body={"query": query, "variables": {"id": receipt_id}})
         if isinstance(data, dict) and data.get("errors") and not data.get("data"):
             raise AHError(str(data["errors"][0].get("message")))
         details = ((data or {}).get("data") or {}).get("posReceiptDetails") or {}
-        out = []
+        lines = []
         for p in details.get("products") or []:
             name = str(p.get("name") or "").strip()
             if not name:
                 continue
             amount = (p.get("amount") or {}).get("amount")
-            out.append({"hq_id": p.get("id") or None, "name": name, "quantity": float(p.get("quantity") or 1),
-                        "amount": round(float(amount), 2) if amount is not None else None})
-        return out
+            deposit = (p.get("deposit") or {}).get("amount")
+            lines.append({"hq_id": p.get("id") or None, "name": name, "quantity": float(p.get("quantity") or 1),
+                          "amount": round(float(amount), 2) if amount is not None else None,
+                          "deposit": round(float(deposit or 0), 2)})
+        discounts = []
+        for d in details.get("discounts") or []:
+            amount = (d.get("amount") or {}).get("amount")
+            if amount:
+                discounts.append({"name": str(d.get("name") or "").strip(), "type": str(d.get("type") or ""),
+                                  "amount": round(float(amount), 2)})
+        return {"lines": lines, "discounts": discounts}

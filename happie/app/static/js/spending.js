@@ -1,7 +1,7 @@
 // ---------------- spending ----------------
 let spend = null, spendPeriod = "week", spendSel = null;
 let spendItems = null, spendRange = "12", spendSrc = "all", spendShown = 15, spendTopAll = false, spendItemsTimer = null;
-const purchaseLines = {};  // purchase id -> lines (or a promise while loading)
+const purchaseLines = {};  // purchase id -> {lines, discounts, deposit, total} (or a promise while loading)
 const listCost = () => items.filter((i) => !i.checked).reduce((n, i) => n + (i.line ? i.line.total : 0), 0);
 const shortDate = (d) => new Date(d + "T12:00:00").toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" });
 const spendPageOpen = () => document.body.dataset.view === "spend" && !$("#spendPage").classList.contains("hidden");

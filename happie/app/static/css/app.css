@@ -475,6 +475,11 @@ details.sp-row .sp-sub-list .thumb { width: 28px; height: 28px; }
 details.sp-row .sp-sub-list .nm > span:first-child { font-size: 13px; }
 details.sp-row .sp-sub-list li.more { color: var(--muted); font-size: 12px; display: block; }
 details.sp-row .sp-note { margin: 0 0 10px 20px; }
+.sp-sub-list b.amt { white-space: nowrap; }
+.sp-sub-list s.was { color: var(--muted); font-weight: 400; font-size: 12px; margin-right: 6px; }
+.sp-sub-list li.extra { justify-content: space-between; font-size: 13px; color: var(--muted); }
+.sp-sub-list li.extra small { font-size: 11px; margin-left: 4px; }
+.sp-sub-list li.extra.sum { color: inherit; font-weight: 600; }
 details.cat > summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; font-size: 13px; }
 details.cat .cname { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 details.cat .camt { color: var(--muted); white-space: nowrap; }
