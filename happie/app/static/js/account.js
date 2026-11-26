@@ -23,6 +23,7 @@ async function loadStatus() {
   $("#menuSyncBtn").classList.toggle("hidden", !status.logged_in || status.sync_interval !== 0);
   $("#menuLogin").classList.toggle("hidden", status.logged_in && st !== "expired");
   $("#accountChip").title = `${name} · ${stateTxt}`;
+  renderSyncLine();
 
   const syncBad = !!status.last_error;
   $("#syncChip").classList.toggle("hidden", !status.logged_in);
@@ -44,7 +45,7 @@ async function loadStatus() {
   const b = [];
   if (st === "expired" && !showLogin)
     b.push(`<div class="banner error"><div><b>Je AH-sessie is verlopen.</b> De sync staat stil tot je opnieuw inlogt.</div><button class="btn sm" data-relogin>Opnieuw inloggen</button></div>`);
-  else if (status.last_error && !showLogin) b.push(`<div class="banner error"><div><b>Sync-fout:</b> ${esc(status.last_error)}</div></div>`);
+  else if (status.last_error && !showLogin) b.push(`<div class="banner error"><div><b>Sync-fout:</b> ${esc(friendlyError(0, status.last_error))}</div></div>`);
   if (status.order_mode && !showLogin)
     b.push(`<div class="banner"><div><b>Je bestelling staat open voor wijzigingen.</b> Zolang dat zo is, vergrendelt AH je boodschappenlijst.
       De sync is gepauzeerd en er wordt niets verwijderd. Rond je wijzigingen af in de AH-app (of annuleer ze), dan gaat alles vanzelf verder.</div></div>`);
@@ -86,18 +87,34 @@ function renderStats() {
     if (i.line) { cost += i.line.total; saving += i.line.saving; } else unknown++;
     if (i.product?.is_bonus) bonus++;
   }
-  $("#stOpen").textContent = open.reduce((n, i) => n + i.quantity, 0);
-  $("#stCost").textContent = euro(cost).replace(",00", ",–");
-  const lbl = [];
-  if (saving > 0.004) lbl.push(`−${euro(saving)} bonus`);
-  if (unknown) lbl.push(`+${unknown} zonder prijs`);
-  $("#stCostLbl").textContent = lbl.length ? lbl.join(" · ") : "Geschatte kosten";
-  $("#stCostLbl").title = saving > 0.004 ? `Inclusief ${euro(saving)} bonusvoordeel` : "";
-  $("#stBonus").textContent = bonus;
-  $("#stDone").textContent = `${done}/${items.length}`;
+  // one summary line under "Mijn lijst" instead of separate tiles
+  const pieces = open.reduce((n, i) => n + i.quantity, 0);
+  $("#listSum").classList.toggle("hidden", !items.length);
+  $("#sumOpen").innerHTML = `<b>${pieces}</b> te halen`;
+  const extra = [];
+  if (saving > 0.004) extra.push(`−${euro(saving)} bonus`);
+  if (unknown) extra.push(`+${unknown} zonder prijs`);
+  $("#sumCost").innerHTML = `<b>${euro(cost)}</b> geschat${extra.length ? ` (${esc(extra.join(", "))})` : ""}`;
+  $("#sumCost").title = saving > 0.004 ? `Inclusief ${euro(saving)} bonusvoordeel` : "";
+  $("#sumDone").textContent = `${done} van ${items.length} afgevinkt`;
   $("#stProg").style.width = items.length ? (done / items.length * 100) + "%" : "0";
+  // the bonus tile only when something on the list is in the bonus
+  $("#stBonus").textContent = bonus;
+  $("#bonusTile").classList.toggle("hidden", !bonus);
   $("#listCount").textContent = open.length;
   $("#tabCount").textContent = open.length;
   $("#tabCount").classList.toggle("hidden", !open.length);
   if (spend) renderSpendTile();
+  renderSyncLine();
+}
+// "Gesynchroniseerd met AH en todo.boodschappen · 18 s geleden" under the list
+function renderSyncLine() {
+  const el = $("#syncLine");
+  if (!status.logged_in) { el.innerHTML = ""; return; }
+  const ha = status.ha_connected && status.todo_exists !== false ? `<span class="ha"> en <code>${esc(status.todo_entity)}</code></span>` : "";
+  const dot = status.last_error ? "bad" : status.order_mode ? "busy" : status.sync_interval === 0 ? "manual" : "ok";
+  const txt = status.last_error ? "Synchroniseren lukt nu niet"
+    : status.order_mode ? "Synchroniseren gepauzeerd"
+    : `Gesynchroniseerd met AH${ha} · ${esc(ago(status.last_sync))}`;
+  el.innerHTML = `<span class="dot ${dot}"></span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${txt}</span>`;
 }

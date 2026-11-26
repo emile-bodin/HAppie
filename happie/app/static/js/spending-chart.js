@@ -20,7 +20,10 @@ function spendChartSvg(buckets, budget, avg) {
   const step = niceStep(max / 4), top = Math.ceil(max / step) * step;
   const y = (v) => T + (H - T - B) * (1 - v / top);
   const bw = (W - L - R) / n;
-  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Uitgaven per ${spendPeriod === "week" ? "week" : "maand"}">`;
+  const unit = spendPeriod === "week" ? "week" : "maand";
+  const label = `Uitgaven per ${unit}` + (n > 1 ? `, ${buckets[0].label} tot ${last.label}` : "")
+    + (last ? `, laatste ${unit} ${euro(last.total)}` : "") + (avg ? `, gemiddeld ${euro(avg)}` : "") + (budget ? `, budget ${euro(budget)}` : "");
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)}">`;
   for (let v = 0; v <= top + 0.001; v += step)
     svg += `<line class="gl" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text class="al" x="${L - 6}" y="${y(v) + 4}" text-anchor="end">€${Math.round(v)}</text>`;
   buckets.forEach((b, i) => {

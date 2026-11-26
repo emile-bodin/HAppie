@@ -9,10 +9,10 @@ Huidige versie: **0.11.0**. Zie de [changelog](happie/CHANGELOG.md) en de [gebru
 ## Functies
 
 **Dashboard** (paneel *HAppie* in de zijbalk), dat zich aanpast aan je scherm: drie kolommen op een computer, twee op een tablet, tabbladen op een telefoon.
-- **Bovenaan:** je volgende bezorging (dag, tijdvak, tot wanneer je kunt wijzigen) en cijfers: te halen, geschatte kosten mét bonus, bonusitems en hoeveel er is afgevinkt.
+- **Bovenaan:** je volgende bezorging (dag, tijdvak, tot wanneer je kunt wijzigen), je uitgaven deze week en, als er iets op je lijst in de bonus is, het aantal bonusitems.
 - **Zoeken:** in het AH-assortiment, met foto, prijs en bonus. Je kunt ook losse tekst toevoegen.
 - **Barcode scannen:** live met de camera, via een foto, of door de code in te typen.
-- **Mijn lijst:** gegroepeerd per categorie. Per regel zie je de bonusprijs ("2 voor 3.99" → ~~€ 5,98~~ € 3,99), en een hint als je nog iets extra moet pakken voor de bonus.
+- **Mijn lijst:** gegroepeerd per categorie, met bovenaan wat je nog moet halen, de geschatte kosten mét bonus, hoeveel er is afgevinkt en wanneer er voor het laatst gesynchroniseerd is. Per regel zie je de bonusprijs ("2 voor 3.99" → ~~€ 5,98~~ € 3,99), en een hint als je nog iets extra moet pakken voor de bonus. Klik op een productfoto om hem groter te zien; iets weghalen kun je meteen ongedaan maken.
 - **Ontdekken:** *Voor jou* (AH-suggesties), *Vaak gekocht* (uit je laatste 8 bestellingen) en *Bonus* (je persoonlijke bonus, plus eerder gekochte producten die nu in de bonus zijn).
 - **Account:** je naam en inlogstatus. Is je sessie verlopen, dan zie je dat meteen.
 - **Automatisch synchroniseren** (in het profielmenu): aan met een interval naar keuze, of uit en dan met de knop *Nu synchroniseren*. Wordt opgeslagen in de configuratie van de app.

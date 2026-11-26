@@ -12,6 +12,9 @@ $("#searchForm").addEventListener("submit", (e) => { e.preventDefault(); const q
 function renderFreeText(q) {
   const el = $("#freeText");
   el.classList.toggle("hidden", !q);
+  // a visible add button next to the field while typing (Enter does the same)
+  $("#searchForm").classList.toggle("typing", !!q);
+  $("#searchAdd").classList.toggle("hidden", !q);
   el.innerHTML = q ? `<a id="addFree">+ “${esc(q)}” als losse tekst</a> <span class="muted">(Enter)</span>` : "";
   const a = $("#addFree"); if (a) a.onclick = () => addItem(q, null);
 }

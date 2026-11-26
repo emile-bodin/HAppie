@@ -25,12 +25,13 @@ function renderList() {
 }
 function row(i) {
   const p = i.product, k = esc(i.key);
-  const img = p?.image ? `<img class="thumb" src="${esc(p.image)}" alt="" loading="lazy">` : `<div class="ph">✎</div>`;
+  const img = p?.image ? `<img class="thumb" src="${esc(p.image)}" alt="" loading="lazy">` : `<div class="ph" aria-hidden="true">${esc(initialOf(i.name))}</div>`;
   const bits = [];
   if (p?.unit_size) bits.push(esc(p.unit_size));
   const l = i.line, unit = p?.price_before || p?.price;
   if (l && unit) {
-    const reg = i.quantity > 1 ? `${euro(unit)} × ${i.quantity} = ` : "";
+    // the calculation is hidden on a phone, where only the line total fits
+    const reg = i.quantity > 1 ? `<span class="calc">${euro(unit)} × ${i.quantity} = </span>` : "";
     bits.push(l.applied
       ? `${reg}<s>${euro(l.regular)}</s> <b class="bonusprice">${euro(l.total)}</b>`
       : i.quantity > 1 ? `${reg}<b>${euro(l.total)}</b>` : euro(l.total));
@@ -38,13 +39,13 @@ function row(i) {
   if (p?.is_bonus) bits.push(`<span class="badge">${esc(bonusLabel(p.bonus))}</span>`);
   if (l?.hint && !i.checked) bits.push(`<span class="bonushint">${esc(bonusLabel(l.hint))}</span>`);
   return `<li class="${i.checked ? "checked" : ""}">
-    <button class="chk ${i.checked ? "on" : ""}" data-act="check" data-key="${k}" aria-label="Afvinken">${i.checked ? "✓" : ""}</button>
+    <button class="chk ${i.checked ? "on" : ""}" data-act="check" data-key="${k}" aria-label="Afvinken">${i.checked ? ICON_CHECK : ""}</button>
     ${img}
     <div class="name"><span>${esc(i.name)}</span>${bits.length ? `<small>${bits.join("<span>·</span>")}</small>` : ""}</div>
     <div class="qty">
-      <button data-act="dec" data-key="${k}" aria-label="Minder">−</button><span>${i.quantity}</span><button data-act="inc" data-key="${k}" aria-label="Meer">+</button>
+      <button data-act="dec" data-key="${k}" aria-label="Minder">${ICON_MINUS}</button><span>${i.quantity}</span><button data-act="inc" data-key="${k}" aria-label="Meer">${ICON_PLUS}</button>
     </div>
-    <button class="del" data-act="del" data-key="${k}" aria-label="Verwijderen">✕</button>
+    <button class="del" data-act="del" data-key="${k}" aria-label="Verwijderen">${ICON_X}</button>
   </li>`;
 }
 async function loadList() {
@@ -70,16 +71,27 @@ $("#list").addEventListener("click", async (e) => {
       await api("api/list/check", { key: item.key, checked: item.checked });
     } else if (btn.dataset.act === "inc" || btn.dataset.act === "dec") {
       const q = item.quantity + (btn.dataset.act === "inc" ? 1 : -1);
-      if (q <= 0 && !confirm(`${item.name} verwijderen?`)) return;
-      item.quantity = q; if (q <= 0) items = items.filter((i) => i !== item); renderList();
+      if (q <= 0) return await removeWithUndo(item);
+      item.quantity = q; renderList();
       await api("api/list/quantity", { key: item.key, quantity: q });
     } else if (btn.dataset.act === "del") {
-      items = items.filter((i) => i !== item); renderList();
-      await api("api/list/remove", { key: item.key });
+      return await removeWithUndo(item);
     }
   } catch (err) { toast(err.message); }
   await loadList().catch(() => {});
 });
+// remove right away, with a way back in the toast instead of a confirmation first
+async function removeWithUndo(item) {
+  items = items.filter((i) => i !== item); renderList();
+  try { await api("api/list/remove", { key: item.key }); }
+  catch (err) { toast(err.message); await loadList().catch(() => {}); return; }
+  toast(`${item.name} verwijderd`, { label: "Ongedaan maken", fn: async () => {
+    try { await api("api/list/add", { name: item.name, product_id: item.product_id, quantity: item.quantity }); }
+    catch (err) { toast(err.message); }
+    await loadList().catch(() => {});
+  } });
+  await loadList().catch(() => {});
+}
 $("#list").addEventListener("click", (e) => { if (e.target.closest("[data-goto=search]")) goSearch(); });
 function goSearch() { if (isPhone()) setTab("search"); else $("#searchInput").focus(); }
 $("#clearChecked").onclick = async () => {
