@@ -157,10 +157,17 @@ def install_mocks(app, mock_ha: bool = True) -> None:
                      "SPA ROOD", "STATIEGELD", "AH TAS PAPIER", "BAKKERIJ DIV"]
     unknown = {"STATIEGELD", "AH TAS PAPIER", "BAKKERIJ DIV"}
 
-    async def receipt_lines(receipt_id):
+    async def receipt_details(receipt_id):
         rnd = random.Random(receipt_id)
-        return [{"hq_id": 1000 + receipt_texts.index(t), "name": t, "quantity": 1.0, "amount": round(rnd.uniform(0.25, 6), 2)}
-                for t in rnd.sample(receipt_texts, rnd.randint(2, 6))]
+        lines = [{"hq_id": 1000 + receipt_texts.index(t), "name": t, "quantity": 1.0,
+                  "amount": round(rnd.uniform(0.25, 6), 2), "deposit": 0.15 if t == "SPA ROOD" else 0.0}
+                 for t in rnd.sample(receipt_texts, rnd.randint(2, 6))]
+        # one discount that matches a line by name, and one for the whole receipt
+        discounts = [{"name": "MB" + lines[0]["name"].replace(" ", "")[:10], "type": "BONUS",
+                      "amount": -round(lines[0]["amount"] / 4, 2)}]
+        if rnd.random() < 0.5:
+            discounts.append({"name": "MIJN AH MILES", "type": "2000", "amount": -0.5})
+        return {"lines": lines, "discounts": discounts}
 
     async def product_by_hq_id(hq_id, name):
         if name in unknown:
@@ -194,7 +201,7 @@ def install_mocks(app, mock_ha: bool = True) -> None:
     ah.order_summaries = order_summaries
     ah.online_purchases = online_purchases
     ah.store_purchases = store_purchases
-    ah.receipt_lines = receipt_lines
+    ah.receipt_details = receipt_details
     ah.product_by_hq_id = product_by_hq_id
     ah.delivered_orders = delivered_orders
     ah.order_lines = mock_order_lines

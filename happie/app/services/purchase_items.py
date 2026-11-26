@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from datetime import date
 from typing import Any
 
@@ -22,18 +23,78 @@ def receipt_key(hq_id: Any, name: str) -> str:
     return f"r:{hq_id}" if hq_id else "r:" + " ".join(name.upper().split())
 
 
+def discount_key(name: str) -> str:
+    """What a receipt discount's name ("ALLEROBIJN", "MBAHSNOEPGRO") has in common with its lines' texts."""
+    key = re.sub(r"[^A-Z0-9]", "", name.upper())
+    for prefix in ("ALLE", "MB", "AH"):  # "alle Robijn", "meer bonus", "AH ..."
+        if key.startswith(prefix) and len(key) > len(prefix) + 3:
+            key = key[len(prefix):]
+    return key[:5]
+
+
+def _share(cents: int, weights: list[int]) -> list[int]:
+    """Split `cents` over the weights; the rounding rest goes to the largest, so the parts add up exactly."""
+    if not weights:
+        return []
+    total = sum(weights)
+    if total <= 0:
+        weights, total = [1] * len(weights), len(weights)
+    parts = [int(cents * w / total) for w in weights]
+    parts[weights.index(max(weights))] += cents - sum(parts)
+    return parts
+
+
+def allocate_receipt(lines: list[dict[str, Any]], discounts: list[dict[str, Any]],
+                     titles: list[str | None]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Put a receipt's discounts and deposits on its lines, so the lines add up to what was paid.
+
+    lines:     [{key, name, qty, amount (before discounts), deposit}]; titles: product title per line or None
+    A discount goes to the lines whose receipt text or product title has its name in it, by their price;
+    one that fits no line (Air Miles, most coupons) is spread over the whole receipt.
+    Returns the lines as [{key, name, qty, gross, deposit, bonus, spread, amount}] and the discounts with `matched`.
+    """
+    def cents(x: Any) -> int:
+        return round((x or 0) * 100)
+
+    gross = [cents(l.get("amount")) for l in lines]
+    texts = [re.sub(r"[^A-Z0-9]", "", f"{l['name']} {t or ''}".upper()) for l, t in zip(lines, titles)]
+    bonus = [0] * len(lines)
+    spread = [0] * len(lines)
+    out_discounts = []
+    for d in discounts:
+        key = discount_key(d["name"])
+        hits = [i for i, t in enumerate(texts) if len(key) >= 3 and key in t]
+        target, idx = (bonus, hits) if hits else (spread, list(range(len(lines))))
+        for i, part in zip(idx, _share(cents(d["amount"]), [gross[i] for i in idx])):
+            target[i] += part
+        out_discounts.append({**d, "matched": bool(hits)})
+    out = []
+    for n, l in enumerate(lines):
+        dep = cents(l.get("deposit"))
+        out.append({"key": l["key"], "name": l["name"], "qty": l["qty"], "gross": gross[n] / 100,
+                    "deposit": dep / 100, "bonus": bonus[n] / 100, "spread": spread[n] / 100,
+                    "amount": (gross[n] + dep + bonus[n] + spread[n]) / 100})
+    return out, out_discounts
+
+
 class PurchaseItems:
     """Lines per purchase, cached on disk. Finished purchases never change, so each one is fetched once.
 
-    lines:    purchase id -> [{key, name, qty, amount}]; amount is what was paid (receipts) or None (orders)
-    products: "p:<webshopId>" -> {id, title, category, image, price}
-    hq:       str(hqId) -> {key: product key or None, guess: category of the best search hit}
-    links:    receipt key ("r:...") -> category the user picked for an unrecognised receipt line
+    lines:     purchase id -> [{key, name, qty, amount}]; amount is what was paid (receipts, after discounts and
+               with statiegeld; see allocate_receipt) or None (orders)
+    discounts: receipt purchase id -> [{name, type, amount, matched}]
+    products:  "p:<webshopId>" -> {id, title, category, image, price}
+    hq:        str(hqId) -> {key: product key or None, guess: category of the best search hit}
+    links:     receipt key ("r:...") -> category the user picked for an unrecognised receipt line
     """
+
+    # 2: receipt lines carry their discounts and statiegeld; older receipt lines are fetched again
+    VERSION = 2
 
     def __init__(self, path: str) -> None:
         self.path = path
         self.lines: dict[str, list[dict[str, Any]]] = {}
+        self.discounts: dict[str, list[dict[str, Any]]] = {}
         self.products: dict[str, dict[str, Any]] = {}
         self.hq: dict[str, dict[str, Any]] = {}
         self.links: dict[str, str] = {}
@@ -41,9 +102,12 @@ class PurchaseItems:
             with open(path, encoding="utf-8") as fh:
                 data = json.load(fh)
             self.lines = data.get("lines") or {}
+            self.discounts = data.get("discounts") or {}
             self.products = data.get("products") or {}
             self.hq = data.get("hq") or {}
             self.links = data.get("links") or {}
+            if data.get("version") != self.VERSION:
+                self.lines = {k: v for k, v in self.lines.items() if not k.startswith("receipt:")}
         except FileNotFoundError:
             pass
         except (OSError, ValueError, TypeError) as err:
@@ -52,7 +116,8 @@ class PurchaseItems:
     def save(self) -> None:
         tmp = self.path + ".tmp"
         with open(tmp, "w", encoding="utf-8") as fh:
-            json.dump({"lines": self.lines, "products": self.products, "hq": self.hq, "links": self.links}, fh)
+            json.dump({"version": self.VERSION, "lines": self.lines, "discounts": self.discounts,
+                       "products": self.products, "hq": self.hq, "links": self.links}, fh)
         os.replace(tmp, self.path)
 
     def pending(self, purchases: list[dict[str, Any]], since: str) -> list[dict[str, Any]]:
@@ -62,6 +127,7 @@ class PurchaseItems:
 
     def prune(self, keep: set[str]) -> None:
         self.lines = {k: v for k, v in self.lines.items() if k in keep}
+        self.discounts = {k: v for k, v in self.discounts.items() if k in keep}
 
     def add_product(self, p: dict[str, Any]) -> str:
         key = product_key(p["id"])

@@ -6,6 +6,11 @@ Alle veranderingen per versie, de nieuwste bovenaan. HAppie volgt [Semantic Vers
 - **MINOR** (0.**10**.0): nieuwe functies of opties; alles wat je had blijft werken.
 - **MAJOR** (**1**.0.0): veranderingen waarvoor je zelf iets moet aanpassen, zoals een andere entiteits-ID of een optie die verdwijnt. Zolang de versie met 0. begint, gebeurt zoiets in een MINOR-versie en staat het bovenaan die sectie.
 
+## 0.12.2
+- Uitgaven: bij kassabonnen telt nu de bonus mee, net als kortingsstickers, coupons, Air Miles en statiegeld. Daardoor waren de bedragen per artikel, per categorie en bij *Meest gekocht* te hoog; de totalen per week en maand klopten al.
+- Op een kassabon zie je per artikel de prijs na bonus, met de oude prijs doorgestreept. Kortingen die niet bij één artikel horen en het statiegeld staan onderaan, met het betaalde bedrag.
+- Kassabonnen die al opgehaald waren, haalt HAppie één keer opnieuw op.
+
 ## 0.12.1
 - Uitgaven, *Per categorie*: een onbekende bonregel koppelen werkt nu ook als de voorgestelde categorie al klopt. Naast de keuzelijst staat een knop *Koppel* om de keuze te bevestigen.
 - De keuzelijst sluit niet meer vanzelf terwijl HAppie op de achtergrond nog artikelen ophaalt.
