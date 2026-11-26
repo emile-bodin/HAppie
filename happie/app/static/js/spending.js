@@ -22,7 +22,8 @@ async function loadSpendItems() {
   try { spendItems = await api(`api/spending/items?months=${spendRange}`); }
   catch (err) { $("#spTop").innerHTML = `<li class="hint">${esc(err.message)}</li>`; return; }
   if (!spendPageOpen()) return;
-  renderSpendItems(); renderSpendInsights();
+  // don't redraw while a category is being picked: that would throw the open dropdown away
+  if (!document.querySelector("#spCats .linkpick")) { renderSpendItems(); renderSpendInsights(); }
   // articles are fetched in the background: keep the page up to date while that runs
   if (spendItems.running) spendItemsTimer = setTimeout(() => { if (spendPageOpen()) loadSpendItems(); }, 8000);
 }

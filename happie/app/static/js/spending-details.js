@@ -147,22 +147,33 @@ $("#spCats").addEventListener("click", async (e) => {
     sel.innerHTML = `<option value="">Kies categorie…</option>` + names.map((n) => `<option${n === guess ? " selected" : ""}>${esc(n)}</option>`).join("")
       + (guess && !names.includes(guess) ? `<option selected>${esc(guess)}</option>` : "");
     sel.dataset.key = link.dataset.link;
-    link.replaceWith(sel); sel.focus();
+    // the guess is often right already: confirm it with the button (choosing it again fires no change event)
+    const ok = document.createElement("button");
+    ok.className = "addbtn"; ok.dataset.confirm = ""; ok.textContent = "Koppel";
+    const pick = document.createElement("span");
+    pick.className = "linkpick"; pick.append(sel, ok);
+    link.replaceWith(pick); sel.focus();
     return;
   }
+  const okBtn = e.target.closest("button[data-confirm]");
+  if (okBtn) return linkCategory(okBtn.previousElementSibling);
   if (unlink) {
     unlink.disabled = true;
     try { await api("api/spending/link", { key: unlink.dataset.unlink, category: "" }); await loadSpendItems(); }
     catch (err) { toast(err.message); unlink.disabled = false; }
   }
 });
-$("#spCats").addEventListener("change", async (e) => {
+$("#spCats").addEventListener("change", (e) => {
   const sel = e.target.closest("select.linksel");
-  if (!sel || !sel.value) return;
-  sel.disabled = true;
+  if (sel) linkCategory(sel);
+});
+async function linkCategory(sel) {
+  if (!sel || !sel.value) { sel?.focus(); return; }
+  const ok = sel.nextElementSibling;
+  sel.disabled = true; if (ok) ok.disabled = true;
   try {
     await api("api/spending/link", { key: sel.dataset.key, category: sel.value });
     toast(`Gekoppeld aan ${sel.value}`);
     await loadSpendItems();
-  } catch (err) { toast(err.message); sel.disabled = false; }
-});
+  } catch (err) { toast(err.message); sel.disabled = false; if (ok) ok.disabled = false; }
+}

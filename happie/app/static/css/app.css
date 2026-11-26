@@ -528,3 +528,4 @@ details.purchase + details.purchase { border-top: 1px solid var(--line); }
 /* phone: only the line total in a list row, the calculation does not fit */
 @media (max-width: 767px) { .name small .calc { display: none; } }
 @media (max-width: 767px) { .syncline .ha { display: none; } }
+.linkpick { display: inline-flex; gap: 6px; align-items: center; max-width: 100%; } .linkpick .linksel { min-width: 0; }
