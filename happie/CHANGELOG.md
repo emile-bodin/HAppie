@@ -6,6 +6,10 @@ Alle veranderingen per versie, de nieuwste bovenaan. HAppie volgt [Semantic Vers
 - **MINOR** (0.**10**.0): nieuwe functies of opties; alles wat je had blijft werken.
 - **MAJOR** (**1**.0.0): veranderingen waarvoor je zelf iets moet aanpassen, zoals een andere entiteits-ID of een optie die verdwijnt. Zolang de versie met 0. begint, gebeurt zoiets in een MINOR-versie en staat het bovenaan die sectie.
 
+## 0.12.1
+- Uitgaven, *Per categorie*: een onbekende bonregel koppelen werkt nu ook als de voorgestelde categorie al klopt. Naast de keuzelijst staat een knop *Koppel* om de keuze te bevestigen.
+- De keuzelijst sluit niet meer vanzelf terwijl HAppie op de achtergrond nog artikelen ophaalt.
+
 ## 0.12.0
 - Nieuw: klik op een productfoto (in je lijst, bij zoeken, Ontdekken, Voorraad, bestellingen en uitgaven) om hem groter te zien.
 - Nieuw: iets van je lijst weghalen gaat meteen, met *Ongedaan maken* in de melding onderin, in plaats van eerst een vraag.
