@@ -42,21 +42,21 @@ function renderInventory() {
 }
 function invRow(i) {
   const k = esc(i.key);
-  const img = i.image ? `<img class="thumb" src="${esc(i.image)}" alt="" loading="lazy">` : `<div class="ph">✎</div>`;
+  const img = i.image ? `<img class="thumb" src="${esc(i.image)}" alt="" loading="lazy">` : `<div class="ph" aria-hidden="true">${esc(initialOf(i.name))}</div>`;
   const bits = [esc(i.unit_size || ""), i.price ? euro(i.price) : "", i.is_bonus ? `<span class="badge">${esc(bonusLabel(i.bonus))}</span>` : "",
                 i.quantity <= 0 ? `<span class="oplabel">op</span>` : ""].filter(Boolean);
   return `<li class="${i.quantity <= 0 ? "empty-stock" : ""}" data-key="${k}">
     ${img}
     <div class="name"><span>${esc(i.name)}</span>${bits.length ? `<small>${bits.join("<span>·</span>")}</small>` : ""}</div>
     <div class="qty">
-      <button data-iact="dec" aria-label="Eén minder">−</button>
+      <button data-iact="dec" aria-label="Eén minder">${ICON_MINUS}</button>
       <button class="qtybtn" data-iact="edit" title="Aantal instellen">${i.quantity}</button>
-      <button data-iact="inc" aria-label="Eén meer">+</button>
+      <button data-iact="inc" aria-label="Eén meer">${ICON_PLUS}</button>
     </div>
     <button class="tolist" data-iact="tolist" title="Op de boodschappenlijst" aria-label="Op de boodschappenlijst">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17 18a2 2 0 1 1 0 4 2 2 0 0 1 0-4M1 2h3.27l.94 2H20a1 1 0 0 1 1 1c0 .17-.05.34-.12.5l-3.58 6.47c-.34.61-1 1.03-1.75 1.03H8.1l-.9 1.63-.03.12a.25.25 0 0 0 .25.25H19v2H7a2 2 0 0 1-2-2c0-.35.09-.68.24-.96l1.36-2.45L3 4H1V2m6 16a2 2 0 1 1 0 4 2 2 0 0 1 0-4"/></svg>
     </button>
-    <button class="del" data-iact="del" aria-label="Uit voorraad verwijderen">✕</button>
+    <button class="del" data-iact="del" aria-label="Uit voorraad verwijderen">${ICON_X}</button>
   </li>`;
 }
 function invApply(item) {

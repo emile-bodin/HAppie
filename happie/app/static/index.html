@@ -38,7 +38,7 @@
     <dt>Laatste sync</dt><dd id="menuSync"></dd>
     <dt><label for="setAuto">Automatisch</label></dt>
     <dd><label class="switch"><input type="checkbox" role="switch" id="setAuto" aria-describedby="setHelp"><span></span></label></dd>
-    <dt class="setrow"><label for="setInterval">Interval</label></dt><dd class="setrow"><select id="setInterval" class="setsel"></select></dd>
+    <dt class="setrow hidden"><label for="setInterval">Interval</label></dt><dd class="setrow hidden"><select id="setInterval" class="setsel"></select></dd>
   </dl>
   <p class="sethelp" id="setHelp"></p>
   <div class="actions">
@@ -89,26 +89,14 @@
         <div class="sub" id="dlvSub"></div>
       </div>
     </div>
-    <div class="stat">
-      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h2v2H3zm4 0h14v2H7zM3 11h2v2H3zm4 0h14v2H7zm-4 7h2v2H3zm4 0h14v2H7z"/></svg></div>
-      <div style="min-width:0"><div class="val" id="stOpen">0</div><div class="lbl">Te halen</div></div>
-    </div>
-    <div class="stat">
-      <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M15 18.5A6.5 6.5 0 0 1 9.24 15H15l1-2H8.58a6 6 0 0 1 0-2H15l1-2H9.24A6.5 6.5 0 0 1 15 5.5c1.61 0 3.09.59 4.23 1.57L21 5.3A9 9 0 0 0 15 3a9 9 0 0 0-8.4 6H3l-1 2h4.06a8 8 0 0 0 0 2H3l-1 2h4.6a9 9 0 0 0 8.4 6c2.31 0 4.41-.87 6-2.3l-1.77-1.77A6.4 6.4 0 0 1 15 18.5"/></svg></div>
-      <div style="min-width:0"><div class="val" id="stCost">€ 0</div><div class="lbl" id="stCostLbl">Geschatte kosten</div></div>
-    </div>
     <button class="stat spend" id="spendTile" type="button" title="Uitgavenoverzicht">
       <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21 18v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1h-9a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2m0-2h10V8H12m4 5.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/></svg></div>
       <div style="min-width:0;flex:1"><div class="val" id="spVal">–</div><div class="lbl" id="spLbl">Uitgegeven deze week</div>
         <div class="budgetbar hidden" id="spBar"><i id="spBarSpent"></i><i class="list" id="spBarList"></i></div></div>
     </button>
-    <div class="stat bonus">
+    <div class="stat bonus hidden" id="bonusTile">
       <div class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M21.41 11.58l-9-9A2 2 0 0 0 11 2H4a2 2 0 0 0-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42M5.5 7A1.5 1.5 0 1 1 7 5.5 1.5 1.5 0 0 1 5.5 7"/></svg></div>
       <div style="min-width:0"><div class="val" id="stBonus">0</div><div class="lbl">In de bonus</div></div>
-    </div>
-    <div class="stat">
-      <div class="ico" style="background:color-mix(in srgb, var(--ok) 15%, transparent);color:var(--ok)"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
-      <div style="min-width:0;flex:1"><div class="val" id="stDone">0/0</div><div class="lbl">Afgevinkt</div><div class="progress"><i id="stProg"></i></div></div>
     </div>
   </section>
 
@@ -118,15 +106,16 @@
       <div class="body">
         <form id="searchForm" class="search" autocomplete="off">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
-          <input type="text" id="searchInput" placeholder="Zoek een product…" enterkeyhint="search">
+          <input type="text" id="searchInput" placeholder="Zoek of voeg toe…" enterkeyhint="done" aria-label="Zoek een product of voeg tekst toe">
           <span class="kbd">/</span>
+          <button type="submit" class="addsubmit hidden" id="searchAdd" aria-label="Als tekst toevoegen">Toevoegen</button>
           <button type="button" class="scanbtn" id="scanBtn" title="Barcode scannen" aria-label="Barcode scannen">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h2v12H4zm3 0h1v12H7zm2 0h3v12H9zm4 0h1v12h-1zm3 0h2v12h-2zm3 0h1v12h-1zM2 4v4H0V4a2 2 0 0 1 2-2h4v2zm20-2a2 2 0 0 1 2 2v4h-2V4h-4V2zM2 16v4h4v2H2a2 2 0 0 1-2-2v-4zm20 4v-4h2v4a2 2 0 0 1-2 2h-4v-2z"/></svg>
           </button>
         </form>
         <div id="freeText" class="freetext hidden"></div>
         <div id="results" class="results"></div>
-        <div id="searchHint" class="hint">Zoek in het AH-assortiment, of typ iets en druk op Enter om het als losse tekst toe te voegen.</div>
+        <div id="searchHint" class="hint">Zoek in het AH-assortiment of scan een barcode.</div>
       </div>
     </section>
 
@@ -135,6 +124,11 @@
         <h2>Mijn lijst <span class="count" id="listCount">0</span></h2>
         <button class="btn ghost sm hidden" id="clearChecked">Afgevinkte wissen</button>
       </header>
+      <div class="listsum hidden" id="listSum">
+        <div class="sumline"><span id="sumOpen"></span><span id="sumCost"></span><span id="sumDone"></span></div>
+        <div class="progress"><i id="stProg"></i></div>
+        <div class="syncline" id="syncLine"></div>
+      </div>
       <div class="body" id="list"></div>
     </section>
 
@@ -183,7 +177,8 @@
           <button class="btn scanbig" id="invScanBig">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h2v12H4zm3 0h1v12H7zm2 0h3v12H9zm4 0h1v12h-1zm3 0h2v12h-2zm3 0h1v12h-1zM2 4v4H0V4a2 2 0 0 1 2-2h4v2zm20-2a2 2 0 0 1 2 2v4h-2V4h-4V2zM2 16v4h4v2H2a2 2 0 0 1-2-2v-4zm20 4v-4h2v4a2 2 0 0 1-2 2h-4v-2z"/></svg>
             Scannen</button>
-          <div class="seg" id="scanModeSeg" title="Scanmodus">
+          <span class="scanlbl" id="scanModeLbl">Bij scannen:</span>
+          <div class="seg" id="scanModeSeg" title="Scanmodus" role="group" aria-labelledby="scanModeLbl">
             <button data-mode="choose" class="active">Kiezen</button>
             <button data-mode="in">Inruimen +1</button>
             <button data-mode="out">Verbruiken −1</button>
@@ -217,13 +212,10 @@
   <section class="spendpage hidden" id="spendPage" aria-labelledby="spTitle">
     <div class="sp-head">
       <h2 id="spTitle">Uitgaven</h2>
-      <div class="sp-tools">
-        <div class="seg" id="spendTabs" role="tablist"><button data-p="week" class="active">Per week</button><button data-p="month">Per maand</button></div>
-        <div class="sp-nav"><button id="spPrev" aria-label="Vorige periode">‹</button><span id="spNavLbl"></span><button id="spNext" aria-label="Volgende periode">›</button></div>
-        <button class="btn ghost sm" id="spendRefresh" title="Opnieuw ophalen bij AH">↻ Bijwerken</button>
-      </div>
+      <div class="sp-nav"><button id="spPrev" aria-label="Vorige periode">‹</button><span id="spNavLbl"></span><button id="spNext" aria-label="Volgende periode">›</button></div>
+      <div class="seg" id="spendTabs" role="tablist"><button data-p="week" class="active">Per week</button><button data-p="month">Per maand</button></div>
     </div>
-    <div class="sp-fresh" id="spendFresh"></div>
+    <div class="sp-freshrow"><span class="sp-fresh" id="spendFresh"></span><button class="iconlink" id="spendRefresh" title="Opnieuw ophalen bij AH" aria-label="Opnieuw ophalen bij AH">↻</button></div>
     <div class="sp-kpis" id="spendKpis"></div>
     <div class="sp-grid">
       <section class="panel sp-chart">
@@ -287,6 +279,13 @@
     <div id="orderSum"></div>
     <div class="ordertools hidden" id="orderTools"><input type="search" id="orderFilter" placeholder="Zoek in deze bestelling…"><span class="muted" id="orderCount" style="font-size:13px;white-space:nowrap"></span></div>
     <div id="orderBody"><div class="hint"><span class="spinner"></span></div></div>
+  </div>
+</div>
+
+<div class="modal hidden" id="imgModal" role="dialog" aria-modal="true" aria-labelledby="imgTitle">
+  <div class="box imgbox">
+    <header><h3 id="imgTitle"></h3><button class="del" id="imgClose" aria-label="Sluiten">✕</button></header>
+    <img id="imgBig" alt="">
   </div>
 </div>
 

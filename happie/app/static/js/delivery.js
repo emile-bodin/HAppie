@@ -9,6 +9,8 @@ async function loadDelivery(refresh = false) {
   let d;
   try { d = (await api("api/delivery" + (refresh ? "?refresh=1" : ""))).delivery; }
   catch (err) { $("#dlvVal").textContent = "Niet beschikbaar"; $("#dlvSub").textContent = err.message; return; }
+  // a date in the past means the cached order is outdated: fetch it again once
+  if (d && !refresh && d.date < new Date().toLocaleDateString("sv-SE")) return loadDelivery(true);
   const el = $("#delivery");
   el.dataset.order = d ? d.order_id : "";
   el.classList.toggle("none", !d);

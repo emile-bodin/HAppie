@@ -6,6 +6,18 @@ Alle veranderingen per versie, de nieuwste bovenaan. HAppie volgt [Semantic Vers
 - **MINOR** (0.**10**.0): nieuwe functies of opties; alles wat je had blijft werken.
 - **MAJOR** (**1**.0.0): veranderingen waarvoor je zelf iets moet aanpassen, zoals een andere entiteits-ID of een optie die verdwijnt. Zolang de versie met 0. begint, gebeurt zoiets in een MINOR-versie en staat het bovenaan die sectie.
 
+## 0.12.0
+- Nieuw: klik op een productfoto (in je lijst, bij zoeken, Ontdekken, Voorraad, bestellingen en uitgaven) om hem groter te zien.
+- Nieuw: iets van je lijst weghalen gaat meteen, met *Ongedaan maken* in de melding onderin, in plaats van eerst een vraag.
+- Rustiger bovenaan: alleen nog de bezorging, je uitgaven en (als er iets in de bonus is) de bonusitems. Wat je nog moet halen, de geschatte kosten, hoeveel er is afgevinkt en de laatste sync staan nu boven je lijst. Op een telefoon begint de lijst daardoor een stuk hoger.
+- Zoeken: tijdens het typen staat er een knop *Toevoegen* in het zoekveld; die doet hetzelfde als Enter.
+- Foutmeldingen zijn nu gewone zinnen met wat je kunt doen, in plaats van technische tekst van AH.
+- Staat er een bezorgdatum die al voorbij is, dan haalt het paneel de bezorging opnieuw op.
+- Uitgaven: de weeknavigatie staat naast de titel en *Bijwerken* is een klein ↻ naast "Bijgewerkt".
+- Dunnere vinkjes en knoppen in de lijst, beter leesbare kleuren (ook in het donkere thema) en bedragen die netjes onder elkaar staan.
+- Op een telefoon toont een regel alleen het totaalbedrag; producten zonder foto tonen hun eerste letter.
+- Het profielmenu blijft zichtbaar als je naar beneden gescrold bent.
+
 ## 0.11.1
 - Een optie die je op de configuratiepagina hebt veranderd, wordt niet meer teruggezet als je daarna in het paneel het sync-interval aanpast.
 - Een sync-interval dat je op de configuratiepagina verandert, geldt binnen 5 minuten, ook zonder herstart. Een waarde onder 15 seconden wordt 15.
